@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Sound Engine — lightweight Audio API wrapper (no Howler dependency)
+// Sound Engine — Web Audio API (oscillator-based, no audio files needed)
 // ---------------------------------------------------------------------------
 import type { ClassId } from '../data/types';
 
@@ -9,144 +9,138 @@ export type SoundEvent =
   | 'click' | 'coin' | 'levelUp';
 
 /**
- * Sound Engine — uses native HTMLAudioElement for instant playback.
- * No preload needed; browsers cache small WAV files automatically.
+ * Generates game sounds using Web Audio API oscillators and noise.
+ * No audio files required — works everywhere AudioContext is supported.
  */
 export class SoundEngine {
   private unlocked = false;
-  private pendingUnlock: (() => void)[] = [];
 
-  /** Class-specific attack/hit sounds. */
-  private classSounds: Record<ClassId, { attack: string[]; hit: string[] }> = {
-    warrior: { attack: ['/sounds/sfx/battle/heavy_swing_01.wav'], hit: ['/sounds/sfx/battle/sword_hit_01.wav'] },
-    mage:    { attack: ['/sounds/sfx/battle/fireball_launch.wav'], hit: ['/sounds/sfx/battle/fireball_impact.wav'] },
-    ranger:  { attack: ['/sounds/sfx/battle/bow_shoot.wav'],      hit: ['/sounds/sfx/battle/bow_hit.wav'] },
-    paladin: { attack: ['/sounds/sfx/battle/sword_swing_01.wav'], hit: ['/sounds/sfx/battle/sword_hit_01.wav'] },
-    rogue:   { attack: ['/sounds/sfx/battle/dagger_swing.wav'],   hit: ['/sounds/sfx/battle/dagger_hit.wav'] },
-    druid:   { attack: ['/sounds/sfx/battle/ice_launch.wav'],     hit: ['/sounds/sfx/battle/ice_impact.wav'] },
-  };
-
-  private attackPool: string[] = ['/sounds/sfx/battle/sword_swing_01.wav'];
-  private hitPool: string[] = ['/sounds/sfx/battle/sword_hit_01.wav'];
-
-  /** File pools per event. */
-  private pools: Record<string, string[]> = {
-    playerAttack: ['/sounds/sfx/battle/sword_swing_01.wav'],
-    enemyHit:    ['/sounds/sfx/battle/sword_hit_01.wav'],
-    playerHit:   ['/sounds/sfx/monster/beast_01.wav', '/sounds/sfx/monster/giant_01.wav', '/sounds/sfx/monster/ogre_01.wav'],
-    combo:       ['/sounds/sfx/battle/heal_01.wav'],
-    skill:       ['/sounds/sfx/battle/spell_01.wav'],
-    heal:        ['/sounds/sfx/battle/heal_01.wav'],
-    shield:      ['/sounds/sfx/battle/shield_01.wav'],
-    victory:     ['/sounds/sfx/ui/victory/fanfare.mp3'], // stopped after 4.5s in play()
-    defeat:      ['/sounds/sfx/battle/swing_02.wav'],
-    bossChant:   ['/sounds/sfx/battle/boss_chant.wav'],
-    click:       ['/sounds/sfx/ui/click_01.wav', '/sounds/sfx/ui/click_02.wav'],
-    coin:        ['/sounds/sfx/battle/coin_01.wav', '/sounds/sfx/battle/coin_02.wav'],
-    levelUp:     ['/sounds/sfx/battle/heal_01.wav'],
-  };
-
-  /** Unlock AudioContext on first user interaction. */
   unlock(): void {
     if (this.unlocked) return;
     this.unlocked = true;
-    // Fire pending plays
-    for (const fn of this.pendingUnlock) fn();
-    this.pendingUnlock = [];
   }
 
-  setClass(classId: ClassId | null): void {
-    if (classId && this.classSounds[classId]) {
-      this.pools.playerAttack = this.classSounds[classId].attack;
-      this.pools.enemyHit = this.classSounds[classId].hit;
-    }
+  setClass(_classId: ClassId | null): void {
+    // Sounds are class-agnostic with the oscillator approach
   }
 
-  private pick(pool: string[]): string {
-    return pool[Math.floor(Math.random() * pool.length)];
-  }
-
-  private _play(src: string, volume: number, rate: number): HTMLAudioElement | null {
-    try {
-      const audio = new Audio(src);
-      audio.volume = Math.min(1, Math.max(0, volume));
-      audio.playbackRate = rate;
-      const promise = audio.play();
-      if (promise) {
-        promise.catch((err) => {
-          // Browser blocked — will retry via unlock()
-          if (err.name === 'NotAllowedError') {
-            if (!this.unlocked) {
-              this.pendingUnlock.push(() => {
-                const retry = new Audio(src);
-                retry.volume = audio.volume;
-                retry.playbackRate = audio.playbackRate;
-                retry.play().catch(() => {});
-              });
-            }
-          }
-        });
-      }
-      return audio;
-    } catch (e) {
-      console.warn('[Sound] Failed to play:', src, e);
-      return null;
-    }
-  }
-
-  /** Track long sounds that need manual stopping */
-  private longSounds: HTMLAudioElement[] = [];
-
-  play(event: SoundEvent, opts?: { rate?: number; volume?: number }): void {
-    const pool = this.pools[event];
-    if (!pool || pool.length === 0) return;
-    const src = this.pick(pool);
-    const vol = opts?.volume ?? 1;
-    const rate = opts?.rate ?? 1;
-
-    if (!this.unlocked) {
-      this.pendingUnlock.push(() => this._play(src, vol, rate));
-      return;
-    }
-    const audio = this._play(src, vol, rate);
-
-    // Victory fanfare: stop after 4.5 seconds
-    if (event === 'victory' && audio) {
-      this.longSounds.push(audio);
-      setTimeout(() => {
-        audio.pause();
-        audio.currentTime = 0;
-      }, 4500);
-    }
-  }
-
-  /** Generate a test beep via Web Audio API to verify audio output works. */
-  testBeep(): void {
+  /** Play a note (frequency in Hz, duration in seconds). */
+  private tone(freq: number, duration: number, type: OscillatorType = 'square', volume = 0.15): void {
     try {
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = 880;
-      gain.gain.value = 0.3;
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(volume, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
-      osc.stop(ctx.currentTime + 0.15);
-    } catch (e) {
-      console.warn('[Sound] AudioContext test failed:', e);
+      osc.stop(ctx.currentTime + duration);
+      // Close context after sound finishes
+      setTimeout(() => ctx.close(), (duration + 0.1) * 1000);
+    } catch { /* ignore */ }
+  }
+
+  /** White noise burst for impact sounds. */
+  private noise(duration: number, volume = 0.1): void {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const bufferSize = ctx.sampleRate * duration;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+      }
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      const gain = ctx.createGain();
+      gain.gain.value = volume;
+      source.connect(gain);
+      gain.connect(ctx.destination);
+      source.start();
+      setTimeout(() => ctx.close(), (duration + 0.1) * 1000);
+    } catch { /* ignore */ }
+  }
+
+  /** Rising arpeggio for combo/powerup. */
+  private arpeggio(base: number, steps: number, duration: number): void {
+    for (let i = 0; i < steps; i++) {
+      const delay = (duration / steps) * i;
+      setTimeout(() => this.tone(base * Math.pow(1.2, i), 0.08, 'square', 0.12), delay * 1000);
+    }
+  }
+
+  play(event: SoundEvent, _opts?: { rate?: number; volume?: number }): void {
+    switch (event) {
+      case 'playerAttack':
+        this.noise(0.15, 0.12);
+        this.tone(220, 0.1, 'sawtooth', 0.1);
+        break;
+      case 'enemyHit':
+        this.noise(0.1, 0.15);
+        this.tone(180, 0.08, 'square', 0.12);
+        break;
+      case 'playerHit':
+        this.tone(120, 0.3, 'sawtooth', 0.15);
+        this.tone(80, 0.25, 'square', 0.1);
+        break;
+      case 'combo':
+        this.arpeggio(300, 5, 0.3);
+        break;
+      case 'skill':
+        this.tone(440, 0.15, 'sine', 0.12);
+        setTimeout(() => this.tone(660, 0.15, 'sine', 0.12), 100);
+        setTimeout(() => this.tone(880, 0.2, 'sine', 0.15), 200);
+        break;
+      case 'heal':
+        this.tone(523, 0.15, 'sine', 0.12);
+        setTimeout(() => this.tone(659, 0.15, 'sine', 0.12), 120);
+        setTimeout(() => this.tone(784, 0.2, 'sine', 0.12), 240);
+        break;
+      case 'shield':
+        this.tone(300, 0.3, 'sine', 0.1);
+        break;
+      case 'victory':
+        this.tone(523, 0.2, 'square', 0.12);
+        setTimeout(() => this.tone(659, 0.2, 'square', 0.12), 200);
+        setTimeout(() => this.tone(784, 0.2, 'square', 0.12), 400);
+        setTimeout(() => this.tone(1047, 0.4, 'square', 0.15), 600);
+        break;
+      case 'defeat':
+        this.tone(300, 0.3, 'sawtooth', 0.1);
+        setTimeout(() => this.tone(200, 0.4, 'sawtooth', 0.1), 300);
+        break;
+      case 'bossChant':
+        this.tone(100, 0.5, 'sawtooth', 0.08);
+        break;
+      case 'click':
+        this.tone(800, 0.04, 'square', 0.06);
+        break;
+      case 'coin':
+        this.tone(1200, 0.06, 'sine', 0.1);
+        setTimeout(() => this.tone(1500, 0.08, 'sine', 0.1), 60);
+        break;
+      case 'levelUp':
+        this.arpeggio(400, 8, 0.5);
+        break;
     }
   }
 
   playAttackSequence(): void {
     this.play('playerAttack');
-    setTimeout(() => this.play('enemyHit'), 250);
+    setTimeout(() => this.play('enemyHit'), 200);
+  }
+
+  testBeep(): void {
+    this.tone(880, 0.15, 'sine', 0.3);
   }
 }
 
 export const soundEngine = new SoundEngine();
 
-/** Global click handler to unlock audio on first interaction. */
+// Unlock on first click
 if (typeof document !== 'undefined') {
   const handler = () => { soundEngine.unlock(); document.removeEventListener('click', handler); };
   document.addEventListener('click', handler, { once: true });
