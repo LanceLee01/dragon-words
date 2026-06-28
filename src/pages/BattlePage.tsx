@@ -41,6 +41,21 @@ const MONSTER_ICONS: Record<string, string> = {
   darkKnight: '🖤', abyssalLord: '👿', archangel: '👼',
   timeKeeper: '⌛', dracolich: '☠️', ancientRed: '🐉',
 };
+
+/** Monster portrait image paths */
+const MONSTER_PORTRAITS: Record<string, string> = {};
+// Filled from generated files
+const monsterNames = [
+  'goblin','skeleton','apprentice','shadowwolf','gargoyle','troglodyte',
+  'harpy','ghost','ogre','succubus','demonhound','fallenAngel',
+  'timeGhost','dragonborn','eliteGuard','goblinKing','deathKnight',
+  'archmage_boss','treantElder','lavaGiant','drowElf','wyvern',
+  'lichKing','stormGiant','darkKnight','abyssalLord','archangel',
+  'timeKeeper','dracolich','ancientRed',
+];
+for (const name of monsterNames) {
+  MONSTER_PORTRAITS[name] = `/assets/images/monsters/${name}.png`;
+}
 import { QuestionCard } from '@/components/battle/QuestionCard';
 import { VictoryScreen } from '@/components/battle/VictoryScreen';
 import { DefeatScreen } from '@/components/battle/DefeatScreen';
@@ -292,8 +307,20 @@ export default function BattlePage() {
           />
           {/* Monster portrait */}
           <div className="mt-2 flex justify-center">
-            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl border-2 border-red-700 bg-gray-800/60 text-5xl">
-              {MONSTER_ICONS[monster.id] || '👹'}
+            <div className="h-24 w-24 overflow-hidden rounded-xl border-2 border-red-700 bg-gray-800/60">
+              <img
+                src={MONSTER_PORTRAITS[monster.id]}
+                alt={monster.name}
+                className="h-full w-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  const fallback = (e.target as HTMLImageElement).nextElementSibling;
+                  if (fallback) fallback.classList.remove('hidden');
+                }}
+              />
+              <div className="flex hidden h-full w-full items-center justify-center bg-gray-800 text-5xl">
+                {MONSTER_ICONS[monster.id] || '👹'}
+              </div>
             </div>
           </div>
         </div>
