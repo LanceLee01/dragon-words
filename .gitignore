@@ -1,24 +1,23 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
+node_modules/
+dist/
 *.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Sound source zip files (keep extracted sfx/)
+public/sounds/rpg_sound_pack.zip
+public/sounds/powerup_50.zip
+public/sounds/virix_jingles.zip
+public/sounds/jc_fantasy_sfx.7z
+public/sounds/fanfare.mp3
+public/sounds/preview/
+
+# ComfyUI generated images
+scripts/*.png
+
+# Source folders (keep extracted sfx/)
+public/sounds/RPG Sound Pack/
+public/sounds/JC_Fantasy_SFX/
+public/sounds/POWERUP_50/
+public/sounds/VIRIX/
+
+# ComfyUI payload
+_comfy_payload.json

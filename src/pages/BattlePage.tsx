@@ -8,6 +8,7 @@ import { useBattleStore } from '@/stores/battleStore';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useGameStore } from '@/stores/gameStore';
 import { useTimer } from '@/hooks/useTimer';
+import { useSound } from '@/hooks/useSound';
 import { HealthBar } from '@/components/shared/HealthBar';
 import { Timer } from '@/components/shared/Timer';
 import { ComboDisplay } from '@/components/shared/ComboDisplay';
@@ -45,6 +46,9 @@ export default function BattlePage() {
 
   const sendEvent = useGameStore((s) => s.sendEvent);
 
+  // Sound
+  const { play, playAttackSequence, setClass } = useSound();
+
   // Prevent double-submissions
   const answeredRef = useRef(false);
 
@@ -59,6 +63,13 @@ export default function BattlePage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ch, lv]);
+
+  // Set player class for sound engine on mount or when class changes
+  useEffect(() => {
+    if (player.classId) {
+      setClass(player.classId);
+    }
+  }, [player.classId, setClass]);
 
   // -----------------------------------------------------------------------
   // Timer — sync'd to current question's timeLimit
@@ -92,7 +103,7 @@ export default function BattlePage() {
     (selected: string) => {
       if (answeredRef.current) return;
       answeredRef.current = true;
-      submitAnswer(selected);
+      const wasCorrect = submitAnswer(selected);
     },
     [submitAnswer],
   );
@@ -101,6 +112,30 @@ export default function BattlePage() {
     nextRound();
   }, [nextRound]);
 
+  // Play sounds when phase changes
+  const prevPhaseRef = useRef(battle?.phase);
+  useEffect(() => {
+    if (!battle) return;
+    const prevPhase = prevPhaseRef.current;
+    prevPhaseRef.current = battle.phase;
+
+    if (battle.phase === 'result' && prevPhase === 'question') {
+      playAttackSequence();
+      if (battle.combo >= 3) {
+        setTimeout(() => play('combo'), 500);
+      }
+    }
+    if (battle.phase === 'monster-turn' && prevPhase === 'question') {
+      play('playerHit');
+    }
+    if (battle.phase === 'victory' && prevPhase !== 'victory') {
+      play('victory');
+    }
+    if (battle.phase === 'defeat' && prevPhase !== 'defeat') {
+      play('defeat');
+    }
+  }, [battle?.phase, battle?.status, battle?.combo, play, playAttackSequence]);
+
   const handleContinue = useCallback(() => {
     finishMonsterTurn();
   }, [finishMonsterTurn]);
@@ -108,6 +143,17 @@ export default function BattlePage() {
   const handleUseSkill = useCallback(() => {
     useSkillAction(0);
   }, [useSkillAction]);
+
+  // Play skill sound when charge resets (skill was used)
+  const prevChargeRef = useRef(battle?.charge);
+  useEffect(() => {
+    if (!battle) return;
+    const prevCharge = prevChargeRef.current;
+    prevChargeRef.current = battle.charge;
+    if (prevCharge === 5 && battle.charge < 5 && battle.phase === 'question') {
+      play('skill');
+    }
+  }, [battle?.charge, battle?.phase, play]);
 
   const handleVictoryContinue = useCallback(() => {
     // Award rewards
@@ -140,8 +186,8 @@ export default function BattlePage() {
   // Determine display phase
   // -----------------------------------------------------------------------
 
-  const isVictory = battle?.status === 'won';
-  const isDefeat = battle?.status === 'lost';
+  const isVictory = battle?.phase === 'victory';
+  const isDefeat = battle?.phase === 'defeat';
   const isResult = lastAnswerCorrect === true && !isVictory && !isDefeat;
   const isMonsterTurn =
     battle?.phase === 'monster-turn' && !isVictory && !isDefeat;
