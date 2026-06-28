@@ -474,7 +474,7 @@ describe('monsterTurn', () => {
     const state = { ...createBattle(player, monster), phase: 'monster-turn' as const };
 
     const result = monsterTurn(state, monster);
-    expect(result.playerHp).toBe(-5);
+    expect(result.playerHp).toBe(0);
     expect(result.status).toBe('lost');
     // phase should NOT become 'question' when player is dead
     expect(result.phase).toBe('monster-turn');

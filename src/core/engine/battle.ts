@@ -349,7 +349,7 @@ export function monsterTurn(
   }
 
   // Normal attack
-  next.playerHp -= monster.attack;
+  next.playerHp = Math.max(0, next.playerHp - monster.attack);
   next.turn += 1;
 
   if (next.playerHp <= 0) {
