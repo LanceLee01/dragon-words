@@ -2,7 +2,7 @@
 // Player Store — Zustand
 // ---------------------------------------------------------------------------
 import { create } from 'zustand';
-import type { PlayerState, ClassId, AdvancedClassId, Equipment } from '@/core/data/types';
+import type { PlayerState, ClassId, AdvancedClassId, Equipment, WordLevel } from '@/core/data/types';
 import { loadPlayer, savePlayer } from '@/core/utils/storage';
 import { getXpForLevel } from '@/core/data/levels';
 
@@ -19,6 +19,7 @@ export interface PlayerStore {
 
   /** Select a base class (resets advanced class) */
   selectClass: (id: ClassId) => void;
+  selectWordLevel: (level: WordLevel) => void;
 
   /** Add gold */
   addGold: (n: number) => void;
@@ -99,6 +100,14 @@ export const usePlayerStore = create<PlayerStore>((set) => ({
         classId: id,
         advancedClassId: null,
       };
+      savePlayer(next);
+      return { player: next };
+    });
+  },
+
+  selectWordLevel: (level) => {
+    set((s) => {
+      const next: PlayerState = { ...s.player, wordLevel: level };
       savePlayer(next);
       return { player: next };
     });

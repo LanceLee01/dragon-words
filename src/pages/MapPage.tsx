@@ -28,7 +28,10 @@ export default function MapPage() {
 
   const levelKey = (ch: number, lv: number) => `${ch}-${lv}`;
 
-  /** A chapter is unlocked if it's chapter 1 or the previous chapter is completed. */
+  // Filter chapters by player's chosen word level  
+  const filteredChapters = CHAPTERS.filter((ch) => ch.wordLevel === player.wordLevel);
+
+  /** A chapter is unlocked if it's the first visible chapter or the previous chapter is completed. */
   const isChapterUnlocked = (ch: number) =>
     ch === 1 || progress.completedChapters.includes(ch - 1);
 
@@ -103,7 +106,7 @@ export default function MapPage() {
 
       {/* --- Chapter list --- */}
       <div className="mx-auto max-w-3xl space-y-6">
-        {CHAPTERS.map((chapter, ci) => (
+        {filteredChapters.map((chapter, ci) => (
           <ChapterCard
             key={chapter.id}
             chapter={chapter}
