@@ -135,17 +135,12 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     const correct = selected === currentQuestion.correctAnswer;
 
     // Process the answer through the battle engine
-    const nextBattle = answerQuestion(battle, player, monster, correct);
+    const wasLastWrong = get().lastAnswerCorrect === false;
+    const nextBattle = answerQuestion(battle, player, monster, correct, wasLastWrong);
 
-    // If correct, award gold
+    // Award gold for correct answer
     if (correct) {
       usePlayerStore.getState().addGold(10);
-    }
-
-    // If won, award XP
-    if (nextBattle.status === 'won') {
-      const xpReward = monster.isBoss ? 100 : 30;
-      usePlayerStore.getState().addXp(xpReward);
     }
 
     // Track which word was used
@@ -170,12 +165,6 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
 
     const player = usePlayerStore.getState().player;
     const nextBattle = useSkill(battle, player, monster, idx);
-
-    // If won, award XP
-    if (nextBattle.status === 'won') {
-      const xpReward = monster.isBoss ? 100 : 30;
-      usePlayerStore.getState().addXp(xpReward);
-    }
 
     set({ battle: nextBattle });
   },
@@ -207,12 +196,13 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
 
     const nextBattle = monsterTurn(battle, monster);
 
-    // If lost, heal player for next attempt (or leave as-is)
-    if (nextBattle.status === 'lost') {
-      // Player died — they'll see gameover screen
-    }
-
     set({ battle: nextBattle });
+
+    // Generate next question if battle continues
+    if (nextBattle.status !== 'lost') {
+      const question = generateNextQuestion(get().chapter, get().usedWordIds);
+      set({ currentQuestion: question, lastAnswerCorrect: null });
+    }
   },
 
   // -----------------------------------------------------------------------

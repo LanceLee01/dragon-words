@@ -117,6 +117,7 @@ export function answerQuestion(
   player: PlayerState,
   monster: MonsterDef,
   correct: boolean,
+  wasLastWrong = false,
 ): BattleState {
   const next = { ...battle };
 
@@ -125,7 +126,7 @@ export function answerQuestion(
     next.charge = Math.min(next.charge + 1, 5);
 
     const attack = getPlayerAttack(player);
-    const crit = isCrit(player, false);
+    const crit = isCrit(player, wasLastWrong);
     const damage = calculateDamage(attack, next.combo, crit);
     next.monsterHp -= damage;
 
