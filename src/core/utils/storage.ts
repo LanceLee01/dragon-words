@@ -12,6 +12,7 @@ const KEYS = {
   PROGRESS: 'dw_progress',
   SETTINGS: 'dw_settings',
   WORD_STATS: 'dw_wordstats',
+  FLAGGED_IMAGES: 'dw_flagged_images',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -127,4 +128,35 @@ export function saveWordStats(stats: WordStats): void {
 
 export function loadWordStats(): WordStats {
   return safeGetItem(KEYS.WORD_STATS, {});
+}
+
+// ---------------------------------------------------------------------------
+// Flagged Images — images the user marked as unsatisfactory for regeneration
+// ---------------------------------------------------------------------------
+
+export interface FlaggedImage {
+  wordId: number;
+  english: string;
+  imagePath: string;
+  level: string;
+  flaggedAt: number;
+}
+
+const FLAGGED_IMAGES_KEY = KEYS.FLAGGED_IMAGES;
+
+export function addFlaggedImage(img: FlaggedImage): void {
+  const list = loadFlaggedImages();
+  // Avoid duplicates for the same word
+  if (!list.some((f) => f.wordId === img.wordId)) {
+    list.push(img);
+    safeSetItem(FLAGGED_IMAGES_KEY, list);
+  }
+}
+
+export function loadFlaggedImages(): FlaggedImage[] {
+  return safeGetItem(FLAGGED_IMAGES_KEY, []);
+}
+
+export function clearFlaggedImages(): void {
+  safeSetItem(FLAGGED_IMAGES_KEY, []);
 }

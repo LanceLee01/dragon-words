@@ -1,63 +1,34 @@
-# Task 1: Project Scaffolding — Report
+# Task 1 Report
 
-**Status:** DONE
+## Status: DONE
 
-## Summary
+## What changed
 
-Successfully scaffolded the Dragon Words Vite + React + TypeScript project at the repository root.
+**File: `src/core/data/types.ts`**
 
-## Steps Completed
+1. **Added two fields to `BattleState`** (lines 243-246):
+   - `lastCrit: boolean;` — tracks whether the last attack was a critical hit
+   - `log: BattleLogEntry[];` — battle log entries accumulated during the fight
 
-1. **Scaffold** — Ran `npx create-vite@latest temp-vite-project --template react-ts`, then moved generated files to the repo root. Existing design/plan docs preserved.
-2. **Install dependencies** — `npm install` (28 packages), then `react-router-dom`, `zustand`, `framer-motion` (37 packages), then dev deps `tailwindcss`, `@tailwindcss/vite`, `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `jsdom` (140 packages total).
-3. **Config files written:**
-   - `vite.config.ts` — react + tailwindcss plugins, `@` → `/src` alias
-   - `tsconfig.app.json` — strict mode, `@/*` → `./src/*` path alias
-   - `vitest.config.ts` — jsdom environment, `@` → `/src` alias
-4. **Source files written:**
-   - `src/index.css` — Tailwind import, D&D theme colors (parchment, blood, gold, magic, dragon), `.game-active` class
-   - `src/main.tsx` — StrictMode + App
-   - `src/App.tsx` — BrowserRouter with `/` route showing "Dragon Words" placeholder
-5. **Directory structure created** — All 22 directories under `src/` (core/engine, core/data, core/utils, stores, components/ui, components/battle, components/adventure, components/home, components/shared, hooks, pages, assets/images/*, assets/sounds, assets/fonts)
-6. **Verification:**
-   - `npx tsc --noEmit` — passes cleanly (no errors)
-   - `npx vite --host` — starts successfully on port 5173
-7. **Commit:** `git add -A && git commit -m "feat: scaffold Vite + React + TS + Tailwind project"` (root commit, 22 files)
+   These were inserted after `lastDamageTaken: number;` (line 242) and before the closing `}` of `BattleState`.
 
-## Test Summary
+2. **Added `BattleLogEntry` interface** (lines 249-265):
+   - `export interface BattleLogEntry` with fields: `turn`, `wordEnglish`, `wordChinese`, `questionType`, `isCorrect`, `damageDealt`, `damageTaken`, `lastCombo`, `isCrit`, `monsterHpAfter`, `monsterMaxHp`, `playerHpAfter`, `playerMaxHp`, `monsterName`
 
-- TypeScript compilation: ✅ passes
-- Vite dev server: ✅ starts
-- Unit tests: not applicable (no test files yet)
+   This was inserted after the closing `}` of `BattleState` (line 247) and before `/** Base question fields shared by all question types */`.
 
-## Concerns
+## `tsc` output
 
-- None. All scaffolding steps completed without issues.
+Ran `npx tsc -p tsconfig.app.json --noEmit`. Output:
 
----
+```
+src/core/engine/battle.ts(87,3): error TS2739: Type '{ playerHp: number; ... }' is missing the following properties from type 'BattleState': lastCrit, log
+```
 
-## Fix 2: Pin Framework Versions & Update Title
+This is the **expected** error — `createBattle()` returns a `BattleState` object missing the new `lastCrit` and `log` fields. It will be fixed in Task 2.
 
-**Date:** 2026-06-28
+Other errors shown are pre-existing and unrelated to this change (missing `word` on `MatchQuestion`, missing `timeLimit` in `PosQuestion`, missing `highestCombo`/`totalQuestions`/`totalCorrect`/`wordLevel` on `PlayerState`).
 
-### Changes Made
+## Commits
 
-1. **package.json** — Pinned all framework versions to the specified ranges:
-   - `react` → `^18.3.1`, `react-dom` → `^18.3.1`
-   - `typescript` → `~5.6.2`
-   - `vite` → `^5.4.0`, `@vitejs/plugin-react` → `^4.3.0`
-   - `@tailwindcss/vite` → `^4.0.0`, `tailwindcss` → `^4.0.0`
-   - `@types/react` → `^18.3.0`, `@types/react-dom` → `^18.3.0`
-   - `vitest` → `^2.1.0`, `jsdom` → `^25.0.0`
-   - `@testing-library/react` → `^16.0.0`, `@testing-library/jest-dom` → `^6.5.0`
-2. **index.html** — Changed `<title>temp-vite-project</title>` to `<title>Dragon Words</title>`
-3. **Clean install** — Deleted `node_modules` and `package-lock.json`, ran `npm install` (201 packages)
-
-### Verification
-
-- `npx tsc --noEmit` — ✅ passes (no errors)
-- `npx vite --host` — ✅ starts (Vite v5.4.21 on port 5173)
-
-### Commit
-
-`git add -A && git commit -m "fix: pin framework versions and update project title"`
+- `6a8829a` — `feat: add BattleLogEntry type and lastCrit/log fields to BattleState`

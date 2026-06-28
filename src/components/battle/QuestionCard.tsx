@@ -3,10 +3,11 @@
 // Supports translate types (word-meaning, meaning-word, fill-blank, listening)
 // and pos type (collocation, wordForm)
 // ---------------------------------------------------------------------------
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useSpeech } from '@/hooks/useSpeech';
 import type { Question, TranslateQuestion, PosQuestion } from '@/core/data/types';
+import { addFlaggedImage } from '@/core/utils/storage';
 
 function isSupportedQuestion(q: Question): q is TranslateQuestion | PosQuestion {
   return (
@@ -44,6 +45,8 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
   const { speak, isAvailable } = useSpeech();
   const [imageError, setImageError] = useState(false);
   const [replayCount, setReplayCount] = useState(0);
+  const [flagged, setFlagged] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   const handleOptionClick = (option: string, idx: number) => {
     if (disabled) return;
@@ -87,7 +90,7 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
       ) : (
         <>
           {/* --- Word image --- */}
-          <div className="flex h-40 w-56 items-center justify-center overflow-hidden rounded-xl bg-white/10">
+          <div className="relative flex h-40 w-56 items-center justify-center overflow-hidden rounded-xl bg-white/10">
             {imageError ? (
               <span className="text-5xl">📜</span>
             ) : (
@@ -97,6 +100,42 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
                 className="h-full w-full object-contain"
                 onError={() => setImageError(true)}
               />
+            )}
+            {/* Flag image button — top-right corner */}
+            {!flagged ? (
+              <button
+                onClick={() => {
+                  addFlaggedImage({
+                    wordId: question.word.id,
+                    english: question.word.english,
+                    imagePath: question.imagePath,
+                    level: question.word.level,
+                    flaggedAt: Date.now(),
+                  });
+                  setFlagged(true);
+                  setShowToast(true);
+                  setTimeout(() => setShowToast(false), 2000);
+                }}
+                className="absolute right-1 top-1 rounded-md bg-black/50 px-1.5 py-0.5 text-xs text-white/70 transition-colors hover:bg-black/70 hover:text-white"
+                title="标记此图片不满意，后续重新生成"
+              >
+                🚩
+              </button>
+            ) : (
+              <span className="absolute right-1 top-1 rounded-md bg-green-800/60 px-1.5 py-0.5 text-xs text-green-200">
+                ✅ 已标记
+              </span>
+            )}
+            {/* Confirmation toast */}
+            {showToast && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-lg bg-green-700/90 px-3 py-1 text-xs text-white shadow-lg"
+              >
+                已标记，后续将重新生成
+              </motion.div>
             )}
           </div>
 

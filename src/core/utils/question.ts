@@ -265,7 +265,7 @@ export function generateQuestion(
         options,
         correctAnswer: word.chinese,
         timeLimit,
-        imagePath: `/assets/images/word-images/${word.english}.png`,
+        imagePath: word.imagePath,
       } as Question;
     }
 
@@ -281,7 +281,7 @@ export function generateQuestion(
         options,
         correctAnswer: word.chinese,
         timeLimit,
-        imagePath: `/assets/images/word-images/${word.english}.png`,
+        imagePath: word.imagePath,
       } as Question;
     }
   }

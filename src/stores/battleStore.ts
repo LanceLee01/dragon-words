@@ -2,7 +2,7 @@
 // Battle Store — Zustand
 // ---------------------------------------------------------------------------
 import { create } from 'zustand';
-import type { BattleState, MonsterDef, Word, Question, TranslateQuestion, SpellQuestion, PosQuestion, MatchQuestion, MatchPair } from '@/core/data/types';
+import type { BattleState, MonsterDef, Word, Question, TranslateQuestion, SpellQuestion, PosQuestion, MatchQuestion, MatchPair, BattleLogEntry } from '@/core/data/types';
 import { CHAPTERS } from '@/core/data/levels';
 import { CHAPTER_MONSTERS, MONSTERS } from '@/core/data/monsters';
 import { createBattle, answerQuestion, monsterTurn } from '@/core/engine/battle';
@@ -155,6 +155,25 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     const wasLastWrong = get().lastAnswerCorrect === false;
     const nextBattle = answerQuestion(battle, player, monster, correct, wasLastWrong);
 
+    // Build battle log entry
+    const entry: BattleLogEntry = {
+      turn: nextBattle.turn,
+      wordEnglish: currentQuestion.word?.english || '',
+      wordChinese: currentQuestion.word?.chinese || '',
+      questionType: currentQuestion.type,
+      isCorrect: correct,
+      damageDealt: nextBattle.lastDamageDealt,
+      damageTaken: 0,  // filled later in finishMonsterTurn for wrong answers
+      lastCombo: battle.combo,  // combo BEFORE this action
+      isCrit: nextBattle.lastCrit,
+      monsterHpAfter: nextBattle.monsterHp,
+      monsterMaxHp: nextBattle.monsterMaxHp,
+      playerHpAfter: nextBattle.playerHp,
+      playerMaxHp: nextBattle.playerMaxHp,
+      monsterName: monster.name,
+    };
+    nextBattle.log = [...nextBattle.log, entry];
+
     // Award gold for correct answer
     if (correct) {
       usePlayerStore.getState().addGold(10);
@@ -199,6 +218,17 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     if (!battle || !monster) return;
 
     const nextBattle = monsterTurn(battle, monster);
+
+    // Update the last log entry with actual damage taken from monster
+    if (nextBattle.log.length > 0 && nextBattle.lastDamageTaken > 0) {
+      const lastEntry = { ...nextBattle.log[nextBattle.log.length - 1] };
+      lastEntry.damageTaken = nextBattle.lastDamageTaken;
+      lastEntry.playerHpAfter = nextBattle.playerHp;
+      nextBattle.log = [
+        ...nextBattle.log.slice(0, -1),
+        lastEntry,
+      ];
+    }
 
     set({ battle: nextBattle });
 
