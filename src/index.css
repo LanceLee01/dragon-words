@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+  --color-parchment: #f4e4c1;
+  --color-parchment-dark: #d4b896;
+  --color-blood: #8b0000;
+  --color-gold: #ffd700;
+  --color-magic: #7b2ff7;
+  --color-dragon: #ff4500;
+}
+
+body {
+  margin: 0;
+  background: var(--color-parchment);
+  font-family: 'Georgia', serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.game-active {
+  user-select: none;
+  -webkit-user-select: none;
+}
