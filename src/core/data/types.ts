@@ -240,6 +240,28 @@ export interface BattleState {
   lastDamageDealt: number;
   /** Damage taken by player in last monster action (for UI floating number) */
   lastDamageTaken: number;
+  /** Whether the last attack was a critical hit */
+  lastCrit: boolean;
+  /** Battle log entries accumulated during the fight */
+  log: BattleLogEntry[];
+}
+
+/** A single entry in the battle log */
+export interface BattleLogEntry {
+  turn: number;
+  wordEnglish: string;
+  wordChinese: string;
+  questionType: string;
+  isCorrect: boolean;
+  damageDealt: number;
+  damageTaken: number;
+  lastCombo: number;
+  isCrit: boolean;
+  monsterHpAfter: number;
+  monsterMaxHp: number;
+  playerHpAfter: number;
+  playerMaxHp: number;
+  monsterName: string;
 }
 
 /** Base question fields shared by all question types */
