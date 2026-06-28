@@ -12,6 +12,31 @@ import { useSound } from '@/hooks/useSound';
 import { HealthBar } from '@/components/shared/HealthBar';
 import { Timer } from '@/components/shared/Timer';
 import { ComboDisplay } from '@/components/shared/ComboDisplay';
+
+// Portrait assets
+const CLASS_NAMES: Record<string, string> = {
+  warrior: '战士', mage: '法师', ranger: '游侠',
+  paladin: '圣骑士', rogue: '盗贼', druid: '德鲁伊',
+};
+const CLASS_ICONS: Record<string, string> = {
+  warrior: '⚔️', mage: '🔮', ranger: '🏹',
+  paladin: '🛡️', rogue: '🗡️', druid: '🌿',
+};
+const CLASS_PORTRAITS: Record<string, string> = {
+  // Real images go to public/assets/images/classes/ when generated
+  // Fallback: use emoji via the icon
+};
+const MONSTER_ICONS: Record<string, string> = {
+  goblin: '👺', skeleton: '💀', apprentice: '🧙', shadowwolf: '🐺',
+  gargoyle: '🗿', troglodyte: '🦎', harpy: '🦅', ghost: '👻',
+  ogre: '👹', succubus: '😈', demonhound: '🐲', fallenAngel: '👼',
+  timeGhost: '⏳', dragonborn: '🐉', eliteGuard: '🛡️',
+  goblinKing: '👑', deathKnight: '⚫', archmage_boss: '🔵',
+  treantElder: '🌳', lavaGiant: '🌋', drowElf: '🏹',
+  wyvern: '🦎', lichKing: '☠️', stormGiant: '⚡',
+  darkKnight: '🖤', abyssalLord: '👿', archangel: '👼',
+  timeKeeper: '⌛', dracolich: '☠️', ancientRed: '🐉',
+};
 import { QuestionCard } from '@/components/battle/QuestionCard';
 import { VictoryScreen } from '@/components/battle/VictoryScreen';
 import { DefeatScreen } from '@/components/battle/DefeatScreen';
@@ -226,12 +251,18 @@ export default function BattlePage() {
           <HealthBar
             current={battle.playerHp}
             max={battle.playerMaxHp}
-            label="玩家"
+            label={`Lv.${player.level} ${player.classId ? CLASS_NAMES[player.classId] || '' : '冒险者'}`}
             color="bg-green-600"
           />
+          {/* Player portrait */}
+          <div className="mt-2 flex justify-center">
+            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl border-2 border-green-700 bg-gray-800/60 text-5xl">
+              {player.classId ? CLASS_ICONS[player.classId] || '🧑' : '🧑'}
+            </div>
+          </div>
         </div>
 
-        <div className="shrink-0">
+        <div className="flex shrink-0 flex-col items-center gap-1">
           <Timer remaining={remaining} isUrgent={isUrgent} />
         </div>
 
@@ -242,6 +273,12 @@ export default function BattlePage() {
             label={monster.name}
             color="bg-red-600"
           />
+          {/* Monster portrait */}
+          <div className="mt-2 flex justify-center">
+            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl border-2 border-red-700 bg-gray-800/60 text-5xl">
+              {MONSTER_ICONS[monster.id] || '👹'}
+            </div>
+          </div>
         </div>
       </div>
 
