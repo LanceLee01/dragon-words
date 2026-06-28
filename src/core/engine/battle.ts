@@ -126,6 +126,7 @@ export function answerQuestion(
   if (correct) {
     next.combo += 1;
     next.charge = Math.min(next.charge + 1, 5);
+    next.phase = 'result';
 
     const attack = getPlayerAttack(player);
     const crit = isCrit(player, wasLastWrong);

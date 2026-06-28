@@ -284,7 +284,7 @@ describe('answerQuestion', () => {
 
     expect(result.combo).toBe(1);
     expect(result.charge).toBe(1);
-    expect(result.phase).toBe('question');
+    expect(result.phase).toBe('result');
   });
 
   it('resets combo and charge to 0 on wrong answer, sets phase monster-turn', () => {
