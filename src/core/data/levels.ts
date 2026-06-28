@@ -30,7 +30,9 @@ function buildChapters(): ChapterDef[] {
   const chapters: ChapterDef[] = [];
 
   for (let i = 1; i <= 15; i++) {
-    const wordCount = i <= 5 ? 101 : i <= 14 ? 110 : 108;
+    const priPerCh = Math.ceil(499 / 5); // primary: 100/chapter
+    const midPerCh = Math.ceil(2018 / 10); // middle: 202/chapter
+    const wordCount = i <= 5 ? priPerCh : midPerCh;
     const wordLevel: WordLevel = i <= 5 ? 'primary' : 'middle';
     const monsterEntry = CHAPTER_MONSTERS[i];
 

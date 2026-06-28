@@ -1,5 +1,6 @@
 // ---------------------------------------------------------------------------
-// generate-words.ts — reads placeholder-words.md and produces src/core/data/words.ts
+// generate-words.ts — reads the merged word list markdown (完整合并版)
+// and produces src/core/data/words.ts
 // ---------------------------------------------------------------------------
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -20,91 +21,98 @@ interface WordEntry {
 // Paths
 // ---------------------------------------------------------------------------
 
-const MD_PATH = resolve(import.meta.dirname, 'placeholder-words.md');
+const SRC_MD = resolve(import.meta.dirname, '..', 'words', '2022新课标_中英词汇对照表_完整合并版.md');
 const OUT_PATH = resolve(import.meta.dirname, '..', 'src', 'core', 'data', 'words.ts');
 
 // ---------------------------------------------------------------------------
-// Parse markdown
+// Parse markdown table into WordEntry[]
 // ---------------------------------------------------------------------------
 
-function parseWords(md: string): { primary: WordEntry[]; middle: WordEntry[] } {
-  const primary: WordEntry[] = [];
-  const middle: WordEntry[] = [];
+/**
+ * Clean an English word for storage.
+ * - Remove leading/trailing whitespace
+ * - Collapse spaces
+ */
+function cleanEnglish(raw: string): string {
+  return raw.trim().replace(/\s+/g, ' ');
+}
 
-  let currentSection: 'primary' | 'middle' | null = null;
+/**
+ * Get the primary English form (the first part before any parentheses variants).
+ * e.g. "a (an)" → "a", "colour (AmE color)" → "colour"
+ */
+function primaryForm(raw: string): string {
+  const cleaned = cleanEnglish(raw);
+  // Remove "(...)" variants
+  return cleaned.replace(/\s*\(.*?\)\s*/g, '').trim();
+}
+
+function parseWords(md: string): WordEntry[] {
+  const wordMap = new Map<string, WordEntry>(); // key=english, value=lowest level
+  const seen = new Set<string>();
 
   const lines = md.split('\n');
   for (const line of lines) {
     const trimmed = line.trim();
 
-    if (trimmed === '## Primary') {
-      currentSection = 'primary';
-      continue;
-    }
-    if (trimmed === '## Middle') {
-      currentSection = 'middle';
+    // Match table data rows: | level | english | pos | chinese |
+    if (!trimmed.startsWith('|')) continue;
+    const parts = trimmed.split('|').map(s => s.trim()).filter(Boolean);
+    if (parts.length < 4) continue;
+
+    const rawLevel = parts[0];
+    const rawEnglish = parts[1];
+    const meaning = parts[3]; // chinese meaning
+
+    // Skip table header rows
+    if (rawLevel === '级别' || rawLevel === '---') continue;
+    if (rawEnglish === '单词' || rawEnglish === '---') continue;
+    if (!rawLevel || !rawEnglish || !meaning) continue;
+
+    let isPrimary: boolean;
+    if (rawLevel.includes('二级') || rawLevel.includes('小学')) {
+      isPrimary = true;
+    } else if (rawLevel.includes('三级') || rawLevel.includes('初中')) {
+      isPrimary = false;
+    } else {
       continue;
     }
 
-    // Parse "english | chinese | difficulty"
-    const match = trimmed.match(/^-\s+(.+?)\s*\|\s*(.+?)\s*\|\s*(\d+)\s*$/);
-    if (match && currentSection) {
-      const entry: WordEntry = {
-        english: match[1].trim(),
-        chinese: match[2].trim(),
-        level: currentSection,
-      };
-      if (currentSection === 'primary') {
-        primary.push(entry);
-      } else {
-        middle.push(entry);
+    const english = primaryForm(rawEnglish);
+    if (!english) continue;
+    const chinese = meaning.trim();
+
+    // If word already exists, keep the lower level (primary < middle)
+    const existing = wordMap.get(english);
+    if (existing) {
+      if (isPrimary && existing.level === 'middle') {
+        // Upgrade to primary
+        wordMap.set(english, { english, chinese, level: 'primary' });
       }
+      // otherwise keep existing (if both are same level, keep first)
+    } else {
+      wordMap.set(english, {
+        english,
+        chinese,
+        level: isPrimary ? 'primary' : 'middle',
+      });
     }
   }
 
-  return { primary, middle };
+  return Array.from(wordMap.values());
 }
 
 // ---------------------------------------------------------------------------
-// Generate words (pad to 1600: 1-505 primary, 506-1600 middle)
+// Assign difficulty based on word length and level
 // ---------------------------------------------------------------------------
 
-function generateWords(samples: { primary: WordEntry[]; middle: WordEntry[] }): WordEntry[] {
-  const TOTAL = 1600;
-  const PRIMARY_COUNT = 505;
-  const MIDDLE_COUNT = TOTAL - PRIMARY_COUNT; // 1095
-
-  const words: WordEntry[] = [];
-
-  // Primary: ids 1-505
-  for (let i = 0; i < PRIMARY_COUNT; i++) {
-    if (i < samples.primary.length) {
-      words.push({ ...samples.primary[i] });
-    } else {
-      const n = i + 1;
-      words.push({
-        english: `word_${n}`,
-        chinese: `单词_${n}`,
-        level: 'primary',
-      });
-    }
-  }
-
-  // Middle: ids 506-1600
-  for (let i = 0; i < MIDDLE_COUNT; i++) {
-    if (i < samples.middle.length) {
-      words.push({ ...samples.middle[i] });
-    } else {
-      const n = PRIMARY_COUNT + i + 1;
-      words.push({
-        english: `word_${n}`,
-        chinese: `单词_${n}`,
-        level: 'middle',
-      });
-    }
-  }
-
-  return words;
+function getDifficulty(word: string, level: WordLevel, i: number): 1 | 2 | 3 {
+  if (level === 'primary') return 1;
+  // For middle level: longer words = harder
+  if (word.length > 8) return 3;
+  if (word.length > 5) return 2;
+  // Mix shorter middle words: some 2, some 1
+  return (i % 3 === 0) ? 3 : 2;
 }
 
 // ---------------------------------------------------------------------------
@@ -115,15 +123,32 @@ function writeWordsFile(words: WordEntry[]): void {
   const lines: string[] = [
     '// ---------------------------------------------------------------------------',
     '// Word Data — auto-generated by scripts/generate-words.ts',
-    '// DO NOT EDIT MANUALLY',
+    '// Source: 2022新课标_中英词汇对照表_完整合并版.md',
+    '// DO NOT EDIT MANUALLY — run `npx tsx scripts/generate-words.ts` to regenerate',
     '// ---------------------------------------------------------------------------',
     "import type { Word } from './types';",
     '',
+    '// prettier-ignore',
     `export const WORDS: Word[] = [`,
   ];
 
-  for (const w of words) {
-    lines.push(`  { english: ${JSON.stringify(w.english)}, chinese: ${JSON.stringify(w.chinese)}, level: ${JSON.stringify(w.level)} },`);
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i];
+    const id = i + 1;
+    const difficulty = getDifficulty(w.english, w.level, i);
+    const imagePath = `/assets/images/word-images/${w.level}/${w.english}.png`;
+
+    lines.push(`  {`);
+    lines.push(`    id: ${id},`);
+    lines.push(`    english: ${JSON.stringify(w.english)},`);
+    lines.push(`    chinese: ${JSON.stringify(w.chinese)},`);
+    lines.push(`    level: ${JSON.stringify(w.level)},`);
+    lines.push(`    difficulty: ${difficulty},`);
+    lines.push(`    imagePath: ${JSON.stringify(imagePath)},`);
+    lines.push(`    correctCount: 0,`);
+    lines.push(`    wrongCount: 0,`);
+    lines.push(`    lastSeenAt: 0,`);
+    lines.push(`  },`);
   }
 
   lines.push('];');
@@ -142,17 +167,16 @@ function writeWordsFile(words: WordEntry[]): void {
 // ---------------------------------------------------------------------------
 
 function main(): void {
-  const md = readFileSync(MD_PATH, 'utf-8');
-  const samples = parseWords(md);
+  const md = readFileSync(SRC_MD, 'utf-8');
+  const words = parseWords(md);
 
-  console.log(`Parsed ${samples.primary.length} primary samples, ${samples.middle.length} middle samples`);
+  const primaryWords = words.filter((w) => w.level === 'primary');
+  const middleWords = words.filter((w) => w.level === 'middle');
+  console.log(`Parsed ${words.length} unique words (${primaryWords.length} primary, ${middleWords.length} middle)`);
 
-  const words = generateWords(samples);
   writeWordsFile(words);
 
-  const primaryWords = words.filter((w) => w.level === 'primary').length;
-  const middleWords = words.filter((w) => w.level === 'middle').length;
-  console.log(`Generated ${primaryWords} primary + ${middleWords} middle = ${words.length} total words`);
+  console.log(`Done — ${words.length} words total (primary: ${primaryWords.length}, middle: ${middleWords.length})`);
 }
 
 main();
