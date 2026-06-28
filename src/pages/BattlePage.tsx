@@ -59,7 +59,7 @@ for (const name of monsterNames) {
 import { QuestionRenderer } from '@/components/battle/QuestionRenderer';
 import { VictoryScreen } from '@/components/battle/VictoryScreen';
 import { DefeatScreen } from '@/components/battle/DefeatScreen';
-import type { TranslateQuestion, PosQuestion } from '@/core/data/types';
+import type { TranslateQuestion, SpellQuestion, PosQuestion } from '@/core/data/types';
 
 export default function BattlePage() {
   const { chapter: chapterParam, level: levelParam } = useParams<{
@@ -199,7 +199,7 @@ export default function BattlePage() {
   useEffect(() => {
     if (!battle || !lastAnswerCorrect) return;
     if (battle.phase === 'result' && battle.status === 'ongoing') {
-      const timer = setTimeout(() => finishMonsterTurn(), 2000);
+      const timer = setTimeout(() => finishMonsterTurn(), 4000);
       return () => clearTimeout(timer);
     }
   }, [battle?.phase, battle?.status, lastAnswerCorrect, finishMonsterTurn]);
@@ -401,8 +401,18 @@ export default function BattlePage() {
               <span className="text-6xl">✅</span>
               <p className="text-2xl font-bold text-green-400">正确!</p>
 
-              {/* Word card — support translate and pos types */}
+              {/* Word card — support all question types */}
               {currentQuestion && (() => {
+                if (currentQuestion.type === 'spell') {
+                  const q = currentQuestion as SpellQuestion;
+                  return (
+                    <div className="w-full max-w-xs rounded-xl border border-green-800/40 bg-black/30 p-4 text-center">
+                      <p className="text-xl font-bold text-white">{q.word.english}</p>
+                      <p className="mt-1 text-lg text-green-300">{q.targetLetters.join('')}</p>
+                      <p className="mt-1 text-sm text-gray-400">{q.chineseHint}</p>
+                    </div>
+                  );
+                }
                 if (currentQuestion.type === 'pos') {
                   const q = currentQuestion as PosQuestion;
                   return (
@@ -434,7 +444,7 @@ export default function BattlePage() {
               </p>
 
               {/* Countdown */}
-              <p className="text-sm text-gray-500">2秒后自动继续...</p>
+              <p className="text-sm text-gray-500">4秒后自动继续...</p>
             </motion.div>
           )}
 
@@ -450,6 +460,20 @@ export default function BattlePage() {
               <p className="text-2xl font-bold text-red-400">答错了!</p>
 
               {currentQuestion && (() => {
+                if (currentQuestion.type === 'spell') {
+                  const q = currentQuestion as SpellQuestion;
+                  return (
+                    <div className="rounded-xl border border-yellow-700/40 bg-yellow-900/20 px-6 py-3 text-center">
+                      <span className="text-sm text-gray-400">正确答案：</span>
+                      <br />
+                      <span className="text-xl font-bold text-yellow-300">{q.word.english}</span>
+                      <br />
+                      <span className="text-base text-gray-300">拼写前 {q.maxLength} 字母：{q.targetLetters.join('')}</span>
+                      <br />
+                      <span className="mt-1 text-xs text-gray-400">{q.chineseHint}</span>
+                    </div>
+                  );
+                }
                 if (currentQuestion.type === 'pos') {
                   const q = currentQuestion as PosQuestion;
                   return (
