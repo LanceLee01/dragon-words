@@ -128,7 +128,7 @@ export function answerQuestion(
     const attack = getPlayerAttack(player);
     const crit = isCrit(player, wasLastWrong);
     const damage = calculateDamage(attack, next.combo, crit);
-    next.monsterHp -= damage;
+    next.monsterHp = Math.max(0, next.monsterHp - damage);
 
     if (next.monsterHp <= 0) {
       next.status = 'won';
@@ -191,7 +191,7 @@ export function useSkill(
     const attack = getPlayerAttack(player);
     const crit = isCrit(player, false);
     const damage = calculateDamage(attack * 2.5, next.combo, crit);
-    next.monsterHp -= damage;
+    next.monsterHp = Math.max(0, next.monsterHp - damage);
     if (next.monsterHp <= 0) {
       next.status = 'won';
     }
@@ -207,7 +207,7 @@ export function useSkill(
     const attack = getPlayerAttack(player);
     const crit = isCrit(player, false);
     const damage = calculateDamage(attack * 2.5, next.combo, crit);
-    next.monsterHp -= damage;
+    next.monsterHp = Math.max(0, next.monsterHp - damage);
     if (next.monsterHp <= 0) {
       next.status = 'won';
     }
@@ -220,7 +220,7 @@ export function useSkill(
     const attack = getPlayerAttack(player);
     const crit = isCrit(player, false);
     const damage = calculateDamage(attack * 4, next.combo, crit);
-    next.monsterHp -= damage;
+    next.monsterHp = Math.max(0, next.monsterHp - damage);
     next.invulnerable = 1;
     if (next.monsterHp <= 0) {
       next.status = 'won';
@@ -233,7 +233,7 @@ export function useSkill(
     const attack = getPlayerAttack(player);
     const crit = isCrit(player, false);
     const damage = calculateDamage(attack * 3, next.combo, crit);
-    next.monsterHp -= damage;
+    next.monsterHp = Math.max(0, next.monsterHp - damage);
     if (next.monsterHp <= 0) {
       next.status = 'won';
     }
@@ -245,7 +245,7 @@ export function useSkill(
     const attack = getPlayerAttack(player);
     const crit = isCrit(player, false);
     const damage = calculateDamage(attack * 3, next.combo, crit);
-    next.monsterHp -= damage;
+    next.monsterHp = Math.max(0, next.monsterHp - damage);
     next.stunTimer = 3;
     if (next.monsterHp <= 0) {
       next.status = 'won';
@@ -258,7 +258,7 @@ export function useSkill(
     const attack = getPlayerAttack(player);
     const crit = isCrit(player, false);
     const damage = calculateDamage(attack * 2, next.combo, crit);
-    next.monsterHp -= damage;
+    next.monsterHp = Math.max(0, next.monsterHp - damage);
     next.stunTimer = 1;
     if (next.monsterHp <= 0) {
       next.status = 'won';
@@ -271,7 +271,7 @@ export function useSkill(
     const attack = getPlayerAttack(player);
     const crit = isCrit(player, false);
     const hitDmg = calculateDamage(attack, next.combo, crit);
-    next.monsterHp -= hitDmg * 5;
+    next.monsterHp = Math.max(0, next.monsterHp - hitDmg * 5);
     next.invulnerable = 1;
     if (next.monsterHp <= 0) {
       next.status = 'won';
@@ -284,7 +284,7 @@ export function useSkill(
     const attack = getPlayerAttack(player);
     const crit = isCrit(player, false);
     const hitDmg = calculateDamage(attack, next.combo, crit);
-    next.monsterHp -= hitDmg * 3;
+    next.monsterHp = Math.max(0, next.monsterHp - hitDmg * 3);
     if (next.monsterHp <= 0) {
       next.status = 'won';
     }
@@ -296,7 +296,7 @@ export function useSkill(
     const attack = getPlayerAttack(player);
     const crit = isCrit(player, false);
     const damage = calculateDamage(attack * 2, next.combo, crit);
-    next.monsterHp -= damage;
+    next.monsterHp = Math.max(0, next.monsterHp - damage);
     next.stunTimer = 2;
     if (next.monsterHp <= 0) {
       next.status = 'won';

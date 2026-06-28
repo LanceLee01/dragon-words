@@ -114,10 +114,13 @@ export default function BattlePage() {
 
   // Play sounds when phase changes
   const prevPhaseRef = useRef(battle?.phase);
+  const prevStatusRef = useRef(battle?.status);
   useEffect(() => {
     if (!battle) return;
     const prevPhase = prevPhaseRef.current;
     prevPhaseRef.current = battle.phase;
+    const prevStatus = prevStatusRef.current;
+    prevStatusRef.current = battle.status;
 
     if (battle.phase === 'result' && prevPhase === 'question') {
       playAttackSequence();
@@ -128,10 +131,10 @@ export default function BattlePage() {
     if (battle.phase === 'monster-turn' && prevPhase === 'question') {
       play('playerHit');
     }
-    if (battle.phase === 'victory' && prevPhase !== 'victory') {
+    if (battle.status === 'won' && prevStatus !== 'won') {
       play('victory');
     }
-    if (battle.phase === 'defeat' && prevPhase !== 'defeat') {
+    if (battle.status === 'lost' && prevStatus !== 'lost') {
       play('defeat');
     }
   }, [battle?.phase, battle?.status, battle?.combo, play, playAttackSequence]);
@@ -186,8 +189,8 @@ export default function BattlePage() {
   // Determine display phase
   // -----------------------------------------------------------------------
 
-  const isVictory = battle?.phase === 'victory';
-  const isDefeat = battle?.phase === 'defeat';
+  const isVictory = battle?.status === 'won';
+  const isDefeat = battle?.status === 'lost';
   const isResult = lastAnswerCorrect === true && !isVictory && !isDefeat;
   const isMonsterTurn =
     battle?.phase === 'monster-turn' && !isVictory && !isDefeat;
