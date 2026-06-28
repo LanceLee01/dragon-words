@@ -33,3 +33,31 @@ Successfully scaffolded the Dragon Words Vite + React + TypeScript project at th
 ## Concerns
 
 - None. All scaffolding steps completed without issues.
+
+---
+
+## Fix 2: Pin Framework Versions & Update Title
+
+**Date:** 2026-06-28
+
+### Changes Made
+
+1. **package.json** — Pinned all framework versions to the specified ranges:
+   - `react` → `^18.3.1`, `react-dom` → `^18.3.1`
+   - `typescript` → `~5.6.2`
+   - `vite` → `^5.4.0`, `@vitejs/plugin-react` → `^4.3.0`
+   - `@tailwindcss/vite` → `^4.0.0`, `tailwindcss` → `^4.0.0`
+   - `@types/react` → `^18.3.0`, `@types/react-dom` → `^18.3.0`
+   - `vitest` → `^2.1.0`, `jsdom` → `^25.0.0`
+   - `@testing-library/react` → `^16.0.0`, `@testing-library/jest-dom` → `^6.5.0`
+2. **index.html** — Changed `<title>temp-vite-project</title>` to `<title>Dragon Words</title>`
+3. **Clean install** — Deleted `node_modules` and `package-lock.json`, ran `npm install` (201 packages)
+
+### Verification
+
+- `npx tsc --noEmit` — ✅ passes (no errors)
+- `npx vite --host` — ✅ starts (Vite v5.4.21 on port 5173)
+
+### Commit
+
+`git add -A && git commit -m "fix: pin framework versions and update project title"`
