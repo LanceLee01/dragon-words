@@ -67,11 +67,31 @@ export class SoundEngine {
   }
 
   private _play(src: string, volume: number, rate: number): HTMLAudioElement | null {
-    const audio = new Audio(src);
-    audio.volume = Math.min(1, Math.max(0, volume));
-    audio.playbackRate = rate;
-    audio.play().catch(() => {});
-    return audio;
+    try {
+      const audio = new Audio(src);
+      audio.volume = Math.min(1, Math.max(0, volume));
+      audio.playbackRate = rate;
+      const promise = audio.play();
+      if (promise) {
+        promise.catch((err) => {
+          // Browser blocked — will retry via unlock()
+          if (err.name === 'NotAllowedError') {
+            if (!this.unlocked) {
+              this.pendingUnlock.push(() => {
+                const retry = new Audio(src);
+                retry.volume = audio.volume;
+                retry.playbackRate = audio.playbackRate;
+                retry.play().catch(() => {});
+              });
+            }
+          }
+        });
+      }
+      return audio;
+    } catch (e) {
+      console.warn('[Sound] Failed to play:', src, e);
+      return null;
+    }
   }
 
   /** Track long sounds that need manual stopping */

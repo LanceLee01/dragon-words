@@ -3,7 +3,7 @@
 // ---------------------------------------------------------------------------
 import { create } from 'zustand';
 import type { PlayerState, ClassId, AdvancedClassId, Equipment, WordLevel } from '@/core/data/types';
-import { loadPlayer, savePlayer } from '@/core/utils/storage';
+import { loadPlayer, savePlayer, loadProgress, saveProgress } from '@/core/utils/storage';
 import { getXpForLevel } from '@/core/data/levels';
 
 // ---------------------------------------------------------------------------
@@ -155,12 +155,24 @@ export const usePlayerStore = create<PlayerStore>((set) => ({
 
   completeLevel: (key, chapter) => {
     set((s) => {
+      // Update PlayerState
       const next: PlayerState = {
         ...s.player,
         currentChapter: chapter,
         currentLevel: s.player.currentLevel + 1,
       };
       savePlayer(next);
+
+      // Also update GameProgress (MapPage reads from dw_progress)
+      const progress = loadProgress();
+      if (!progress.completedLevels.includes(key)) {
+        progress.completedLevels.push(key);
+      }
+      if (!progress.completedChapters.includes(chapter)) {
+        progress.completedChapters.push(chapter);
+      }
+      saveProgress(progress);
+
       return { player: next };
     });
   },
