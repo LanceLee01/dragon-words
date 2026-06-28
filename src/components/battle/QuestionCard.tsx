@@ -1,29 +1,36 @@
 // ---------------------------------------------------------------------------
 // QuestionCard — displays a word question with 4 options in a 2x2 grid
+// Supports translate types (word-meaning, meaning-word, fill-blank, listening)
+// and pos type (collocation, wordForm)
 // ---------------------------------------------------------------------------
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useSpeech } from '@/hooks/useSpeech';
-import type { Question, TranslateQuestion } from '@/core/data/types';
+import type { Question, TranslateQuestion, PosQuestion } from '@/core/data/types';
 
-function isTranslateQuestion(q: Question): q is TranslateQuestion {
+function isSupportedQuestion(q: Question): q is TranslateQuestion | PosQuestion {
   return (
     q.type === 'word-meaning' ||
     q.type === 'meaning-word' ||
     q.type === 'fill-blank' ||
-    q.type === 'listening'
+    q.type === 'listening' ||
+    q.type === 'pos'
   );
+}
+
+function isPosQuestion(q: TranslateQuestion | PosQuestion): q is PosQuestion {
+  return q.type === 'pos';
 }
 
 interface QuestionCardProps {
   question: Question;
-  onAnswer: (selected: string) => void;
+  onAnswer: (selected: string | number) => void;
   disabled: boolean;
 }
 
 export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps) {
-  // Narrow to TranslateQuestion — this component only supports translate-type questions
-  if (!isTranslateQuestion(question)) {
+  // Narrow to supported types — this component handles translate + pos
+  if (!isSupportedQuestion(question)) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-gray-400">
         <span className="text-4xl">❓</span>
@@ -32,17 +39,20 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
     );
   }
 
+  const isPos = isPosQuestion(question);
+
   const { speak, isAvailable } = useSpeech();
   const [imageError, setImageError] = useState(false);
   const [replayCount, setReplayCount] = useState(0);
 
-  const handleOptionClick = (option: string) => {
+  const handleOptionClick = (option: string, idx: number) => {
     if (disabled) return;
-    onAnswer(option);
+    // For pos questions, pass the index as string; for translate, pass the option string
+    onAnswer(isPos ? String(idx) : option);
   };
 
   const handlePlaySound = () => {
-    if (!isAvailable) return;
+    if (!isAvailable || isPos) return;
     if (question.type === 'listening' && replayCount >= 1) return;
     speak(question.word.english);
     if (question.type === 'listening') {
@@ -54,59 +64,83 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
 
   return (
     <div className="flex flex-col items-center gap-6 px-4">
-      {/* --- Word image --- */}
-      <div className="flex h-40 w-56 items-center justify-center overflow-hidden rounded-xl bg-white/10">
-        {imageError ? (
-          <span className="text-5xl">📜</span>
-        ) : (
-          <img
-            src={question.imagePath}
-            alt={question.word.english}
-            className="h-full w-full object-contain"
-            onError={() => setImageError(true)}
-          />
-        )}
-      </div>
-
-      {/* --- Question prompt --- */}
-      <div className="flex flex-col items-center gap-3">
-        {question.type === 'listening' ? (
-          <>
-            <p className="text-center text-lg text-gray-300">请选择你听到的单词意思：</p>
-            <button
-              onClick={handlePlaySound}
-              disabled={!isAvailable || (question.type === 'listening' && replayCount >= 1)}
-              className="flex items-center gap-2 rounded-lg bg-blue-700 px-5 py-2 text-lg text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+      {/* --- Word image or stem (for pos) --- */}
+      {isPos ? (
+        <div className="flex w-full max-w-md flex-col items-center gap-2">
+          <p className="text-sm font-semibold uppercase tracking-wider text-gray-500">
+            {question.subtype === 'collocation' ? '词语搭配' : '词性变形'}
+          </p>
+          <div className="w-full rounded-xl border border-purple-700/40 bg-purple-900/20 px-6 py-4 text-center">
+            <p className="text-xl font-bold text-white">{question.stem}</p>
+          </div>
+          {/* Explanation shown after answering */}
+          {disabled && question.explanation && (
+            <motion.p
+              className="mt-2 rounded-lg bg-blue-900/30 px-4 py-2 text-sm text-blue-200"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
             >
-              <span>🔊</span>
-              <span>{replayCount >= 1 ? '已播放' : '播放'}</span>
-            </button>
-          </>
-        ) : (
-          <>
-            <p className="text-center text-lg text-gray-300">请选择以下单词的意思：</p>
-            <div className="flex items-center gap-3">
-              <span className="text-3xl font-bold text-white">{question.word.english}</span>
-              {isAvailable && (
+              💡 {question.explanation}
+            </motion.p>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* --- Word image --- */}
+          <div className="flex h-40 w-56 items-center justify-center overflow-hidden rounded-xl bg-white/10">
+            {imageError ? (
+              <span className="text-5xl">📜</span>
+            ) : (
+              <img
+                src={question.imagePath}
+                alt={question.word.english}
+                className="h-full w-full object-contain"
+                onError={() => setImageError(true)}
+              />
+            )}
+          </div>
+
+          {/* --- Question prompt --- */}
+          <div className="flex flex-col items-center gap-3">
+            {question.type === 'listening' ? (
+              <>
+                <p className="text-center text-lg text-gray-300">请选择你听到的单词意思：</p>
                 <button
                   onClick={handlePlaySound}
-                  className="rounded-lg bg-blue-700 p-2 text-lg text-white transition-colors hover:bg-blue-600"
-                  title="再听一次"
+                  disabled={!isAvailable || (question.type === 'listening' && replayCount >= 1)}
+                  className="flex items-center gap-2 rounded-lg bg-blue-700 px-5 py-2 text-lg text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  🔊
+                  <span>🔊</span>
+                  <span>{replayCount >= 1 ? '已播放' : '播放'}</span>
                 </button>
-              )}
-            </div>
-          </>
-        )}
-      </div>
+              </>
+            ) : (
+              <>
+                <p className="text-center text-lg text-gray-300">请选择以下单词的意思：</p>
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl font-bold text-white">{question.word.english}</span>
+                  {isAvailable && (
+                    <button
+                      onClick={handlePlaySound}
+                      className="rounded-lg bg-blue-700 p-2 text-lg text-white transition-colors hover:bg-blue-600"
+                      title="再听一次"
+                    >
+                      🔊
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      )}
 
       {/* --- 2x2 option grid --- */}
       <div className="grid w-full max-w-md grid-cols-2 gap-3">
         {question.options.map((option, idx) => (
           <motion.button
             key={`${idx}-${option}`}
-            onClick={() => handleOptionClick(option)}
+            onClick={() => handleOptionClick(option, idx)}
             disabled={disabled}
             className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
               disabled

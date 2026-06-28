@@ -7,6 +7,10 @@
   --color-gold: #ffd700;
   --color-magic: #7b2ff7;
   --color-dragon: #ff4500;
+  --color-pos-stem: #a78bfa;
+  --color-pos-correct: #6ee7b7;
+  --color-match-pair: #93c5fd;
+  --color-spell-slot: #fde68a;
 }
 
 body {

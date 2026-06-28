@@ -56,10 +56,10 @@ const monsterNames = [
 for (const name of monsterNames) {
   MONSTER_PORTRAITS[name] = `/assets/images/monsters/${name}.png`;
 }
-import { QuestionCard } from '@/components/battle/QuestionCard';
+import { QuestionRenderer } from '@/components/battle/QuestionRenderer';
 import { VictoryScreen } from '@/components/battle/VictoryScreen';
 import { DefeatScreen } from '@/components/battle/DefeatScreen';
-import type { TranslateQuestion } from '@/core/data/types';
+import type { TranslateQuestion, PosQuestion } from '@/core/data/types';
 
 export default function BattlePage() {
   const { chapter: chapterParam, level: levelParam } = useParams<{
@@ -78,6 +78,7 @@ export default function BattlePage() {
   const lastAnswerCorrect = useBattleStore((s) => s.lastAnswerCorrect);
   const initBattle = useBattleStore((s) => s.initBattle);
   const submitAnswer = useBattleStore((s) => s.submitAnswer);
+  const matchConnect = useBattleStore((s) => s.matchConnect);
   const nextRound = useBattleStore((s) => s.nextRound);
   const finishMonsterTurn = useBattleStore((s) => s.finishMonsterTurn);
   const resetBattle = useBattleStore((s) => s.resetBattle);
@@ -144,12 +145,19 @@ export default function BattlePage() {
   // -----------------------------------------------------------------------
 
   const handleAnswer = useCallback(
-    (selected: string) => {
+    (selected: string | number) => {
       if (answeredRef.current) return;
       answeredRef.current = true;
-      const wasCorrect = submitAnswer(selected);
+      submitAnswer(String(selected));
     },
     [submitAnswer],
+  );
+
+  const handleMatchConnect = useCallback(
+    (leftWordId: number, rightWordId: number) => {
+      matchConnect(leftWordId, rightWordId);
+    },
+    [matchConnect],
   );
 
   // Play sounds when phase changes
@@ -393,8 +401,19 @@ export default function BattlePage() {
               <span className="text-6xl">✅</span>
               <p className="text-2xl font-bold text-green-400">正确!</p>
 
-              {/* Word card */}
+              {/* Word card — support translate and pos types */}
               {currentQuestion && (() => {
+                if (currentQuestion.type === 'pos') {
+                  const q = currentQuestion as PosQuestion;
+                  return (
+                    <div className="w-full max-w-xs rounded-xl border border-green-800/40 bg-black/30 p-4 text-center">
+                      <p className="text-sm text-gray-400">{q.subtype === 'collocation' ? '搭配' : '词性'}</p>
+                      <p className="mt-1 text-lg font-bold text-white">{q.stem}</p>
+                      <p className="mt-1 text-base text-green-300">✅ {q.options[q.correctIndex]}</p>
+                      <p className="mt-2 text-xs text-blue-300">💡 {q.explanation}</p>
+                    </div>
+                  );
+                }
                 const q = currentQuestion as TranslateQuestion;
                 return (
                   <div className="w-full max-w-xs rounded-xl border border-green-800/40 bg-black/30 p-4 text-center">
@@ -431,6 +450,20 @@ export default function BattlePage() {
               <p className="text-2xl font-bold text-red-400">答错了!</p>
 
               {currentQuestion && (() => {
+                if (currentQuestion.type === 'pos') {
+                  const q = currentQuestion as PosQuestion;
+                  return (
+                    <div className="rounded-xl border border-yellow-700/40 bg-yellow-900/20 px-6 py-3 text-center">
+                      <span className="text-sm text-gray-400">正确答案：</span>
+                      <br />
+                      <span className="text-lg font-bold text-yellow-300">
+                        {q.stem} → {q.options[q.correctIndex]}
+                      </span>
+                      <br />
+                      <span className="mt-1 text-xs text-blue-200">💡 {q.explanation}</span>
+                    </div>
+                  );
+                }
                 const q = currentQuestion as TranslateQuestion;
                 return (
                   <p className="rounded-xl border border-yellow-700/40 bg-yellow-900/20 px-6 py-3 text-center">
@@ -464,9 +497,10 @@ export default function BattlePage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -40 }}
             >
-              <QuestionCard
+              <QuestionRenderer
                 question={currentQuestion}
                 onAnswer={handleAnswer}
+                onMatchConnect={handleMatchConnect}
                 disabled={answeredRef.current}
               />
             </motion.div>
