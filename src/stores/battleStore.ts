@@ -5,7 +5,7 @@ import { create } from 'zustand';
 import type { BattleState, MonsterDef, Word, Question } from '@/core/data/types';
 import { CHAPTERS } from '@/core/data/levels';
 import { CHAPTER_MONSTERS, MONSTERS } from '@/core/data/monsters';
-import { createBattle, answerQuestion, useSkill, monsterTurn } from '@/core/engine/battle';
+import { createBattle, answerQuestion, monsterTurn } from '@/core/engine/battle';
 import { generateQuestion, getQuestionTypeForRound } from '@/core/utils/question';
 import { getTimeLimit } from '@/core/data/levels';
 import { usePlayerStore } from '@/stores/playerStore';
@@ -29,9 +29,6 @@ export interface BattleStore {
 
   /** Player submits an answer (the selected option string). Returns true if correct. */
   submitAnswer: (selected: string) => boolean;
-
-  /** Player uses a skill (0 = base, 1 = advanced). */
-  useSkillAction: (idx?: 0 | 1) => void;
 
   /** Advance to the next round (generate a new question). */
   nextRound: () => void;
@@ -153,20 +150,6 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     });
 
     return correct;
-  },
-
-  // -----------------------------------------------------------------------
-  // useSkillAction
-  // -----------------------------------------------------------------------
-
-  useSkillAction: (idx = 0) => {
-    const { battle, monster } = get();
-    if (!battle || !monster) return;
-
-    const player = usePlayerStore.getState().player;
-    const nextBattle = useSkill(battle, player, monster, idx);
-
-    set({ battle: nextBattle });
   },
 
   // -----------------------------------------------------------------------

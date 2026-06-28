@@ -11,7 +11,6 @@ import {
   getEffectiveComboStart,
   isCrit,
   answerQuestion,
-  useSkill,
   monsterTurn,
 } from './battle';
 
@@ -276,52 +275,50 @@ describe('isCrit', () => {
 // ---------------------------------------------------------------------------
 
 describe('answerQuestion', () => {
-  it('increments combo and charge on correct answer', () => {
+  it('increments combo and sets phase=result on correct answer', () => {
     const player = makePlayer({ hp: 100, maxHp: 100, classId: 'warrior', attack: 0 });
     const monster = makeMonster({ hp: 100, attack: 6 });
     const state = createBattle(player, monster);
     const result = answerQuestion(state, player, monster, true);
 
     expect(result.combo).toBe(1);
-    expect(result.charge).toBe(1);
     expect(result.phase).toBe('result');
   });
 
-  it('resets combo and charge to 0 on wrong answer, sets phase monster-turn', () => {
-    const player = makePlayer({ hp: 100, maxHp: 100 });
+  it('resets combo to 0 on wrong answer, deals basic attack, sets phase monster-turn', () => {
+    const player = makePlayer({ hp: 100, maxHp: 100, classId: 'warrior', attack: 0 });
     const monster = makeMonster({ hp: 100, attack: 6 });
     const state = createBattle(player, monster);
-    // Build some combo/charge first
+    // Build some combo first
     const afterCorrect = answerQuestion(state, player, monster, true);
     expect(afterCorrect.combo).toBe(1);
-    expect(afterCorrect.charge).toBe(1);
 
     const result = answerQuestion(afterCorrect, player, monster, false);
     expect(result.combo).toBe(0);
-    expect(result.charge).toBe(0);
+    expect(result.lastDamageDealt).toBeGreaterThan(0); // deals basic attack damage
+    expect(result.phase).toBe('monster-turn');
   });
 
-  it('deals damage to monster HP on correct answer', () => {
+  it('deals skill damage to monster HP on correct answer (warrior ×1.5)', () => {
     const player = makePlayer({ hp: 100, maxHp: 100, classId: 'warrior', attack: 0 });
     const monster = makeMonster({ hp: 100, attack: 6 });
     const state = createBattle(player, monster);
 
-    // Warrior baseAttack=12, attack=0 → getPlayerAttack=12, combo=1 → mult=1, no crit
+    // Warrior baseAttack=12, attack=0 → getPlayerAttack=12
+    // Skill ×1.5 = 18, combo=1 → mult=1, no crit
     const result = answerQuestion(state, player, monster, true);
-    // Damage = Math.round(12 * 1) = 12
-    expect(result.monsterHp).toBe(88);
+    expect(result.monsterHp).toBe(82); // 100 - 18 = 82
   });
 
-  it('caps charge at 5', () => {
+  it('keeps incrementing combo on consecutive correct answers', () => {
     const player = makePlayer({ hp: 100, maxHp: 100, classId: 'warrior', attack: 0 });
-    const monster = makeMonster({ hp: 200, attack: 1 });
+    const monster = makeMonster({ hp: 500, attack: 1 });
     let state = createBattle(player, monster);
 
     for (let i = 0; i < 10; i++) {
       state = answerQuestion(state, player, monster, true);
     }
 
-    expect(state.charge).toBe(5);
     expect(state.combo).toBe(10);
   });
 
@@ -335,103 +332,20 @@ describe('answerQuestion', () => {
     expect(result.monsterHp).toBeLessThanOrEqual(0);
   });
 
-  it('sets phase=monster-turn on wrong answer but does NOT deal damage (deferred to monsterTurn)', () => {
-    const player = makePlayer({ hp: 10, maxHp: 100, classId: 'warrior', attack: 0 });
+  it('sets phase=monster-turn on wrong answer and deals basic attack damage', () => {
+    const player = makePlayer({ hp: 100, maxHp: 100, classId: 'warrior', attack: 0 });
     const monster = makeMonster({ hp: 200, attack: 20 });
     const state = createBattle(player, monster);
 
     const result = answerQuestion(state, player, monster, false);
-    // Wrong answer should NOT deal damage — only reset combo/charge and set phase
-    expect(result.playerHp).toBe(10);  // unchanged
+    // Wrong answer now deals basic attack damage
+    expect(result.lastDamageDealt).toBeGreaterThan(0);
     expect(result.status).toBe('ongoing');
     expect(result.combo).toBe(0);
-    expect(result.charge).toBe(0);
     expect(result.phase).toBe('monster-turn');
   });
 });
 
-// ---------------------------------------------------------------------------
-// useSkill
-// ---------------------------------------------------------------------------
-
-describe('useSkill', () => {
-  it('resets charge to 0 after use', () => {
-    const player = makePlayer({ hp: 100, maxHp: 100, classId: 'warrior', attack: 10 });
-    const monster = makeMonster({ hp: 200, attack: 6 });
-    let state = createBattle(player, monster);
-    // Charge up to 5
-    for (let i = 0; i < 5; i++) {
-      state = answerQuestion(state, player, monster, true);
-    }
-    expect(state.charge).toBe(5);
-
-    const result = useSkill(state, player, monster, 0);
-    expect(result.charge).toBe(0);
-  });
-
-  it('warrior skill deals 3x damage', () => {
-    const player = makePlayer({ hp: 100, maxHp: 100, classId: 'warrior', attack: 0 });
-    const monster = makeMonster({ hp: 100, attack: 6 });
-    let state = createBattle(player, monster);
-    state.charge = 5;
-
-    // warrior baseAttack=12, attack=0 → getPlayerAttack=12, skill ×3, combo=0 → mult=1
-    // Damage = Math.round(12 * 3 * 1) = 36
-    const result = useSkill(state, player, monster, 0);
-    expect(result.monsterHp).toBe(64);
-  });
-
-  it('dragon-knight skill deals 4x damage and grants shield', () => {
-    const player = makePlayer({
-      hp: 100, maxHp: 100,
-      classId: 'warrior',
-      advancedClassId: 'dragon-knight',
-      attack: 0,
-    });
-    const monster = makeMonster({ hp: 200, attack: 6 });
-    let state = createBattle(player, monster);
-    state.charge = 5;
-
-    // warrior baseAttack=12 + dragon-knight baseAttackBonus=8 + attack=0 → 20, skill ×4, combo=0 → mult=1
-    // Damage = Math.round(20 * 4 * 1) = 80
-    const result = useSkill(state, player, monster, 1);
-    expect(result.monsterHp).toBe(120);
-    expect(result.invulnerable).toBe(1);
-  });
-
-  it('paladin skill heals 40% max HP', () => {
-    const player = makePlayer({
-      hp: 50, maxHp: 100,
-      classId: 'paladin',
-      attack: 0,
-    });
-    const monster = makeMonster({ hp: 100, attack: 6 });
-    let state = createBattle(player, monster);
-    state.charge = 5;
-
-    const result = useSkill(state, player, monster, 0);
-    // Heal 40% of 100 = 40, 50 + 40 = 90
-    expect(result.playerHp).toBe(90);
-  });
-
-  it('light-lord skill heals to full HP', () => {
-    const player = makePlayer({
-      hp: 30, maxHp: 100,
-      classId: 'paladin',
-      advancedClassId: 'light-lord',
-      attack: 0,
-    });
-    const monster = makeMonster({ hp: 100, attack: 6 });
-    let state = createBattle(player, monster);
-    state.charge = 5;
-
-    const result = useSkill(state, player, monster, 1);
-    expect(result.playerHp).toBe(100);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// monsterTurn
 // ---------------------------------------------------------------------------
 
 describe('monsterTurn', () => {

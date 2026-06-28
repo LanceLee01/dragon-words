@@ -111,8 +111,8 @@ export function createBattle(
 
 /**
  * Process the player answering a question.
- * - Correct → combo++, charge++ (max 5), deal damage, check victory.
- * - Wrong → combo=0, charge=0, monster counter-attacks, check defeat.
+ * - Correct → deal class-specific damage, heal (paladin/druid), stun (mage), combo++
+ * - Wrong → deal regular damage, combo=0, monster turn
  */
 export function answerQuestion(
   battle: BattleState,
@@ -124,202 +124,75 @@ export function answerQuestion(
   const next = { ...battle };
 
   if (correct) {
-    next.combo += 1;
-    next.charge = Math.min(next.charge + 1, 5);
-    next.phase = 'result';
-
-    const attack = getPlayerAttack(player);
+    const base = getPlayerAttack(player);
     const crit = isCrit(player, wasLastWrong);
-    const damage = calculateDamage(attack, next.combo, crit);
+
+    let damage = 0;
+
+    switch (player.classId) {
+      case 'warrior': {
+        damage = calculateDamage(base * 1.5, next.combo, crit);
+        break;
+      }
+      case 'mage': {
+        damage = calculateDamage(base * 1.2, next.combo, crit);
+        next.stunTimer = 1;
+        break;
+      }
+      case 'ranger': {
+        damage = calculateDamage(base * 0.7 * 3, next.combo, crit);
+        break;
+      }
+      case 'paladin': {
+        damage = calculateDamage(base * 1.0, next.combo, crit);
+        const heal = Math.round(next.playerMaxHp * 0.15);
+        next.playerHp = Math.min(next.playerHp + heal, next.playerMaxHp);
+        break;
+      }
+      case 'rogue': {
+        const bonusDmg = Math.round(next.monsterHp * 0.1);
+        damage = calculateDamage(base * 1.3, next.combo, crit) + bonusDmg;
+        break;
+      }
+      case 'druid': {
+        damage = calculateDamage(base * 1.2, next.combo, crit);
+        const druidHeal = Math.round(next.playerMaxHp * 0.05);
+        next.playerHp = Math.min(next.playerHp + druidHeal, next.playerMaxHp);
+        break;
+      }
+      default: {
+        damage = calculateDamage(base, next.combo, crit);
+      }
+    }
+
     next.lastDamageDealt = damage;
     next.monsterHp = Math.max(0, next.monsterHp - damage);
     next.lastDamageTaken = 0;
+    next.combo += 1;
+    next.phase = 'result';
 
     if (next.monsterHp <= 0) {
       next.status = 'won';
     }
   } else {
+    const base = getPlayerAttack(player);
+    const crit = isCrit(player, wasLastWrong);
+    const damage = calculateDamage(base, next.combo, crit);
+    next.lastDamageDealt = damage;
+    next.monsterHp = Math.max(0, next.monsterHp - damage);
+    next.lastDamageTaken = 0;
     next.combo = 0;
-    next.charge = 0;
     next.phase = 'monster-turn';
+
+    if (next.monsterHp <= 0) {
+      next.status = 'won';
+    }
   }
 
   return next;
 }
 
-// ---------------------------------------------------------------------------
-// Player action: use a skill
-// ---------------------------------------------------------------------------
 
-/**
- * Apply a class skill (skillIndex 0 = base, 1 = advanced).
- * Always resets charge to 0.
- */
-export function useSkill(
-  battle: BattleState,
-  player: PlayerState,
-  monster: MonsterDef,
-  skillIndex: 0 | 1,
-): BattleState {
-  const next = { ...battle };
-  next.charge = 0;
-
-  const classDef = BASE_CLASSES[player.classId];
-  const advDef = player.advancedClassId
-    ? ADVANCED_CLASSES[player.advancedClassId]
-    : null;
-
-  // Determine which skill to use: index 1 requires advanced class
-  const isAdvanced = skillIndex === 1 && advDef !== null;
-
-  // ----- Non-damage skills (heal-only) handled first -----
-  if (isAdvanced && advDef!.id === 'light-lord') {
-    // Full heal
-    next.playerHp = next.playerMaxHp;
-    return next;
-  }
-
-  if (!isAdvanced && classDef.id === 'paladin') {
-    // Heal 40 %
-    const heal = Math.round(next.playerMaxHp * 0.4);
-    next.playerHp = Math.min(next.playerHp + heal, next.playerMaxHp);
-    return next;
-  }
-
-  if (!isAdvanced && classDef.id === 'rogue') {
-    // Instakill if monster HP < 50 %, else ×2.5
-    if (next.monsterHp < Math.round(next.monsterMaxHp / 2)) {
-      next.status = 'won';
-      return next;
-    }
-    // ×2.5 damage
-    const attack = getPlayerAttack(player);
-    const crit = isCrit(player, false);
-    const damage = calculateDamage(attack * 2.5, next.combo, crit);
-    next.monsterHp = Math.max(0, next.monsterHp - damage);
-    if (next.monsterHp <= 0) {
-      next.status = 'won';
-    }
-    return next;
-  }
-
-  if (isAdvanced && advDef!.id === 'shadow-master') {
-    // Instakill if monster HP < 50 % (mark + kill), else ×2.5
-    if (next.monsterHp < Math.round(next.monsterMaxHp / 2)) {
-      next.status = 'won';
-      return next;
-    }
-    const attack = getPlayerAttack(player);
-    const crit = isCrit(player, false);
-    const damage = calculateDamage(attack * 2.5, next.combo, crit);
-    next.monsterHp = Math.max(0, next.monsterHp - damage);
-    if (next.monsterHp <= 0) {
-      next.status = 'won';
-    }
-    return next;
-  }
-
-  // ----- Damage skills -----
-  if (isAdvanced && advDef!.id === 'dragon-knight') {
-    // ×4 + shield 1 turn
-    const attack = getPlayerAttack(player);
-    const crit = isCrit(player, false);
-    const damage = calculateDamage(attack * 4, next.combo, crit);
-    next.monsterHp = Math.max(0, next.monsterHp - damage);
-    next.invulnerable = 1;
-    if (next.monsterHp <= 0) {
-      next.status = 'won';
-    }
-    return next;
-  }
-
-  if (!isAdvanced && classDef.id === 'warrior') {
-    // ×3 damage
-    const attack = getPlayerAttack(player);
-    const crit = isCrit(player, false);
-    const damage = calculateDamage(attack * 3, next.combo, crit);
-    next.monsterHp = Math.max(0, next.monsterHp - damage);
-    if (next.monsterHp <= 0) {
-      next.status = 'won';
-    }
-    return next;
-  }
-
-  if (isAdvanced && advDef!.id === 'archmage') {
-    // ×3 + freeze 3 turns
-    const attack = getPlayerAttack(player);
-    const crit = isCrit(player, false);
-    const damage = calculateDamage(attack * 3, next.combo, crit);
-    next.monsterHp = Math.max(0, next.monsterHp - damage);
-    next.stunTimer = 3;
-    if (next.monsterHp <= 0) {
-      next.status = 'won';
-    }
-    return next;
-  }
-
-  if (!isAdvanced && classDef.id === 'mage') {
-    // ×2 + stun 1 turn
-    const attack = getPlayerAttack(player);
-    const crit = isCrit(player, false);
-    const damage = calculateDamage(attack * 2, next.combo, crit);
-    next.monsterHp = Math.max(0, next.monsterHp - damage);
-    next.stunTimer = 1;
-    if (next.monsterHp <= 0) {
-      next.status = 'won';
-    }
-    return next;
-  }
-
-  if (isAdvanced && advDef!.id === 'elf-lord') {
-    // 5 hits + dodge
-    const attack = getPlayerAttack(player);
-    const crit = isCrit(player, false);
-    const hitDmg = calculateDamage(attack, next.combo, crit);
-    next.monsterHp = Math.max(0, next.monsterHp - hitDmg * 5);
-    next.invulnerable = 1;
-    if (next.monsterHp <= 0) {
-      next.status = 'won';
-    }
-    return next;
-  }
-
-  if (!isAdvanced && classDef.id === 'ranger') {
-    // 3 hits
-    const attack = getPlayerAttack(player);
-    const crit = isCrit(player, false);
-    const hitDmg = calculateDamage(attack, next.combo, crit);
-    next.monsterHp = Math.max(0, next.monsterHp - hitDmg * 3);
-    if (next.monsterHp <= 0) {
-      next.status = 'won';
-    }
-    return next;
-  }
-
-  if (!isAdvanced && classDef.id === 'druid') {
-    // ×2 + stun 2 turns
-    const attack = getPlayerAttack(player);
-    const crit = isCrit(player, false);
-    const damage = calculateDamage(attack * 2, next.combo, crit);
-    next.monsterHp = Math.max(0, next.monsterHp - damage);
-    next.stunTimer = 2;
-    if (next.monsterHp <= 0) {
-      next.status = 'won';
-    }
-    return next;
-  }
-
-  if (isAdvanced && advDef!.id === 'nature-spirit') {
-    // 3-turn DoT, no upfront damage
-    // Apply effect for 3 turns
-    next.monsterEffects = [...next.monsterEffects.filter(e => e !== 'dot3'), 'dot3'];
-    // Also has revive component — mark it
-    next.playerEffects = [...next.playerEffects.filter(e => e !== 'revive'), 'revive'];
-    return next;
-  }
-
-  return next;
-}
 
 // ---------------------------------------------------------------------------
 // Monster turn

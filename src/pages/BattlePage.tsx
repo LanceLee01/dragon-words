@@ -77,7 +77,6 @@ export default function BattlePage() {
   const lastAnswerCorrect = useBattleStore((s) => s.lastAnswerCorrect);
   const initBattle = useBattleStore((s) => s.initBattle);
   const submitAnswer = useBattleStore((s) => s.submitAnswer);
-  const useSkillAction = useBattleStore((s) => s.useSkillAction);
   const nextRound = useBattleStore((s) => s.nextRound);
   const finishMonsterTurn = useBattleStore((s) => s.finishMonsterTurn);
   const resetBattle = useBattleStore((s) => s.resetBattle);
@@ -152,10 +151,6 @@ export default function BattlePage() {
     [submitAnswer],
   );
 
-  const handleNextRound = useCallback(() => {
-    nextRound();
-  }, [nextRound]);
-
   // Play sounds when phase changes
   const prevPhaseRef = useRef(battle?.phase);
   const prevStatusRef = useRef(battle?.status);
@@ -172,9 +167,6 @@ export default function BattlePage() {
         setTimeout(() => play('combo'), 500);
       }
     }
-    if (battle.phase === 'monster-turn' && prevPhase === 'question') {
-      play('playerHit');
-    }
     if (battle.status === 'won' && prevStatus !== 'won') {
       play('victory');
     }
@@ -183,24 +175,29 @@ export default function BattlePage() {
     }
   }, [battle?.phase, battle?.status, battle?.combo, play, playAttackSequence]);
 
+  // Play playerHit sound when monster deals damage (works for both correct and wrong)
+  const prevDamageRef = useRef(battle?.lastDamageTaken);
+  useEffect(() => {
+    if (!battle) return;
+    const prev = prevDamageRef.current;
+    prevDamageRef.current = battle.lastDamageTaken;
+    if (battle.lastDamageTaken > 0 && prev === 0) {
+      play('playerHit');
+    }
+  }, [battle?.lastDamageTaken, play]);
+
+  // Auto-advance from result screen to monster turn after 2 seconds
+  useEffect(() => {
+    if (!battle || !lastAnswerCorrect) return;
+    if (battle.phase === 'result' && battle.status === 'ongoing') {
+      const timer = setTimeout(() => finishMonsterTurn(), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [battle?.phase, battle?.status, lastAnswerCorrect, finishMonsterTurn]);
+
   const handleContinue = useCallback(() => {
     finishMonsterTurn();
   }, [finishMonsterTurn]);
-
-  const handleUseSkill = useCallback(() => {
-    useSkillAction(0);
-  }, [useSkillAction]);
-
-  // Play skill sound when charge resets (skill was used)
-  const prevChargeRef = useRef(battle?.charge);
-  useEffect(() => {
-    if (!battle) return;
-    const prevCharge = prevChargeRef.current;
-    prevChargeRef.current = battle.charge;
-    if (prevCharge === 5 && battle.charge < 5 && battle.phase === 'question') {
-      play('skill');
-    }
-  }, [battle?.charge, battle?.phase, play]);
 
   const handleVictoryContinue = useCallback(() => {
     // Award rewards
@@ -387,19 +384,34 @@ export default function BattlePage() {
           {isResult && (
             <motion.div
               key="result"
-              className="flex flex-col items-center gap-6"
+              className="flex flex-col items-center gap-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
               <span className="text-6xl">✅</span>
               <p className="text-2xl font-bold text-green-400">正确!</p>
-              <button
-                onClick={handleNextRound}
-                className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-8 py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
-              >
-                下一题 →
-              </button>
+
+              {/* Word card */}
+              {currentQuestion && (
+                <div className="w-full max-w-xs rounded-xl border border-green-800/40 bg-black/30 p-4 text-center">
+                  <p className="text-xl font-bold text-white">{currentQuestion.word.english}</p>
+                  <p className="mt-1 text-lg text-gray-400">{currentQuestion.word.chinese}</p>
+                </div>
+              )}
+
+              {/* Damage info */}
+              <p className="text-lg text-yellow-300">
+                ⚔️ 造成 <span className="font-bold text-white">{battle.lastDamageDealt}</span> 点伤害
+              </p>
+
+              {/* Combo */}
+              <p className={`text-lg ${battle.combo >= 3 ? 'font-bold text-orange-400' : 'text-gray-400'}`}>
+                🔥 连击 x{battle.combo}
+              </p>
+
+              {/* Countdown */}
+              <p className="text-sm text-gray-500">2秒后自动继续...</p>
             </motion.div>
           )}
 
@@ -455,28 +467,7 @@ export default function BattlePage() {
         </AnimatePresence>
       </div>
 
-      {/* ===== Skill button (bottom) ===== */}
-      <div className="flex justify-center pb-6">
-        {battle.charge >= 5 && !isVictory && !isDefeat && (
-          <motion.button
-            onClick={handleUseSkill}
-            className="rounded-xl bg-purple-700 px-8 py-3 text-lg font-bold text-white shadow-lg shadow-purple-700/50"
-            animate={{
-              scale: [1, 1.08, 1],
-              boxShadow: [
-                '0 0 15px rgba(168, 85, 247, 0.4)',
-                '0 0 30px rgba(168, 85, 247, 0.7)',
-                '0 0 15px rgba(168, 85, 247, 0.4)',
-              ],
-            }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            ⚡ 释放技能
-          </motion.button>
-        )}
-      </div>
+
     </div>
   );
 }
