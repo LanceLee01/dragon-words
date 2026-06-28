@@ -100,6 +100,8 @@ export function createBattle(
     status: 'ongoing',
     playerEffects: [],
     monsterEffects: [],
+    lastDamageDealt: 0,
+    lastDamageTaken: 0,
   };
 }
 
@@ -128,7 +130,9 @@ export function answerQuestion(
     const attack = getPlayerAttack(player);
     const crit = isCrit(player, wasLastWrong);
     const damage = calculateDamage(attack, next.combo, crit);
+    next.lastDamageDealt = damage;
     next.monsterHp = Math.max(0, next.monsterHp - damage);
+    next.lastDamageTaken = 0;
 
     if (next.monsterHp <= 0) {
       next.status = 'won';
@@ -349,7 +353,9 @@ export function monsterTurn(
   }
 
   // Normal attack
-  next.playerHp = Math.max(0, next.playerHp - monster.attack);
+  const dmg = monster.attack;
+  next.lastDamageTaken = dmg;
+  next.playerHp = Math.max(0, next.playerHp - dmg);
   next.turn += 1;
 
   if (next.playerHp <= 0) {

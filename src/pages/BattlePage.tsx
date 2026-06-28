@@ -273,9 +273,20 @@ export default function BattlePage() {
             label={`Lv.${player.level} ${player.classId ? CLASS_NAMES[player.classId] || '' : '冒险者'}`}
             color="bg-green-600"
           />
-          {/* Player portrait */}
-          <div className="mt-2 flex justify-center">
-            <div className="h-24 w-24 overflow-hidden rounded-xl border-2 border-green-700 bg-gray-800/60">
+          {/* Player portrait with damage animation */}
+          <div className="relative mt-2 flex justify-center">
+            {battle.lastDamageTaken > 0 && (
+              <motion.div
+                key={`taken-${battle.turn}`}
+                className="pointer-events-none absolute left-1/2 top-0 z-10 -translate-x-1/2 text-3xl font-bold text-red-400"
+                initial={{ opacity: 1, y: 0, scale: 1.5 }}
+                animate={{ opacity: 0, y: -80, scale: 0.8 }}
+                transition={{ duration: 1.2, ease: 'easeOut' }}
+              >
+                -{battle.lastDamageTaken}
+              </motion.div>
+            )}
+            <div className="h-48 w-48 overflow-hidden rounded-xl border-2 border-green-700 bg-gray-800/60">
               {player.classId && CLASS_PORTRAITS[player.classId] ? (
                 <img
                   src={CLASS_PORTRAITS[player.classId]}
@@ -305,9 +316,20 @@ export default function BattlePage() {
             label={monster.name}
             color="bg-red-600"
           />
-          {/* Monster portrait */}
-          <div className="mt-2 flex justify-center">
-            <div className="h-24 w-24 overflow-hidden rounded-xl border-2 border-red-700 bg-gray-800/60">
+          {/* Monster portrait with damage animation */}
+          <div className="relative mt-2 flex justify-center">
+            {battle.lastDamageDealt > 0 && (
+              <motion.div
+                key={`dealt-${battle.turn}`}
+                className="pointer-events-none absolute left-1/2 top-0 z-10 -translate-x-1/2 text-3xl font-bold text-yellow-300"
+                initial={{ opacity: 1, y: 0, scale: 1.5 }}
+                animate={{ opacity: 0, y: -80, scale: 0.8 }}
+                transition={{ duration: 1.2, ease: 'easeOut' }}
+              >
+                -{battle.lastDamageDealt}
+              </motion.div>
+            )}
+            <div className="h-48 w-48 overflow-hidden rounded-xl border-2 border-red-700 bg-gray-800/60">
               <img
                 src={MONSTER_PORTRAITS[monster.id]}
                 alt={monster.name}

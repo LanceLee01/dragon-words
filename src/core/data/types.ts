@@ -220,6 +220,10 @@ export interface BattleState {
   playerEffects: string[];
   /** Status effects on monster */
   monsterEffects: string[];
+  /** Damage dealt to monster in last action (for UI floating number) */
+  lastDamageDealt: number;
+  /** Damage taken by player in last monster action (for UI floating number) */
+  lastDamageTaken: number;
 }
 
 /** A question presented to the player during battle */
