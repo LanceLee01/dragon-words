@@ -4,7 +4,16 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useSpeech } from '@/hooks/useSpeech';
-import type { Question } from '@/core/data/types';
+import type { Question, TranslateQuestion } from '@/core/data/types';
+
+function isTranslateQuestion(q: Question): q is TranslateQuestion {
+  return (
+    q.type === 'word-meaning' ||
+    q.type === 'meaning-word' ||
+    q.type === 'fill-blank' ||
+    q.type === 'listening'
+  );
+}
 
 interface QuestionCardProps {
   question: Question;
@@ -13,6 +22,16 @@ interface QuestionCardProps {
 }
 
 export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps) {
+  // Narrow to TranslateQuestion — this component only supports translate-type questions
+  if (!isTranslateQuestion(question)) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+        <span className="text-4xl">❓</span>
+        <p className="mt-2">不支持的题目类型</p>
+      </div>
+    );
+  }
+
   const { speak, isAvailable } = useSpeech();
   const [imageError, setImageError] = useState(false);
   const [replayCount, setReplayCount] = useState(0);

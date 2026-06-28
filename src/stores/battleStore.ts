@@ -2,7 +2,7 @@
 // Battle Store — Zustand
 // ---------------------------------------------------------------------------
 import { create } from 'zustand';
-import type { BattleState, MonsterDef, Word, Question } from '@/core/data/types';
+import type { BattleState, MonsterDef, Word, Question, TranslateQuestion } from '@/core/data/types';
 import { CHAPTERS } from '@/core/data/levels';
 import { CHAPTER_MONSTERS, MONSTERS } from '@/core/data/monsters';
 import { createBattle, answerQuestion, monsterTurn } from '@/core/engine/battle';
@@ -129,7 +129,7 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     if (!battle || !monster || !currentQuestion) return false;
 
     const player = usePlayerStore.getState().player;
-    const correct = selected === currentQuestion.correctAnswer;
+    const correct = selected === (currentQuestion as TranslateQuestion).correctAnswer;
 
     // Process the answer through the battle engine
     const wasLastWrong = get().lastAnswerCorrect === false;

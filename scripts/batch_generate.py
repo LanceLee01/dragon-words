@@ -14,7 +14,7 @@ import os
 import argparse
 import sys
 
-COMFY_URL = "http://127.0.0.1:8188"
+COMFY_URL = "http://192.168.18.28:8188"
 WORKFLOW_FILE = "dnd_workflow_api.json"
 OUTPUT_DIR = "output_images"
 PROMPT_FILE = "word_prompts.json"
@@ -213,8 +213,10 @@ def generate_from_list(workflow, word_list, test_mode=False):
     print(f"{'='*60}")
 
 
-def generate_word_prompts():
-    """生成 1600 个单词的提示词文件（从项目数据读取）"""
+def generate_word_prompts(level_filter=None):
+    """生成 1600 个单词的提示词文件（从项目数据读取）
+    level_filter: 'primary' | 'middle' | None (全部)
+    """
     # 尝试从项目的 words.ts 读取
     words_ts = "../src/core/data/words.ts"
     if os.path.exists(words_ts):
@@ -224,19 +226,22 @@ def generate_word_prompts():
         word_list = []
         with open(words_ts, "r", encoding="utf-8") as f:
             content = f.read()
-            # 提取所有单词条目
-            entries = re.findall(r"english:\s*'([^']+)'", content)
-            types = re.findall(r"difficulty:\s*(\d)", content)
-            
+            # 提取所有单词条目 — 格式: english: "word", level: "primary|middle"
+            entries = re.findall(r'english:\s*"([^"]+)"', content)
+            levels = re.findall(r'level:\s*"(primary|middle)"', content)
+
             for i, eng in enumerate(entries):
-                diff = int(types[i]) if i < len(types) else 2
-                if diff == 1:
+                lvl = levels[i] if i < len(levels) else "primary"
+                if level_filter and lvl != level_filter:
+                    continue
+                if lvl == "primary":
                     wtype = "concrete"
-                elif diff == 3:
-                    wtype = "abstract"
                 else:
-                    wtype = "concrete"  # 默认为实物类
+                    wtype = "abstract"
                 word_list.append({"word": eng, "type": wtype})
+
+        if level_filter:
+            print(f"  过滤后: {len(word_list)} 个 ({level_filter})")
         
         print(f"  读取到 {len(word_list)} 个单词")
         return word_list
@@ -258,6 +263,7 @@ def main():
     parser = argparse.ArgumentParser(description="Dragon Words ComfyUI 批量生图")
     parser.add_argument("--test", action="store_true", help="测试模式: 只生成前3张")
     parser.add_argument("--word", type=str, help="只生成指定单词")
+    parser.add_argument("--level", type=str, choices=["primary", "middle"], help="只生成指定级别的单词 (primary/middle)")
     parser.add_argument("--workflow", type=str, default=WORKFLOW_FILE, help=f"工作流JSON文件 (默认: {WORKFLOW_FILE})")
     parser.add_argument("--output", type=str, default=OUTPUT_DIR, help=f"输出目录 (默认: {OUTPUT_DIR})")
     args = parser.parse_args()
@@ -290,7 +296,7 @@ def main():
     if args.word:
         word_list = [{"word": args.word, "type": "concrete"}]
     else:
-        word_list = generate_word_prompts()
+        word_list = generate_word_prompts(level_filter=args.level)
     
     # 5. 生成图片
     generate_from_list(workflow, word_list, test_mode=args.test)

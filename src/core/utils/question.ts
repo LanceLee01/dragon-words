@@ -127,5 +127,5 @@ export function generateQuestion(
     correctAnswer: word.chinese,
     timeLimit,
     imagePath: `/assets/images/word-images/${word.english}.png`,
-  };
+  } as Question;
 }

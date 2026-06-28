@@ -10,3 +10,5 @@ Task 8: complete, 69 tests pass
 Task 9: complete, build OK
 Task 10: complete - 69 tests, build OK
 Task 10-11: complete (final fixes, 69 tests, build OK)
+Task 1-6: complete (commit 192b191, test run verified 3/3 words generated)
+Prompt fix: complete (commit ff29ef6, test verified new prompts generate richer images)

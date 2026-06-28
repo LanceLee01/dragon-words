@@ -18,7 +18,17 @@ function makeWord(
   chinese: string,
   level: 'primary' | 'middle' = 'primary',
 ): Word {
-  return { english, chinese, level };
+  return {
+    id: 0,
+    english,
+    chinese,
+    level,
+    difficulty: 1,
+    imagePath: `/assets/images/word-images/${english}.png`,
+    correctCount: 0,
+    wrongCount: 0,
+    lastSeenAt: 0,
+  };
 }
 
 const SAMPLE_WORDS: Word[] = [

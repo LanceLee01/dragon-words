@@ -17,7 +17,10 @@ export type QuestionType =
   | 'word-meaning'   // see English → pick Chinese
   | 'meaning-word'   // see Chinese → pick English
   | 'fill-blank'     // complete the English word
-  | 'listening';     // hear word → pick meaning
+  | 'listening'      // hear word → pick meaning
+  | 'spell'          // spell the word
+  | 'pos'            // part of speech / collocation
+  | 'match';         // match pairs
 
 /** Base class identifiers */
 export type ClassId =
@@ -49,9 +52,22 @@ export type WordLevel = 'primary' | 'middle';
 
 /** A single vocabulary word */
 export interface Word {
+  id: number;
   english: string;
   chinese: string;
   level: WordLevel;
+  difficulty: 1 | 2 | 3;
+  imagePath: string;
+  correctCount: number;
+  wrongCount: number;
+  lastSeenAt: number;
+  collocations?: string[];
+  posVariants?: {
+    noun?: string;
+    verb?: string;
+    adj?: string;
+    adv?: string;
+  };
 }
 
 /** A passive ability effect descriptor */
@@ -226,14 +242,60 @@ export interface BattleState {
   lastDamageTaken: number;
 }
 
-/** A question presented to the player during battle */
-export interface Question {
+/** Base question fields shared by all question types */
+export interface BaseQuestion {
   type: QuestionType;
+  timeLimit: number;
+}
+
+/** Translate-type question (word-meaning, meaning-word, listening, fill-blank) */
+export interface TranslateQuestion extends BaseQuestion {
+  type: 'word-meaning' | 'meaning-word' | 'listening' | 'fill-blank';
   word: Word;
   options: string[];
   correctAnswer: string;
-  /** Time limit in seconds for answering */
-  timeLimit: number;
-  /** Path to the word image asset */
   imagePath: string;
 }
+
+/** Spelling question */
+export interface SpellQuestion extends BaseQuestion {
+  type: 'spell';
+  word: Word;
+  targetLetters: string[];
+  maxLength: number;
+  chineseHint: string;
+  audioPath?: string;
+}
+
+/** Part-of-speech question (collocation or wordForm) */
+export interface PosQuestion extends BaseQuestion {
+  type: 'pos';
+  subtype: 'collocation' | 'wordForm';
+  word: Word;
+  stem: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+
+/** A single match pair for the match question type */
+export interface MatchPair {
+  id: string;
+  left: { type: 'text'; content: string; wordId: number };
+  right: { type: 'text' | 'image'; content: string; wordId: number };
+  locked: boolean;
+}
+
+/** Match question */
+export interface MatchQuestion extends BaseQuestion {
+  type: 'match';
+  pairs: MatchPair[];
+  reward: { goldBase: number; goldMultiplier: number; shieldBonus: number };
+}
+
+/** A question presented to the player during battle (discriminated union) */
+export type Question =
+  | TranslateQuestion
+  | SpellQuestion
+  | PosQuestion
+  | MatchQuestion;

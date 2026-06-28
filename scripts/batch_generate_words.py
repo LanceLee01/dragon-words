@@ -31,7 +31,7 @@ COMFY_URL = "http://192.168.18.28:8188"
 WORKFLOW_FILE = "scripts/dnd_workflow_api.json"
 OUTPUT_DIR = "src/assets/images/word-images/primary"
 WORD_LIST_FILE = "words/2022新课标_二级词汇表_小学505词.md"
-MAX_QUEUE = 5
+MAX_QUEUE = 20  # ComfyUI 队列中同时保留的最大任务数
 HISTORY_POLL_INTERVAL = 3
 MAX_HISTORY_POLLS = 20
 

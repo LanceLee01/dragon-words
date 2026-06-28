@@ -59,6 +59,7 @@ for (const name of monsterNames) {
 import { QuestionCard } from '@/components/battle/QuestionCard';
 import { VictoryScreen } from '@/components/battle/VictoryScreen';
 import { DefeatScreen } from '@/components/battle/DefeatScreen';
+import type { TranslateQuestion } from '@/core/data/types';
 
 export default function BattlePage() {
   const { chapter: chapterParam, level: levelParam } = useParams<{
@@ -393,12 +394,15 @@ export default function BattlePage() {
               <p className="text-2xl font-bold text-green-400">正确!</p>
 
               {/* Word card */}
-              {currentQuestion && (
-                <div className="w-full max-w-xs rounded-xl border border-green-800/40 bg-black/30 p-4 text-center">
-                  <p className="text-xl font-bold text-white">{currentQuestion.word.english}</p>
-                  <p className="mt-1 text-lg text-gray-400">{currentQuestion.word.chinese}</p>
-                </div>
-              )}
+              {currentQuestion && (() => {
+                const q = currentQuestion as TranslateQuestion;
+                return (
+                  <div className="w-full max-w-xs rounded-xl border border-green-800/40 bg-black/30 p-4 text-center">
+                    <p className="text-xl font-bold text-white">{q.word.english}</p>
+                    <p className="mt-1 text-lg text-gray-400">{q.word.chinese}</p>
+                  </div>
+                );
+              })()}
 
               {/* Damage info */}
               <p className="text-lg text-yellow-300">
@@ -426,15 +430,18 @@ export default function BattlePage() {
               <span className="text-6xl">❌</span>
               <p className="text-2xl font-bold text-red-400">答错了!</p>
 
-              {currentQuestion && (
-                <p className="rounded-xl border border-yellow-700/40 bg-yellow-900/20 px-6 py-3 text-center">
-                  <span className="text-sm text-gray-400">正确答案：</span>
-                  <br />
-                  <span className="text-xl font-bold text-yellow-300">
-                    {currentQuestion.correctAnswer}
-                  </span>
-                </p>
-              )}
+              {currentQuestion && (() => {
+                const q = currentQuestion as TranslateQuestion;
+                return (
+                  <p className="rounded-xl border border-yellow-700/40 bg-yellow-900/20 px-6 py-3 text-center">
+                    <span className="text-sm text-gray-400">正确答案：</span>
+                    <br />
+                    <span className="text-xl font-bold text-yellow-300">
+                      {q.correctAnswer}
+                    </span>
+                  </p>
+                );
+              })()}
 
               <p className="text-sm text-gray-400">
                 ⚔️ {monster.name} 对你造成了 <span className="font-bold text-red-400">{monster.attack}</span> 点伤害！
