@@ -227,4 +227,8 @@ export interface Question {
   word: Word;
   options: string[];
   correctAnswer: string;
+  /** Time limit in seconds for answering */
+  timeLimit: number;
+  /** Path to the word image asset */
+  imagePath: string;
 }
