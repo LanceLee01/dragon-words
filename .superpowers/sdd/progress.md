@@ -4,3 +4,4 @@ Task 3: complete (commits 17db106..8eefea878069b6602413c4e33bf5db1a25001572, rev
 Task 4: complete (commit cbe41fa, 60 tests pass, zero tsc errors)
 Task 4: complete (commit cbe41fa, review clean)
 Task 5: complete (commit 1566403, 69 tests pass)
+Task 6: complete, 69 tests pass
