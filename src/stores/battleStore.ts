@@ -2,7 +2,7 @@
 // Battle Store — Zustand
 // ---------------------------------------------------------------------------
 import { create } from 'zustand';
-import type { BattleState, MonsterDef, Word, Question, TranslateQuestion } from '@/core/data/types';
+import type { BattleState, MonsterDef, Word, Question, TranslateQuestion, SpellQuestion, PosQuestion, MatchQuestion, MatchPair } from '@/core/data/types';
 import { CHAPTERS } from '@/core/data/levels';
 import { CHAPTER_MONSTERS, MONSTERS } from '@/core/data/monsters';
 import { createBattle, answerQuestion, monsterTurn } from '@/core/engine/battle';
@@ -10,6 +10,7 @@ import { generateQuestion, getQuestionTypeForRound } from '@/core/utils/question
 import { getTimeLimit } from '@/core/data/levels';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useGameStore } from '@/stores/gameStore';
+import { soundEngine } from '@/core/utils/sound';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -35,6 +36,9 @@ export interface BattleStore {
 
   /** Execute the monster's turn (after a wrong answer). */
   finishMonsterTurn: () => void;
+
+  /** Connect a left-right pair in a Match question. */
+  matchConnect: (leftWordId: number, rightWordId: number) => void;
 
   /** Reset battle state to null. */
   resetBattle: () => void;
@@ -70,7 +74,23 @@ function generateNextQuestion(
   const isBoss = useBattleStore.getState().battle?.isBoss ?? false;
   const timeLimit = getTimeLimit(ch, isBoss ? 'boss' : 'normal');
 
-  return generateQuestion(wp, usedWordIds, timeLimit, ch);
+  return generateQuestion(wp, usedWordIds, timeLimit, ch, undefined, isBoss);
+}
+
+/**
+ * Evaluate whether the given answer is correct for the given question.
+ * Handles all question types through discriminated union dispatch.
+ */
+function evaluateAnswer(question: Question, answer: string | number): boolean {
+  switch (question.type) {
+    case 'spell':
+      return answer === (question as SpellQuestion).targetLetters.join('');
+    case 'pos':
+      return Number(answer) === (question as PosQuestion).correctIndex;
+    default:
+      // word-meaning, meaning-word, fill-blank, listening
+      return answer === (question as TranslateQuestion).correctAnswer;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -129,7 +149,7 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     if (!battle || !monster || !currentQuestion) return false;
 
     const player = usePlayerStore.getState().player;
-    const correct = selected === (currentQuestion as TranslateQuestion).correctAnswer;
+    const correct = evaluateAnswer(currentQuestion, selected);
 
     // Process the answer through the battle engine
     const wasLastWrong = get().lastAnswerCorrect === false;
@@ -186,6 +206,77 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     if (nextBattle.status !== 'lost') {
       const question = generateNextQuestion(get().chapter, get().usedWordIds);
       set({ currentQuestion: question, lastAnswerCorrect: null });
+    }
+  },
+
+  // -----------------------------------------------------------------------
+  // matchConnect
+  // -----------------------------------------------------------------------
+
+  matchConnect: (leftWordId, rightWordId) => {
+    const { currentQuestion, battle, monster } = get();
+    if (!currentQuestion || currentQuestion.type !== 'match' || !battle || !monster) return;
+
+    const q = currentQuestion as MatchQuestion;
+    const pairIndex = q.pairs.findIndex(p => p.left.wordId === leftWordId);
+    if (pairIndex === -1) return;
+
+    const pair = q.pairs[pairIndex];
+    if (pair.locked) return; // already matched
+
+    if (leftWordId === rightWordId) {
+      // Correct connection — lock this pair
+      const updatedPairs = q.pairs.map((p, i) =>
+        i === pairIndex ? { ...p, locked: true } : p
+      ) as MatchPair[];
+
+      const allLocked = updatedPairs.every(p => p.locked);
+
+      if (allLocked) {
+        // --- settlement: all pairs matched ---
+        const completedPairs = updatedPairs.filter(p => p.locked).length;
+        const allCorrect = completedPairs === updatedPairs.length;
+        const goldAmount = q.reward.goldBase * completedPairs * (allCorrect ? q.reward.goldMultiplier : 1);
+
+        // Award gold
+        usePlayerStore.getState().addGold(goldAmount);
+
+        // Process through battle engine as a correct answer
+        const player = usePlayerStore.getState().player;
+        const wasLastWrong = get().lastAnswerCorrect === false;
+        const nextBattle = answerQuestion(battle, player, monster, true, wasLastWrong);
+
+        // Extra combo for each pair beyond the first (answerQuestion already adds 1)
+        nextBattle.combo += (completedPairs - 1);
+
+        // Shield bonus if all correct
+        if (allCorrect) {
+          nextBattle.invulnerable += q.reward.shieldBonus;
+        }
+
+        // Track used word index (same pattern as submitAnswer)
+        const wordIndex = get().usedWordIds.size;
+
+        set({
+          battle: nextBattle,
+          currentQuestion: { ...q, pairs: updatedPairs },
+          lastAnswerCorrect: true,
+          usedWordIds: new Set([...get().usedWordIds, wordIndex]),
+        });
+
+        // Play settlement sound
+        soundEngine.play('coin');
+
+        // Advance to next round
+        get().nextRound();
+      } else {
+        // Not all locked yet — just update the pairs in place
+        set({ currentQuestion: { ...q, pairs: updatedPairs } });
+        soundEngine.play('combo');
+      }
+    } else {
+      // Wrong connection — do not lock, play feedback sound
+      soundEngine.play('click');
     }
   },
 
