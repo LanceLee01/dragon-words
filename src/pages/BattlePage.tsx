@@ -12,6 +12,8 @@ import { useSound } from '@/hooks/useSound';
 import { HealthBar } from '@/components/shared/HealthBar';
 import { Timer } from '@/components/shared/Timer';
 import { ComboDisplay } from '@/components/shared/ComboDisplay';
+import { AnswerLog } from '@/components/battle/AnswerLog';
+import { CombatLog } from '@/components/battle/CombatLog';
 
 // Portrait assets
 const CLASS_NAMES: Record<string, string> = {
@@ -292,7 +294,7 @@ export default function BattlePage() {
                 -{battle.lastDamageTaken}
               </motion.div>
             )}
-            <div className="h-48 w-48 overflow-hidden rounded-xl border-2 border-green-700 bg-gray-800/60">
+            <div className="h-56 w-56 overflow-hidden rounded-xl border-2 border-green-700 bg-gray-800/60">
               {player.classId && CLASS_PORTRAITS[player.classId] ? (
                 <img
                   src={CLASS_PORTRAITS[player.classId]}
@@ -335,7 +337,7 @@ export default function BattlePage() {
                 -{battle.lastDamageDealt}
               </motion.div>
             )}
-            <div className="h-48 w-48 overflow-hidden rounded-xl border-2 border-red-700 bg-gray-800/60">
+            <div className="h-56 w-56 overflow-hidden rounded-xl border-2 border-red-700 bg-gray-800/60">
               <img
                 src={MONSTER_PORTRAITS[monster.id]}
                 alt={monster.name}
@@ -359,9 +361,16 @@ export default function BattlePage() {
         <ComboDisplay combo={battle.combo} />
       </div>
 
-      {/* ===== Main content area ===== */}
-      <div className="flex flex-1 flex-col items-center justify-center px-4 pb-8">
-        <AnimatePresence mode="wait">
+      {/* ===== Main content area (three columns) ===== */}
+      <div className="flex flex-1 gap-2 px-2 pb-2 pt-1 overflow-hidden min-h-0">
+        {/* Left column — Answer Log */}
+        <div className="w-[280px] shrink-0 rounded-xl bg-black/10 p-3 overflow-hidden flex flex-col">
+          <AnswerLog />
+        </div>
+
+        {/* Center column — Battle content */}
+        <div className="flex flex-1 flex-col items-center justify-center px-2 overflow-y-auto">
+          <AnimatePresence mode="wait">
           {isVictory && (
             <motion.div
               key="victory"
@@ -530,6 +539,12 @@ export default function BattlePage() {
             </motion.div>
           )}
         </AnimatePresence>
+        </div>
+
+        {/* Right column — Combat Log */}
+        <div className="w-[280px] shrink-0 rounded-xl bg-black/10 p-3 overflow-hidden flex flex-col">
+          <CombatLog />
+        </div>
       </div>
 
 

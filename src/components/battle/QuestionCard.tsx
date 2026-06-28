@@ -90,7 +90,7 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
       ) : (
         <>
           {/* --- Word image --- */}
-          <div className="relative flex h-40 w-56 items-center justify-center overflow-hidden rounded-xl bg-white/10">
+          <div className="relative flex h-48 w-72 items-center justify-center overflow-hidden rounded-xl bg-white/10">
             {imageError ? (
               <span className="text-5xl">📜</span>
             ) : (
