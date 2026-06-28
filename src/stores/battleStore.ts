@@ -181,6 +181,7 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     const question = generateNextQuestion(chapter, usedWordIds);
 
     set({
+      battle: { ...battle, phase: 'question' },
       currentQuestion: question,
       lastAnswerCorrect: null,
     });
