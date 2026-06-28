@@ -51,6 +51,7 @@ const DEFAULT_PLAYER: PlayerState = {
   attack: 5,
   defense: 0,
   equipment: [],
+  equippedWeaponId: null,
   currentChapter: 1,
   currentLevel: 1,
   gold: 0,

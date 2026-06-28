@@ -3,6 +3,7 @@
 // ---------------------------------------------------------------------------
 import { create } from 'zustand';
 import type { GamePhase, Word } from '@/core/data/types';
+import { WORDS } from '@/core/data/words';
 import { GameFSM, type FSMEvent } from '@/core/engine/fsm';
 
 // ---------------------------------------------------------------------------
@@ -67,9 +68,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     initWords: () => {
-      // Word pool initialisation is delegated to the caller;
-      // this ensures the shape is ready.
-      set((s) => ({ words: s.words }));
+      set({ words: WORDS });
     },
   };
 });

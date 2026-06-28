@@ -2,7 +2,7 @@
 // Player Store — Zustand
 // ---------------------------------------------------------------------------
 import { create } from 'zustand';
-import type { PlayerState, ClassId, AdvancedClassId } from '@/core/data/types';
+import type { PlayerState, ClassId, AdvancedClassId, Equipment } from '@/core/data/types';
 import { loadPlayer, savePlayer } from '@/core/utils/storage';
 import { getXpForLevel } from '@/core/data/levels';
 
@@ -38,6 +38,9 @@ export interface PlayerStore {
   /** Equip a weapon by ID */
   equipWeapon: (id: string) => void;
 
+  /** Buy equipment (subtract gold, add to inventory, auto-equip) */
+  buyEquipment: (item: Equipment) => void;
+
   /** Promote to an advanced class */
   promoteToAdvanced: (id: AdvancedClassId) => void;
 
@@ -70,6 +73,7 @@ const DEFAULT_PLAYER: PlayerState = {
   attack: 5,
   defense: 0,
   equipment: [],
+  equippedWeaponId: null,
   currentChapter: 1,
   currentLevel: 1,
   gold: 0,
@@ -154,7 +158,24 @@ export const usePlayerStore = create<PlayerStore>((set) => ({
 
   equipWeapon: (id) => {
     set((s) => {
-      const next: PlayerState = { ...s.player, equipment: [{ id, name: '', tier: 1, cost: 0, classId: 'warrior', attack: 0, defense: 0 }] };
+      const next: PlayerState = { ...s.player, equippedWeaponId: id };
+      savePlayer(next);
+      return { player: next };
+    });
+  },
+
+  buyEquipment: (item) => {
+    set((s) => {
+      // Check if already owned
+      if (s.player.equipment.some((e) => e.id === item.id)) {
+        return s;
+      }
+      const next: PlayerState = {
+        ...s.player,
+        gold: s.player.gold - item.cost,
+        equipment: [...s.player.equipment, item],
+        equippedWeaponId: item.id,
+      };
       savePlayer(next);
       return { player: next };
     });

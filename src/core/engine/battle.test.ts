@@ -31,6 +31,7 @@ function makePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     attack: 5,
     defense: 2,
     equipment: [],
+    equippedWeaponId: null,
     currentChapter: 1,
     currentLevel: 1,
     gold: 0,

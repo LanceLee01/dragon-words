@@ -192,6 +192,7 @@ export interface PlayerState {
   attack: number;
   defense: number;
   equipment: Equipment[];
+  equippedWeaponId: string | null;
   currentChapter: number;
   currentLevel: number;
   gold: number;
