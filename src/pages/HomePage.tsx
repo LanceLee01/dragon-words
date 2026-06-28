@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePlayerStore } from '@/stores/playerStore';
+import { soundEngine } from '@/core/utils/sound';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -89,6 +90,15 @@ export default function HomePage() {
         />
         <ActionButton onClick={handleShop} label="🏪  商店" />
       </motion.div>
+
+      {/* Audio test button */}
+      <motion.button
+        onClick={() => soundEngine.testBeep()}
+        className="mt-4 text-xs text-gray-600 hover:text-gray-400"
+        whileHover={{ scale: 1.05 }}
+      >
+        🔊 测试音效
+      </motion.button>
 
       {/* Player stats (only if save exists) */}
       {hasSave && loaded && (

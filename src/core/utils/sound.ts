@@ -120,6 +120,24 @@ export class SoundEngine {
     }
   }
 
+  /** Generate a test beep via Web Audio API to verify audio output works. */
+  testBeep(): void {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      gain.gain.value = 0.3;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.15);
+    } catch (e) {
+      console.warn('[Sound] AudioContext test failed:', e);
+    }
+  }
+
   playAttackSequence(): void {
     this.play('playerAttack');
     setTimeout(() => this.play('enemyHit'), 250);
