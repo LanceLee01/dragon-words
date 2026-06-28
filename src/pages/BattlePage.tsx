@@ -23,8 +23,12 @@ const CLASS_ICONS: Record<string, string> = {
   paladin: '🛡️', rogue: '🗡️', druid: '🌿',
 };
 const CLASS_PORTRAITS: Record<string, string> = {
-  // Real images go to public/assets/images/classes/ when generated
-  // Fallback: use emoji via the icon
+  warrior: '/assets/images/classes/warrior.png',
+  mage: '/assets/images/classes/mage.png',
+  ranger: '/assets/images/classes/ranger.png',
+  paladin: '/assets/images/classes/paladin.png',
+  rogue: '/assets/images/classes/rogue.png',
+  druid: '/assets/images/classes/druid.png',
 };
 const MONSTER_ICONS: Record<string, string> = {
   goblin: '👺', skeleton: '💀', apprentice: '🧙', shadowwolf: '🐺',
@@ -256,8 +260,21 @@ export default function BattlePage() {
           />
           {/* Player portrait */}
           <div className="mt-2 flex justify-center">
-            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl border-2 border-green-700 bg-gray-800/60 text-5xl">
-              {player.classId ? CLASS_ICONS[player.classId] || '🧑' : '🧑'}
+            <div className="h-24 w-24 overflow-hidden rounded-xl border-2 border-green-700 bg-gray-800/60">
+              {player.classId && CLASS_PORTRAITS[player.classId] ? (
+                <img
+                  src={CLASS_PORTRAITS[player.classId]}
+                  alt={player.classId}
+                  className="h-full w-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+              ) : null}
+              <div className="flex h-full w-full items-center justify-center text-4xl hidden">
+                {CLASS_ICONS[player.classId || ''] || '🧑'}
+              </div>
             </div>
           </div>
         </div>
