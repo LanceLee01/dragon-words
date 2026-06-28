@@ -1,166 +1,115 @@
 // ---------------------------------------------------------------------------
-// Sound Engine — Howler.js wrapper for battle & UI audio
+// Sound Engine — lightweight Audio API wrapper (no Howler dependency)
 // ---------------------------------------------------------------------------
-import { Howl } from 'howler';
 import type { ClassId } from '../data/types';
 
-/** Every sound event the game can fire. */
 export type SoundEvent =
-  // Battle
-  | 'playerAttack'
-  | 'enemyHit'
-  | 'playerHit'
-  | 'combo'
-  | 'skill'
-  | 'heal'
-  | 'shield'
-  | 'victory'
-  | 'defeat'
-  | 'bossChant'
-  // UI
-  | 'click'
-  | 'coin'
-  | 'levelUp';
-
-interface SoundPool {
-  [key: string]: Howl[];
-}
+  | 'playerAttack' | 'enemyHit' | 'playerHit' | 'combo'
+  | 'skill' | 'heal' | 'shield' | 'victory' | 'defeat' | 'bossChant'
+  | 'click' | 'coin' | 'levelUp';
 
 /**
- * Sound Engine — singleton wrapper around Howler.js.
- *
- * Manages lazy-loaded sound pools for each game event.
- * Call {@link preload} once at app start to load the default pool.
+ * Sound Engine — uses native HTMLAudioElement for instant playback.
+ * No preload needed; browsers cache small WAV files automatically.
  */
 export class SoundEngine {
-  private pools: SoundPool = {};
-  private loaded = false;
+  private unlocked = false;
+  private pendingUnlock: (() => void)[] = [];
 
-  /** Map sound events to one or more file paths. */
-  private soundMap: Record<SoundEvent, { files: string[]; volume?: number; rate?: number }> = {
-    // --- Battle: class-specific attack sounds ---
-    playerAttack: { files: ['/sounds/sfx/battle/sword_swing_01.wav'] },            // replaced at runtime per class
-    enemyHit:    { files: ['/sounds/sfx/battle/sword_hit_01.wav'] },                // replaced at runtime per class
-    playerHit:   { files: [
-      '/sounds/sfx/monster/beast_01.wav',
-      '/sounds/sfx/monster/giant_01.wav',
-      '/sounds/sfx/monster/ogre_01.wav',
-    ]},
-    combo:       { files: ['/sounds/sfx/battle/heal_01.wav'], volume: 0.6 },
-    skill:       { files: ['/sounds/sfx/battle/spell_01.wav'] },
-    heal:        { files: ['/sounds/sfx/battle/heal_01.wav'] },
-    shield:      { files: ['/sounds/sfx/battle/shield_01.wav'] },
-    victory:     { files: ['/sounds/sfx/ui/victory/fanfare.mp3'], volume: 0.7 },
-    defeat:      { files: ['/sounds/sfx/battle/swing_02.wav', '/sounds/sfx/battle/spell_01.wav'] },
-    bossChant:   { files: ['/sounds/sfx/battle/boss_chant.wav'], volume: 0.5 },
-    // --- UI ---
-    click:       { files: [
-      '/sounds/sfx/ui/click_01.wav',
-      '/sounds/sfx/ui/click_02.wav',
-    ], volume: 0.5 },
-    coin:        { files: [
-      '/sounds/sfx/battle/coin_01.wav',
-      '/sounds/sfx/battle/coin_02.wav',
-    ], volume: 0.6 },
-    levelUp:     { files: ['/sounds/sfx/battle/heal_01.wav'] },
-  };
-
-  /** Class-specific sound overrides. */
+  /** Class-specific attack/hit sounds. */
   private classSounds: Record<ClassId, { attack: string[]; hit: string[] }> = {
-    warrior: {
-      attack: ['/sounds/sfx/battle/heavy_swing_01.wav', '/sounds/sfx/battle/sword_swing_02.wav'],
-      hit:    ['/sounds/sfx/battle/sword_hit_01.wav'],
-    },
-    mage: {
-      attack: ['/sounds/sfx/battle/fireball_launch.wav'],
-      hit:    ['/sounds/sfx/battle/fireball_impact.wav'],
-    },
-    ranger: {
-      attack: ['/sounds/sfx/battle/bow_shoot.wav'],
-      hit:    ['/sounds/sfx/battle/bow_hit.wav'],
-    },
-    paladin: {
-      attack: ['/sounds/sfx/battle/sword_swing_01.wav'],
-      hit:    ['/sounds/sfx/battle/sword_hit_01.wav'],
-    },
-    rogue: {
-      attack: ['/sounds/sfx/battle/dagger_swing.wav'],
-      hit:    ['/sounds/sfx/battle/dagger_hit.wav'],
-    },
-    druid: {
-      attack: ['/sounds/sfx/battle/ice_launch.wav'],
-      hit:    ['/sounds/sfx/battle/ice_impact.wav'],
-    },
+    warrior: { attack: ['/sounds/sfx/battle/heavy_swing_01.wav'], hit: ['/sounds/sfx/battle/sword_hit_01.wav'] },
+    mage:    { attack: ['/sounds/sfx/battle/fireball_launch.wav'], hit: ['/sounds/sfx/battle/fireball_impact.wav'] },
+    ranger:  { attack: ['/sounds/sfx/battle/bow_shoot.wav'],      hit: ['/sounds/sfx/battle/bow_hit.wav'] },
+    paladin: { attack: ['/sounds/sfx/battle/sword_swing_01.wav'], hit: ['/sounds/sfx/battle/sword_hit_01.wav'] },
+    rogue:   { attack: ['/sounds/sfx/battle/dagger_swing.wav'],   hit: ['/sounds/sfx/battle/dagger_hit.wav'] },
+    druid:   { attack: ['/sounds/sfx/battle/ice_launch.wav'],     hit: ['/sounds/sfx/battle/ice_impact.wav'] },
   };
 
-  private currentClass: ClassId | null = null;
+  private attackPool: string[] = ['/sounds/sfx/battle/sword_swing_01.wav'];
+  private hitPool: string[] = ['/sounds/sfx/battle/sword_hit_01.wav'];
 
-  /** Whether the engine has been preloaded. */
-  isLoaded(): boolean {
-    return this.loaded;
+  /** File pools per event. */
+  private pools: Record<string, string[]> = {
+    playerAttack: ['/sounds/sfx/battle/sword_swing_01.wav'],
+    enemyHit:    ['/sounds/sfx/battle/sword_hit_01.wav'],
+    playerHit:   ['/sounds/sfx/monster/beast_01.wav', '/sounds/sfx/monster/giant_01.wav', '/sounds/sfx/monster/ogre_01.wav'],
+    combo:       ['/sounds/sfx/battle/heal_01.wav'],
+    skill:       ['/sounds/sfx/battle/spell_01.wav'],
+    heal:        ['/sounds/sfx/battle/heal_01.wav'],
+    shield:      ['/sounds/sfx/battle/shield_01.wav'],
+    victory:     ['/sounds/sfx/ui/victory/fanfare.mp3'], // stopped after 4.5s in play()
+    defeat:      ['/sounds/sfx/battle/swing_02.wav'],
+    bossChant:   ['/sounds/sfx/battle/boss_chant.wav'],
+    click:       ['/sounds/sfx/ui/click_01.wav', '/sounds/sfx/ui/click_02.wav'],
+    coin:        ['/sounds/sfx/battle/coin_01.wav', '/sounds/sfx/battle/coin_02.wav'],
+    levelUp:     ['/sounds/sfx/battle/heal_01.wav'],
+  };
+
+  /** Unlock AudioContext on first user interaction. */
+  unlock(): void {
+    if (this.unlocked) return;
+    this.unlocked = true;
+    // Fire pending plays
+    for (const fn of this.pendingUnlock) fn();
+    this.pendingUnlock = [];
   }
 
-  /**
-   * Set the player's current class, updating attack/hit sounds.
-   */
   setClass(classId: ClassId | null): void {
-    this.currentClass = classId;
     if (classId && this.classSounds[classId]) {
-      this.soundMap.playerAttack = { files: this.classSounds[classId].attack };
-      this.soundMap.enemyHit = { files: this.classSounds[classId].hit };
+      this.pools.playerAttack = this.classSounds[classId].attack;
+      this.pools.enemyHit = this.classSounds[classId].hit;
     }
   }
 
-  /**
-   * Preload all sound files. Now a no-op — sounds are lazy-loaded on play.
-   * Kept for API compatibility.
-   */
-  preload(): Promise<void> {
-    this.loaded = true;
-    return Promise.resolve();
+  private pick(pool: string[]): string {
+    return pool[Math.floor(Math.random() * pool.length)];
   }
 
-  /**
-   * Play a sound event.
-   * Lazily creates Howl instances — no preload needed.
-   * @param event  The sound event to play.
-   * @param opts   Optional: rate override, volume override.
-   */
+  private _play(src: string, volume: number, rate: number): HTMLAudioElement | null {
+    const audio = new Audio(src);
+    audio.volume = Math.min(1, Math.max(0, volume));
+    audio.playbackRate = rate;
+    audio.play().catch(() => {});
+    return audio;
+  }
+
+  /** Track long sounds that need manual stopping */
+  private longSounds: HTMLAudioElement[] = [];
+
   play(event: SoundEvent, opts?: { rate?: number; volume?: number }): void {
-    const def = this.soundMap[event];
-    if (!def) return;
+    const pool = this.pools[event];
+    if (!pool || pool.length === 0) return;
+    const src = this.pick(pool);
+    const vol = opts?.volume ?? 1;
+    const rate = opts?.rate ?? 1;
 
-    const { files, volume = 1 } = def;
+    if (!this.unlocked) {
+      this.pendingUnlock.push(() => this._play(src, vol, rate));
+      return;
+    }
+    const audio = this._play(src, vol, rate);
 
-    // Pick a random variant from the file list
-    const idx = Math.floor(Math.random() * files.length);
-    const src = files[idx];
-
-    // Create a temporary Howl, play immediately, auto-unload on end
-    const howl = new Howl({
-      src: [src],
-      volume: opts?.volume ?? volume,
-      rate: opts?.rate ?? 1,
-      preload: true,
-    });
-    howl.play();
-
-    // Auto-cleanup after sound finishes
-    howl.once('end', () => howl.unload());
-    howl.once('loaderror', () => howl.unload());
+    // Victory fanfare: stop after 4.5 seconds
+    if (event === 'victory' && audio) {
+      this.longSounds.push(audio);
+      setTimeout(() => {
+        audio.pause();
+        audio.currentTime = 0;
+      }, 4500);
+    }
   }
 
-  /**
-   * Play class-appropriate attack + hit sounds in sequence.
-   * Used when a correct answer deals damage.
-   */
   playAttackSequence(): void {
-    const attackDelay = 100; // ms
-    const hitDelay = 400;    // ms
     this.play('playerAttack');
-    setTimeout(() => this.play('enemyHit'), hitDelay);
+    setTimeout(() => this.play('enemyHit'), 250);
   }
 }
 
-/** Singleton instance */
 export const soundEngine = new SoundEngine();
+
+/** Global click handler to unlock audio on first interaction. */
+if (typeof document !== 'undefined') {
+  const handler = () => { soundEngine.unlock(); document.removeEventListener('click', handler); };
+  document.addEventListener('click', handler, { once: true });
+}
