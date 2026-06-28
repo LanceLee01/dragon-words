@@ -449,7 +449,7 @@ describe('monsterTurn', () => {
   it('skips attack when stunned and decrements stun', () => {
     const player = makePlayer({ hp: 100, maxHp: 100 });
     const monster = makeMonster({ hp: 100, attack: 10 });
-    const state = { ...createBattle(player, monster), stunTimer: 2, phase: 'monster-turn' };
+    const state = { ...createBattle(player, monster), stunTimer: 2, phase: 'monster-turn' as const };
 
     const result = monsterTurn(state, monster);
     expect(result.playerHp).toBe(100); // no damage
@@ -460,7 +460,7 @@ describe('monsterTurn', () => {
   it('skips attack when invulnerable and decrements invulnerable', () => {
     const player = makePlayer({ hp: 100, maxHp: 100 });
     const monster = makeMonster({ hp: 100, attack: 10 });
-    const state = { ...createBattle(player, monster), invulnerable: 1, phase: 'monster-turn' };
+    const state = { ...createBattle(player, monster), invulnerable: 1, phase: 'monster-turn' as const };
 
     const result = monsterTurn(state, monster);
     expect(result.playerHp).toBe(100); // no damage
@@ -471,7 +471,7 @@ describe('monsterTurn', () => {
   it('sets defeat when player HP ≤ 0 and does NOT cycle to question phase', () => {
     const player = makePlayer({ hp: 5, maxHp: 100 });
     const monster = makeMonster({ hp: 100, attack: 10 });
-    const state = { ...createBattle(player, monster), phase: 'monster-turn' };
+    const state = { ...createBattle(player, monster), phase: 'monster-turn' as const };
 
     const result = monsterTurn(state, monster);
     expect(result.playerHp).toBe(-5);

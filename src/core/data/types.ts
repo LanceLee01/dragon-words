@@ -199,7 +199,7 @@ export interface PlayerState {
 }
 
 /** Phase within an active battle */
-export type BattlePhase = 'question' | 'monster-turn';
+export type BattlePhase = 'question' | 'result' | 'monster-turn' | 'victory' | 'defeat';
 
 /** Snapshot of an active battle (runtime state for the battle engine) */
 export interface BattleState {
