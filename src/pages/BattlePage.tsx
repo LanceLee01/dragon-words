@@ -62,6 +62,9 @@ import { QuestionRenderer } from '@/components/battle/QuestionRenderer';
 import { VictoryScreen } from '@/components/battle/VictoryScreen';
 import { DefeatScreen } from '@/components/battle/DefeatScreen';
 import type { TranslateQuestion, SpellQuestion, PosQuestion } from '@/core/data/types';
+import { EQUIPMENT } from '@/core/data/equipment';
+import { BASE_CLASSES, ADVANCED_CLASSES } from '@/core/data/classes';
+import { getPlayerAttack, getPlayerDefense } from '@/core/engine/battle';
 
 export default function BattlePage() {
   const { chapter: chapterParam, level: levelParam } = useParams<{
@@ -281,33 +284,121 @@ export default function BattlePage() {
             label={`Lv.${player.level} ${player.classId ? CLASS_NAMES[player.classId] || '' : '冒险者'}`}
             color="bg-green-600"
           />
-          {/* Player portrait with damage animation */}
-          <div className="relative mt-2 flex justify-center">
-            {battle.lastDamageTaken > 0 && (
-              <motion.div
-                key={`taken-${battle.turn}`}
-                className="pointer-events-none absolute left-1/2 top-0 z-10 -translate-x-1/2 text-3xl font-bold text-red-400"
-                initial={{ opacity: 1, y: 0, scale: 1.5 }}
-                animate={{ opacity: 0, y: -80, scale: 0.8 }}
-                transition={{ duration: 1.2, ease: 'easeOut' }}
-              >
-                -{battle.lastDamageTaken}
-              </motion.div>
-            )}
-            <div className="h-56 w-56 overflow-hidden rounded-xl border-2 border-green-700 bg-gray-800/60">
-              {player.classId && CLASS_PORTRAITS[player.classId] ? (
-                <img
-                  src={CLASS_PORTRAITS[player.classId]}
-                  alt={player.classId}
-                  className="h-full w-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-              ) : null}
-              <div className="flex h-full w-full items-center justify-center text-4xl hidden">
-                {CLASS_ICONS[player.classId || ''] || '🧑'}
+          {/* Player portrait with equipment + skills + stats */}
+          <div className="relative mt-2 flex items-center justify-center gap-2">
+            {/* Left: 3 equipment slots */}
+            <div className="w-28 shrink-0 flex flex-col gap-1">
+              {(['weapon', 'armor', 'accessory'] as const).map((slot) => {
+                const eqId = slot === 'weapon' ? player.equippedWeaponId
+                  : slot === 'armor' ? player.equippedArmorId
+                  : player.equippedAccessoryId;
+                const eq = eqId ? EQUIPMENT.find((e) => e.id === eqId) : null;
+                const icon = slot === 'weapon' ? '⚔️' : slot === 'armor' ? '🛡️' : '💍';
+                return (
+                  <div key={slot} className="rounded bg-black/20 px-1.5 py-1 text-[10px] text-center">
+                    {eq ? (
+                      <>
+                        <div className="text-xs">{icon}</div>
+                        <div className="font-medium text-white truncate">{eq.name}</div>
+                        <div className="text-gray-400">
+                          {eq.attack > 0 && <span>⚔+{eq.attack}</span>}
+                          {eq.defense > 0 && <span> 🛡+{eq.defense}</span>}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-gray-600">
+                        <div className="text-xs">{icon}</div>
+                        <div>空</div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Skills — 4 equal-height cards with icons */}
+            <div className="w-64 shrink-0">
+              {(() => {
+                const classDef = player.advancedClassId
+                  ? ADVANCED_CLASSES[player.advancedClassId]
+                  : BASE_CLASSES[player.classId];
+                if (!classDef) return null;
+                const icons = ['⚔️', '🔮', '🛡️', '🏹'];
+                return (
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {classDef.skills.map((skill, i) => (
+                      <div
+                        key={i}
+                        className="flex flex-col items-center rounded-lg bg-white/5 px-2 py-2 text-center min-h-[4.5rem]"
+                      >
+                        <span className="text-base leading-none mb-0.5">{icons[i % icons.length]}</span>
+                        <div className="text-xs font-medium leading-tight text-blue-300 w-full">
+                          {skill.name}
+                        </div>
+                        <div className="text-[10px] text-gray-500 leading-snug w-full">
+                          {skill.description}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Center: Portrait */}
+            <div className="relative">
+              {battle.lastDamageTaken > 0 && (
+                <motion.div
+                  key={`taken-${battle.turn}`}
+                  className="pointer-events-none absolute left-1/2 top-0 z-10 -translate-x-1/2 text-3xl font-bold text-red-400"
+                  initial={{ opacity: 1, y: 0, scale: 1.5 }}
+                  animate={{ opacity: 0, y: -80, scale: 0.8 }}
+                  transition={{ duration: 1.2, ease: 'easeOut' }}
+                >
+                  -{battle.lastDamageTaken}
+                </motion.div>
+              )}
+              <div className="h-56 w-56 overflow-hidden rounded-xl border-2 border-green-700 bg-gray-800/60">
+                {player.classId && CLASS_PORTRAITS[player.classId] ? (
+                  <img
+                    src={CLASS_PORTRAITS[player.classId]}
+                    alt={player.classId}
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div className="flex h-full w-full items-center justify-center text-4xl hidden">
+                  {CLASS_ICONS[player.classId || ''] || '🧑'}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Battle stats */}
+            <div className="w-28 shrink-0 rounded-lg bg-black/20 p-2 text-xs">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-gray-300">
+                  <span>⚔️ 攻击</span>
+                  <span className="font-bold text-white">{getPlayerAttack(player)}</span>
+                </div>
+                <div className="flex items-center justify-between text-gray-300">
+                  <span>🛡️ 防御</span>
+                  <span className="font-bold text-white">{getPlayerDefense(player)}</span>
+                </div>
+                <div className="flex items-center justify-between text-gray-300">
+                  <span>❤️ 生命</span>
+                  <span className="font-bold text-white">{battle.playerMaxHp}</span>
+                </div>
+                <div className="flex items-center justify-between text-gray-300">
+                  <span>📈 等级</span>
+                  <span className="font-bold text-white">{player.level}</span>
+                </div>
+                <div className="flex items-center justify-between text-gray-300">
+                  <span>💰 金币</span>
+                  <span className="font-bold text-yellow-300">{player.gold}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -444,8 +535,17 @@ export default function BattlePage() {
 
               {/* Damage info */}
               <p className="text-lg text-yellow-300">
-                ⚔️ 造成 <span className="font-bold text-white">{battle.lastDamageDealt}</span> 点伤害
+                ⚔️ 使用 <span className="font-bold text-white">{battle.lastSkillName || '普通攻击'}</span> 造成 <span className="font-bold text-white">{battle.lastDamageDealt}</span> 点伤害
               </p>
+
+              {/* Monster attack */}
+              {battle.lastDamageTaken > 0 && (
+                <p className="text-lg text-red-400">
+                  {battle.lastMonsterSkillName
+                    ? <>👹 {monster.name} 使用 <span className="font-bold text-white">{battle.lastMonsterSkillName}</span> 造成 <span className="font-bold text-white">{battle.lastDamageTaken}</span> 点伤害</>
+                    : <>💢 {monster.name} 反击造成 <span className="font-bold text-white">{battle.lastDamageTaken}</span> 点伤害</>}
+                </p>
+              )}
 
               {/* Combo */}
               <p className={`text-lg ${battle.combo >= 3 ? 'font-bold text-orange-400' : 'text-gray-400'}`}>

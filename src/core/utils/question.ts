@@ -26,6 +26,26 @@ function pickRandom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+/**
+ * Generate 4 English-word answer options (1 correct + 3 distractors) and shuffle them.
+ * Used for meaning-word (看中文选英文) questions.
+ */
+function generateEnglishOptions(
+  allWords: Word[],
+  correctEnglish: string,
+  excludeWordId: number,
+): string[] {
+  const distractors = allWords.filter(
+    (w, i) => i !== excludeWordId && w.english !== correctEnglish,
+  );
+  shuffle(distractors);
+  const selected = distractors.slice(0, 3).map(w => w.english);
+  while (selected.length < 3) {
+    selected.push('???');
+  }
+  return shuffle([correctEnglish, ...selected]);
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -271,6 +291,18 @@ export function generateQuestion(
 
     case 'match':
       return generateMatchQuestion(wordPool, timeLimit);
+
+    case 'meaning-word': {
+      const engOptions = generateEnglishOptions(wordPool, word.english, wordIndex);
+      return {
+        type: 'meaning-word',
+        word,
+        options: engOptions,
+        correctAnswer: word.english,
+        timeLimit,
+        imagePath: word.imagePath,
+      } as Question;
+    }
 
     default: {
       // word-meaning, meaning-word, fill-blank, listening

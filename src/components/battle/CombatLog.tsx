@@ -35,23 +35,28 @@ export function CombatLog() {
             {entry.isCorrect ? (
               <>
                 <div className="text-green-300">
-                  ⚔️ 对 {entry.monsterName} 造成 {entry.damageDealt} 点伤害
+                  ⚔️ {entry.skillName} — 对 {entry.monsterName} 造成 {entry.damageDealt} 点伤害
                   {entry.isCrit && <span className="ml-1 text-yellow-300">💥 暴击!</span>}
                 </div>
                 {entry.lastCombo >= 1 && (
                   <div className="text-orange-300">🔥 连击 x{entry.lastCombo + 1}</div>
                 )}
+                {entry.damageTaken > 0 && (
+                  <div className="text-red-400">
+                    {entry.monsterSkillName ? <>👹 {entry.monsterName} 使用 <span className="font-medium">{entry.monsterSkillName}</span> — {entry.damageTaken} 点伤害</> : <>💢 {entry.monsterName} 反击 {entry.damageTaken} 点伤害</>}
+                  </div>
+                )}
               </>
             ) : (
               <>
-                <div className="text-red-300">
-                  ❌ 答错
+                <div className="text-red-300">❌ 答错</div>
+                <div className="text-red-400">
+                  {entry.damageTaken > 0
+                    ? (entry.monsterSkillName 
+                      ? <>👹 {entry.monsterName} 使用 <span className="font-medium">{entry.monsterSkillName}</span> — {entry.damageTaken} 点伤害</>
+                      : <>💢 受到 {entry.monsterName} {entry.damageTaken} 点伤害</>)
+                    : <>🛡️ {entry.monsterName} 的攻击被阻挡</>}
                 </div>
-                {entry.damageTaken > 0 && (
-                  <div className="text-red-400">
-                    💢 受到 {entry.monsterName} {entry.damageTaken} 点伤害
-                  </div>
-                )}
               </>
             )}
             <div className="mt-0.5 text-gray-500">

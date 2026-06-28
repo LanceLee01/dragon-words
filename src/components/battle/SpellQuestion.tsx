@@ -11,12 +11,11 @@ interface SpellQuestionProps {
   disabled: boolean;
 }
 
-/** Layout rows for the virtual keyboard (8-8-8-2) */
+/** QWERTY layout rows for the virtual keyboard (10-9-7) */
 const KEYBOARD_ROWS = [
-  ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
-  ['I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'],
-  ['Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X'],
-  ['Y', 'Z'],
+  ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+  ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+  ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
 ];
 
 export function SpellQuestion({ question, onAnswer, disabled }: SpellQuestionProps) {
@@ -24,8 +23,17 @@ export function SpellQuestion({ question, onAnswer, disabled }: SpellQuestionPro
 
   const [inputLetters, setInputLetters] = useState<string[]>([]);
 
-  // Collect letters already placed (to disable their buttons)
-  const usedLetters = new Set(inputLetters.map((c) => c.toUpperCase()));
+  // Count how many times each letter has been placed (to disable buttons when max reached)
+  const letterCount: Record<string, number> = {};
+  for (const c of inputLetters) {
+    const u = c.toUpperCase();
+    letterCount[u] = (letterCount[u] || 0) + 1;
+  }
+  const targetCount: Record<string, number> = {};
+  for (const c of targetLetters) {
+    const u = c.toUpperCase();
+    targetCount[u] = (targetCount[u] || 0) + 1;
+  }
 
   // Determine which letter slots are "active" (the one the player is about to fill)
   const activeIndex = inputLetters.length;
@@ -139,18 +147,23 @@ export function SpellQuestion({ question, onAnswer, disabled }: SpellQuestionPro
       </div>
 
       {/* --- Virtual keyboard --- */}
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center gap-1.5">
         {KEYBOARD_ROWS.map((row, rowIdx) => (
-          <div key={`row-${rowIdx}`} className="flex gap-1.5">
+          <div key={`row-${rowIdx}`} className="flex gap-1">
+            {/* Left shift for QWERTY stagger */}
+            {rowIdx === 1 && <div className="w-[18px]" />}
+            {rowIdx === 2 && <div className="w-[36px]" />}
             {row.map((letter) => {
-              const isUsed = usedLetters.has(letter);
-              const isDisabled = disabled || isUsed;
+              const placed = letterCount[letter] || 0;
+              const needed = targetCount[letter] || 0;
+              const isMaxed = placed >= needed;
+              const isDisabled = disabled || (needed > 0 && isMaxed);
               return (
                 <motion.button
                   key={letter}
                   onClick={() => addLetter(letter)}
                   disabled={isDisabled}
-                  className={`flex h-10 w-10 items-center justify-center rounded-lg text-base font-bold transition-colors ${
+                  className={`flex h-10 w-9 items-center justify-center rounded-lg text-sm font-bold transition-colors ${
                     isDisabled
                       ? 'cursor-not-allowed bg-gray-700 text-gray-500'
                       : 'bg-gray-600 text-white hover:bg-blue-600 active:bg-blue-500'
@@ -162,40 +175,38 @@ export function SpellQuestion({ question, onAnswer, disabled }: SpellQuestionPro
                 </motion.button>
               );
             })}
-            {/* Add backspace / submit buttons after the last row */}
+            {/* Backspace on row 0, Submit on row 2 */}
+            {rowIdx === 0 && (
+              <motion.button
+                onClick={handleBackspace}
+                disabled={disabled || inputLetters.length === 0}
+                className={`flex h-10 w-[52px] items-center justify-center rounded-lg text-sm font-bold transition-colors ${
+                  disabled || inputLetters.length === 0
+                    ? 'cursor-not-allowed bg-gray-700 text-gray-500'
+                    : 'bg-orange-700 text-white hover:bg-orange-600 active:bg-orange-500'
+                }`}
+                whileHover={disabled || inputLetters.length === 0 ? undefined : { scale: 1.05 }}
+                whileTap={disabled || inputLetters.length === 0 ? undefined : { scale: 0.95 }}
+                title="退格"
+              >
+                ←
+              </motion.button>
+            )}
             {rowIdx === KEYBOARD_ROWS.length - 1 && (
-              <>
-                {/* Spacer */}
-                <div className="w-10" />
-                <motion.button
-                  onClick={handleBackspace}
-                  disabled={disabled || inputLetters.length === 0}
-                  className={`flex h-10 w-10 items-center justify-center rounded-lg text-lg transition-colors ${
-                    disabled || inputLetters.length === 0
-                      ? 'cursor-not-allowed bg-gray-700 text-gray-500'
-                      : 'bg-orange-700 text-white hover:bg-orange-600 active:bg-orange-500'
-                  }`}
-                  whileHover={disabled || inputLetters.length === 0 ? undefined : { scale: 1.1 }}
-                  whileTap={disabled || inputLetters.length === 0 ? undefined : { scale: 0.9 }}
-                  title="退格"
-                >
-                  ←
-                </motion.button>
-                <motion.button
-                  onClick={handleSubmit}
-                  disabled={disabled || inputLetters.length === 0}
-                  className={`flex h-10 w-10 items-center justify-center rounded-lg text-lg transition-colors ${
-                    disabled || inputLetters.length === 0
-                      ? 'cursor-not-allowed bg-gray-700 text-gray-500'
-                      : 'bg-green-700 text-white hover:bg-green-600 active:bg-green-500'
-                  }`}
-                  whileHover={disabled || inputLetters.length === 0 ? undefined : { scale: 1.1 }}
-                  whileTap={disabled || inputLetters.length === 0 ? undefined : { scale: 0.9 }}
-                  title="提交"
-                >
-                  ✓
-                </motion.button>
-              </>
+              <motion.button
+                onClick={handleSubmit}
+                disabled={disabled || inputLetters.length === 0}
+                className={`flex h-10 w-[52px] items-center justify-center rounded-lg text-sm font-bold transition-colors ${
+                  disabled || inputLetters.length === 0
+                    ? 'cursor-not-allowed bg-gray-700 text-gray-500'
+                    : 'bg-green-700 text-white hover:bg-green-600 active:bg-green-500'
+                }`}
+                whileHover={disabled || inputLetters.length === 0 ? undefined : { scale: 1.05 }}
+                whileTap={disabled || inputLetters.length === 0 ? undefined : { scale: 0.95 }}
+                title="提交"
+              >
+                ✓
+              </motion.button>
             )}
           </div>
         ))}

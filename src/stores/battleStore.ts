@@ -155,6 +155,18 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     const wasLastWrong = get().lastAnswerCorrect === false;
     const nextBattle = answerQuestion(battle, player, monster, correct, wasLastWrong);
 
+    // Monster attacks every round (both correct and wrong answers)
+    const afterMonster = monsterTurn(nextBattle, monster);
+    nextBattle.lastDamageTaken = afterMonster.lastDamageTaken;
+    nextBattle.playerHp = afterMonster.playerHp;
+    nextBattle.turn = afterMonster.turn;
+    nextBattle.status = afterMonster.status;
+    nextBattle.lastMonsterSkillName = afterMonster.lastMonsterSkillName;
+    // Keep phase as 'result' for correct, 'monster-turn' for wrong
+    // (monsterTurn sets phase to 'question', so restore it)
+    if (correct) nextBattle.phase = 'result';
+    else nextBattle.phase = 'monster-turn';
+
     // Build battle log entry
     const entry: BattleLogEntry = {
       turn: nextBattle.turn,
@@ -163,14 +175,16 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
       questionType: currentQuestion.type,
       isCorrect: correct,
       damageDealt: nextBattle.lastDamageDealt,
-      damageTaken: 0,  // filled later in finishMonsterTurn for wrong answers
-      lastCombo: battle.combo,  // combo BEFORE this action
+      damageTaken: nextBattle.lastDamageTaken,
+      lastCombo: battle.combo,
       isCrit: nextBattle.lastCrit,
       monsterHpAfter: nextBattle.monsterHp,
       monsterMaxHp: nextBattle.monsterMaxHp,
       playerHpAfter: nextBattle.playerHp,
       playerMaxHp: nextBattle.playerMaxHp,
       monsterName: monster.name,
+      skillName: correct ? nextBattle.lastSkillName : '',
+      monsterSkillName: nextBattle.lastMonsterSkillName,
     };
     nextBattle.log = [...nextBattle.log, entry];
 
@@ -214,21 +228,12 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
   // -----------------------------------------------------------------------
 
   finishMonsterTurn: () => {
-    const { battle, monster } = get();
-    if (!battle || !monster) return;
+    const { battle } = get();
+    if (!battle) return;
 
-    const nextBattle = monsterTurn(battle, monster);
-
-    // Update the last log entry with actual damage taken from monster
-    if (nextBattle.log.length > 0 && nextBattle.lastDamageTaken > 0) {
-      const lastEntry = { ...nextBattle.log[nextBattle.log.length - 1] };
-      lastEntry.damageTaken = nextBattle.lastDamageTaken;
-      lastEntry.playerHpAfter = nextBattle.playerHp;
-      nextBattle.log = [
-        ...nextBattle.log.slice(0, -1),
-        lastEntry,
-      ];
-    }
+    // Monster damage was already processed in submitAnswer.
+    // Just advance to next round.
+    const nextBattle = { ...battle, phase: 'question' as const };
 
     set({ battle: nextBattle });
 

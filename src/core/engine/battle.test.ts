@@ -299,15 +299,16 @@ describe('answerQuestion', () => {
     expect(result.phase).toBe('monster-turn');
   });
 
-  it('deals skill damage to monster HP on correct answer (warrior ×1.5)', () => {
+  it('deals skill damage to monster HP on correct answer (warrior random skill)', () => {
     const player = makePlayer({ hp: 100, maxHp: 100, classId: 'warrior', attack: 0 });
     const monster = makeMonster({ hp: 100, attack: 6 });
     const state = createBattle(player, monster);
 
-    // Warrior baseAttack=12, attack=0 → getPlayerAttack=12
-    // Skill ×1.5 = 18, combo=1 → mult=1, no crit
     const result = answerQuestion(state, player, monster, true);
-    expect(result.monsterHp).toBe(82); // 100 - 18 = 82
+    expect(result.monsterHp).toBeLessThan(100); // skill damage applied
+    expect(result.monsterHp).toBeGreaterThanOrEqual(0);
+    expect(result.phase).toBe('result');
+    expect(result.lastDamageDealt).toBeGreaterThan(0);
   });
 
   it('keeps incrementing combo on consecutive correct answers', () => {
@@ -349,13 +350,14 @@ describe('answerQuestion', () => {
 // ---------------------------------------------------------------------------
 
 describe('monsterTurn', () => {
-  it('deals monster attack damage to player and cycles to question phase', () => {
+  it('deals monster attack damage to player (reduced by defense) and cycles to question phase', () => {
     const player = makePlayer({ hp: 100, maxHp: 100 });
     const monster = makeMonster({ hp: 100, attack: 10 });
     const state = createBattle(player, monster);
 
+    // monster.attack(10) - player.defense(2) = 8 damage
     const result = monsterTurn(state, monster);
-    expect(result.playerHp).toBe(90);
+    expect(result.playerHp).toBe(92);
     expect(result.turn).toBe(2);
     expect(result.phase).toBe('question');
   });

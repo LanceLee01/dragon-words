@@ -14,6 +14,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 200,
     attack: 12,
     isBoss: false,
+    skills: [
+      { name: '偷袭', description: '造成1.5倍伤害', multiplier: 1.5, weight: 1 },
+    ],
   },
   skeleton: {
     id: 'skeleton',
@@ -21,6 +24,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 225,
     attack: 14,
     isBoss: false,
+    skills: [
+      { name: '骨盾', description: '获得护盾', shield: true, weight: 1 },
+    ],
   },
   apprentice: {
     id: 'apprentice',
@@ -28,6 +34,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 250,
     attack: 16,
     isBoss: false,
+    skills: [
+      { name: '魔法箭', description: '造成1.5倍伤害', multiplier: 1.5, weight: 1 },
+    ],
   },
   shadowwolf: {
     id: 'shadowwolf',
@@ -35,6 +44,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 275,
     attack: 16,
     isBoss: false,
+    skills: [
+      { name: '迅捷爪击', description: '造成2倍伤害', multiplier: 2, weight: 1 },
+    ],
   },
   gargoyle: {
     id: 'gargoyle',
@@ -42,6 +54,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 275,
     attack: 16,
     isBoss: false,
+    skills: [
+      { name: '石化', description: '眩晕玩家', stun: true, weight: 1 },
+    ],
   },
   troglodyte: {
     id: 'troglodyte',
@@ -49,6 +64,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 375,
     attack: 24,
     isBoss: false,
+    skills: [
+      { name: '重击', description: '造成1.5倍伤害', multiplier: 1.5, weight: 1 },
+    ],
   },
   harpy: {
     id: 'harpy',
@@ -56,6 +74,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 400,
     attack: 26,
     isBoss: false,
+    skills: [
+      { name: '尖啸', description: '眩晕玩家', stun: true, weight: 1 },
+    ],
   },
   ghost: {
     id: 'ghost',
@@ -63,6 +84,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 425,
     attack: 28,
     isBoss: false,
+    skills: [
+      { name: '灵魂吸取', description: '恢复20%生命', heal: true, weight: 1 },
+    ],
   },
   ogre: {
     id: 'ogre',
@@ -70,6 +94,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 450,
     attack: 30,
     isBoss: false,
+    skills: [
+      { name: '猛砸', description: '造成2倍伤害', multiplier: 2, weight: 1 },
+    ],
   },
   succubus: {
     id: 'succubus',
@@ -77,6 +104,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 475,
     attack: 32,
     isBoss: false,
+    skills: [
+      { name: '魅惑', description: '眩晕玩家', stun: true, weight: 1 },
+    ],
   },
   demonhound: {
     id: 'demonhound',
@@ -84,6 +114,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 500,
     attack: 34,
     isBoss: false,
+    skills: [
+      { name: '地狱火', description: '造成2倍伤害', multiplier: 2, weight: 1 },
+    ],
   },
   fallenAngel: {
     id: 'fallenAngel',
@@ -91,6 +124,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 550,
     attack: 36,
     isBoss: false,
+    skills: [
+      { name: '堕落之光', description: '造成1.5倍伤害并眩晕', multiplier: 1.5, stun: true, weight: 1 },
+    ],
   },
   timeGhost: {
     id: 'timeGhost',
@@ -98,6 +134,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 600,
     attack: 40,
     isBoss: false,
+    skills: [
+      { name: '时光迟缓', description: '眩晕玩家', stun: true, weight: 1 },
+    ],
   },
   dragonborn: {
     id: 'dragonborn',
@@ -105,6 +144,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 650,
     attack: 44,
     isBoss: false,
+    skills: [
+      { name: '龙息', description: '造成2倍伤害', multiplier: 2, weight: 1 },
+    ],
   },
   eliteGuard: {
     id: 'eliteGuard',
@@ -112,6 +154,9 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 750,
     attack: 50,
     isBoss: false,
+    skills: [
+      { name: '盾击', description: '造成1.5倍伤害并眩晕', multiplier: 1.5, stun: true, weight: 1 },
+    ],
   },
 
   // -----------------------------------------------------------------------
@@ -124,11 +169,14 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 250,
     attack: 16,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '王之号令',
       description: '召唤哥布林增援',
       summon: true,
     },
+      { name: '王之怒吼', description: '提升100%攻击力1回合', enrage: true, enrageAttack: 100, weight: 1 },
+    ],
   },
   deathKnight: {
     id: 'deathKnight',
@@ -136,11 +184,14 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 275,
     attack: 18,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '死亡缠绕',
       description: '造成暗影伤害并吸血',
       heal: true,
     },
+      { name: '暗影打击', description: '造成2倍伤害', multiplier: 2, weight: 1 },
+    ],
   },
   archmage_boss: {
     id: 'archmage_boss',
@@ -148,11 +199,14 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 300,
     attack: 20,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '魔力风暴',
       description: '全体魔法攻击',
       aoe: true,
     },
+      { name: '寒冰护盾', description: '获得护盾', shield: true, weight: 1 },
+    ],
   },
   treantElder: {
     id: 'treantElder',
@@ -160,11 +214,14 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 325,
     attack: 22,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '自然屏障',
       description: '为自己恢复生命值',
       heal: true,
     },
+      { name: '缠绕根须', description: '造成1.5倍伤害并眩晕', multiplier: 1.5, stun: true, weight: 1 },
+    ],
   },
   lavaGiant: {
     id: 'lavaGiant',
@@ -172,12 +229,15 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 350,
     attack: 24,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '熔岩爆发',
       description: '造成全体伤害并灼烧',
       aoe: true,
       poison: true,
     },
+      { name: '熔岩护甲', description: '提升防御', shield: true, weight: 1 },
+    ],
   },
   drowElf: {
     id: 'drowElf',
@@ -185,11 +245,14 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 500,
     attack: 30,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '暗影突袭',
       description: '造成2倍伤害',
       multiplier: 2,
     },
+      { name: '暗影之幕', description: '眩晕玩家1回合', stun: true, weight: 1 },
+    ],
   },
   wyvern: {
     id: 'wyvern',
@@ -197,11 +260,14 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 550,
     attack: 32,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '毒液喷射',
       description: '造成伤害并使其中毒',
       poison: true,
     },
+      { name: '龙尾扫击', description: '造成2倍伤害', multiplier: 2, weight: 1 },
+    ],
   },
   lichKing: {
     id: 'lichKing',
@@ -209,11 +275,14 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 600,
     attack: 36,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '亡灵天灾',
       description: '召唤亡灵大军',
       summon: true,
     },
+      { name: '灵魂收割', description: '造成1.5倍伤害并恢复生命', multiplier: 1.5, heal: true, weight: 1 },
+    ],
   },
   stormGiant: {
     id: 'stormGiant',
@@ -221,12 +290,15 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 700,
     attack: 40,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '雷霆之怒',
       description: '造成全体伤害并眩晕',
       aoe: true,
       stun: true,
     },
+      { name: '风暴之盾', description: '获得护盾', shield: true, weight: 1 },
+    ],
   },
   darkKnight: {
     id: 'darkKnight',
@@ -234,11 +306,14 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 800,
     attack: 44,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '黑暗护盾',
       description: '获得护盾减少伤害',
       shield: true,
     },
+      { name: '暗影斩', description: '造成2倍伤害', multiplier: 2, weight: 1 },
+    ],
   },
   abyssalLord: {
     id: 'abyssalLord',
@@ -246,12 +321,15 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 900,
     attack: 50,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '深渊凝视',
       description: '造成3倍伤害并使目标恐惧',
       multiplier: 3,
       stun: true,
     },
+      { name: '深渊护盾', description: '获得护盾', shield: true, weight: 1 },
+    ],
   },
   archangel: {
     id: 'archangel',
@@ -259,12 +337,15 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 1000,
     attack: 56,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '圣光审判',
       description: '全体攻击并恢复自身生命',
       aoe: true,
       heal: true,
     },
+      { name: '天使之盾', description: '获得护盾', shield: true, weight: 1 },
+    ],
   },
   timeKeeper: {
     id: 'timeKeeper',
@@ -272,12 +353,15 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 1150,
     attack: 60,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '时光倒流',
       description: '恢复大量生命值',
       heal: true,
       multiplier: 0.5,
     },
+      { name: '时间裂缝', description: '造成1.5倍伤害并眩晕', multiplier: 1.5, stun: true, weight: 1 },
+    ],
   },
   dracolich: {
     id: 'dracolich',
@@ -285,12 +369,15 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 1300,
     attack: 70,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '龙息亡者',
       description: '造成毁灭性伤害并召唤骷髅',
       aoe: true,
       summon: true,
     },
+      { name: '亡灵护盾', description: '获得护盾', shield: true, weight: 1 },
+    ],
   },
   ancientRed: {
     id: 'ancientRed',
@@ -298,12 +385,15 @@ export const MONSTERS: Record<string, MonsterDef> = {
     hp: 2500,
     attack: 120,
     isBoss: true,
-    bossSkill: {
+    skills: [
+      {
       name: '灭世龙息',
       description: '全体5倍伤害',
       aoe: true,
       multiplier: 5,
     },
+      { name: '龙鳞护体', description: '获得护盾', shield: true, weight: 1 },
+    ],
   },
 };
 

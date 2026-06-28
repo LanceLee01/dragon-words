@@ -144,7 +144,7 @@ describe('generateQuestion', () => {
       1,
     );
     expect(question).not.toBeNull();
-    // Round 0 always picks word-meaning (rand=0 < 0.30)
+    // Round 0 always picks word-meaning (rand=0 < 0.32)
     expect(question!.type).toBe('word-meaning');
     expect(question!.timeLimit).toBeGreaterThanOrEqual(8);
   });
@@ -341,7 +341,7 @@ describe('pickQuestionType', () => {
       const type = pickQuestionType(QUESTION_TYPE_WEIGHTS, round, false);
       if (type === 'match') matchCount++;
     }
-    // match weight is 0.05, so ~50 out of 1000
+    // match weight is 0.06, so ~60 out of 1000
     expect(matchCount).toBeGreaterThan(0);
   });
 });

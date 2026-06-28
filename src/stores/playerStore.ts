@@ -37,7 +37,12 @@ export interface PlayerStore {
   completeLevel: (key: string, chapter: number) => void;
 
   /** Equip a weapon by ID */
-  equipWeapon: (id: string) => void;
+  /** Equip / unequip a weapon */
+  equipWeapon: (id: string | null) => void;
+  /** Equip / unequip armor */
+  equipArmor: (id: string | null) => void;
+  /** Equip / unequip an accessory */
+  equipAccessory: (id: string | null) => void;
 
   /** Buy equipment (subtract gold, add to inventory, auto-equip) */
   buyEquipment: (item: Equipment) => void;
@@ -185,6 +190,22 @@ export const usePlayerStore = create<PlayerStore>((set) => ({
     });
   },
 
+  equipArmor: (id) => {
+    set((s) => {
+      const next: PlayerState = { ...s.player, equippedArmorId: id };
+      savePlayer(next);
+      return { player: next };
+    });
+  },
+
+  equipAccessory: (id) => {
+    set((s) => {
+      const next: PlayerState = { ...s.player, equippedAccessoryId: id };
+      savePlayer(next);
+      return { player: next };
+    });
+  },
+
   buyEquipment: (item) => {
     set((s) => {
       // Check if already owned
@@ -195,8 +216,11 @@ export const usePlayerStore = create<PlayerStore>((set) => ({
         ...s.player,
         gold: s.player.gold - item.cost,
         equipment: [...s.player.equipment, item],
-        equippedWeaponId: item.id,
       };
+      // Auto-equip to the correct slot
+      if (item.slot === 'weapon') next.equippedWeaponId = item.id;
+      else if (item.slot === 'armor') next.equippedArmorId = item.id;
+      else if (item.slot === 'accessory') next.equippedAccessoryId = item.id;
       savePlayer(next);
       return { player: next };
     });

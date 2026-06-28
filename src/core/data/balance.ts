@@ -5,13 +5,13 @@ import type { QuestionType } from './types';
 
 /** Probability weights for each question type (must sum to 1.0) */
 export const QUESTION_TYPE_WEIGHTS: Record<QuestionType, number> = {
-  'word-meaning': 0.30,
-  'meaning-word': 0.10,
-  'fill-blank':   0.05,
+  'word-meaning': 0.11,
+  'meaning-word': 0.32,
+  'fill-blank':   0.06,
   'listening':    0.20,
-  'spell':        0.20,
+  'spell':        0.15,
   'pos':          0.10,
-  'match':        0.05,
+  'match':        0.06,
 };
 
 /**

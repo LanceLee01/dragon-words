@@ -1,8 +1,9 @@
 // ---------------------------------------------------------------------------
 // Core Battle Engine — pure TypeScript, no React
 // ---------------------------------------------------------------------------
-import type { PlayerState, MonsterDef, BattleState } from '@/core/data/types';
+import type { PlayerState, MonsterDef, BattleState, SkillDef } from '@/core/data/types';
 import { BASE_CLASSES, ADVANCED_CLASSES } from '@/core/data/classes';
+import { EQUIPMENT } from '@/core/data/equipment';
 
 
 // ---------------------------------------------------------------------------
@@ -36,14 +37,24 @@ export function calculateDamage(
 
 /**
  * Get the player's effective attack value.
- * Base class baseAttack + player.attack + advanced class baseAttackBonus (if any).
+ * Base class baseAttack + player.attack + advanced class baseAttackBonus
+ * + all equipped items' attack bonuses.
  */
 export function getPlayerAttack(player: PlayerState): number {
   const base = BASE_CLASSES[player.classId]?.baseAttack ?? 0;
   const bonus = player.advancedClassId
     ? (ADVANCED_CLASSES[player.advancedClassId]?.baseAttackBonus ?? 0)
     : 0;
-  return base + player.attack + bonus;
+  const equippedIds = [
+    player.equippedWeaponId,
+    player.equippedArmorId,
+    player.equippedAccessoryId,
+  ].filter((id): id is string => id !== null);
+  const eqAtk = equippedIds.reduce((sum, id) => {
+    const item = EQUIPMENT.find((e) => e.id === id);
+    return sum + (item?.attack ?? 0);
+  }, 0);
+  return base + player.attack + bonus + eqAtk;
 }
 
 /**
@@ -73,9 +84,40 @@ export function isCrit(player: PlayerState, wasLastWrong: boolean): boolean {
   return false;
 }
 
+/**
+ * Pick a random skill from a weighted list.
+ * Skills with higher weight are more likely to be chosen.
+ */
+export function pickRandomSkill(skills: SkillDef[]): SkillDef {
+  const totalWeight = skills.reduce((sum, s) => sum + (s.weight ?? 1), 0);
+  let roll = Math.random() * totalWeight;
+  for (const skill of skills) {
+    roll -= skill.weight ?? 1;
+    if (roll <= 0) return skill;
+  }
+  return skills[skills.length - 1];
+}
+
 // ---------------------------------------------------------------------------
 // Battle lifecycle
 // ---------------------------------------------------------------------------
+
+/**
+ * Get the player's effective defense value.
+ * player.defense + all equipped items' defense bonuses.
+ */
+export function getPlayerDefense(player: PlayerState): number {
+  const equippedIds = [
+    player.equippedWeaponId,
+    player.equippedArmorId,
+    player.equippedAccessoryId,
+  ].filter((id): id is string => id !== null);
+  const eqDef = equippedIds.reduce((sum, id) => {
+    const item = EQUIPMENT.find((e) => e.id === id);
+    return sum + (item?.defense ?? 0);
+  }, 0);
+  return (player.defense ?? 0) + eqDef;
+}
 
 /**
  * Create a new battle state.
@@ -103,6 +145,9 @@ export function createBattle(
     lastDamageDealt: 0,
     lastDamageTaken: 0,
     lastCrit: false,
+    lastSkillName: '',
+    lastMonsterSkillName: '',
+    playerDefense: getPlayerDefense(player),
     log: [],
   };
 }
@@ -130,46 +175,52 @@ export function answerQuestion(
     const crit = isCrit(player, wasLastWrong);
     next.lastCrit = crit;
 
-    let damage = 0;
+    // Get the class definition
+    const classDef = player.advancedClassId
+      ? ADVANCED_CLASSES[player.advancedClassId]
+      : BASE_CLASSES[player.classId];
 
-    switch (player.classId) {
-      case 'warrior': {
-        damage = calculateDamage(base * 1.5, next.combo, crit);
-        break;
+    if (classDef) {
+      // Pick a random skill based on weights
+      const skill = pickRandomSkill(classDef.skills);
+      next.lastSkillName = skill.name;
+
+      let damage = 0;
+      const skillMult = skill.multiplier ?? 1;
+      const hits = skill.hits ?? 1;
+
+      // Calculate damage: base attack × skill multiplier × combo × crit × hits
+      const dmgPerHit = calculateDamage(base * skillMult, next.combo, crit);
+      damage = dmgPerHit * hits;
+
+      // Apply skill effects
+      if (skill.stun && skill.stunDuration) {
+        next.stunTimer = skill.stunDuration;
       }
-      case 'mage': {
-        damage = calculateDamage(base * 1.2, next.combo, crit);
-        next.stunTimer = 1;
-        break;
+      if (skill.freeze && skill.freezeDuration) {
+        next.stunTimer = (next.stunTimer || 0) + skill.freezeDuration;
       }
-      case 'ranger': {
-        damage = calculateDamage(base * 0.7 * 3, next.combo, crit);
-        break;
+      if (skill.heal && skill.healPercent) {
+        const healAmt = Math.round(next.playerMaxHp * skill.healPercent);
+        next.playerHp = Math.min(next.playerHp + healAmt, next.playerMaxHp);
       }
-      case 'paladin': {
-        damage = calculateDamage(base * 1.0, next.combo, crit);
-        const heal = Math.round(next.playerMaxHp * 0.15);
-        next.playerHp = Math.min(next.playerHp + heal, next.playerMaxHp);
-        break;
+      if (skill.shield && skill.shieldDuration) {
+        next.invulnerable = (next.invulnerable || 0) + skill.shieldDuration;
       }
-      case 'rogue': {
-        const bonusDmg = Math.round(next.monsterHp * 0.1);
-        damage = calculateDamage(base * 1.3, next.combo, crit) + bonusDmg;
-        break;
+      if (skill.dodge) {
+        next.invulnerable = (next.invulnerable || 0) + 1;
       }
-      case 'druid': {
-        damage = calculateDamage(base * 1.2, next.combo, crit);
-        const druidHeal = Math.round(next.playerMaxHp * 0.05);
-        next.playerHp = Math.min(next.playerHp + druidHeal, next.playerMaxHp);
-        break;
-      }
-      default: {
-        damage = calculateDamage(base, next.combo, crit);
-      }
+
+      next.lastDamageDealt = damage;
+      next.monsterHp = Math.max(0, next.monsterHp - damage);
+    } else {
+      // Fallback — no class def found
+      const damage = calculateDamage(base, next.combo, crit);
+      next.lastSkillName = '攻击';
+      next.lastDamageDealt = damage;
+      next.monsterHp = Math.max(0, next.monsterHp - damage);
     }
 
-    next.lastDamageDealt = damage;
-    next.monsterHp = Math.max(0, next.monsterHp - damage);
     next.lastDamageTaken = 0;
     next.combo += 1;
     next.phase = 'result';
@@ -206,7 +257,8 @@ export function answerQuestion(
  * Process the monster's turn.
  * - If stunned: decrement stun, skip attack.
  * - If invulnerable: decrement invuln, skip attack.
- * - Otherwise: deal monster.attack damage to player, check defeat.
+ * - 25% chance to use a random skill from monster.skills (for variety)
+ * - Otherwise: normal attack.
  */
 export function monsterTurn(
   battle: BattleState,
@@ -219,6 +271,7 @@ export function monsterTurn(
     next.stunTimer -= 1;
     next.turn += 1;
     next.phase = 'question';
+    next.lastMonsterSkillName = '';
     return next;
   }
 
@@ -227,13 +280,45 @@ export function monsterTurn(
     next.invulnerable -= 1;
     next.turn += 1;
     next.phase = 'question';
+    next.lastMonsterSkillName = '';
     return next;
   }
 
-  // Normal attack
-  const dmg = monster.attack;
-  next.lastDamageTaken = dmg;
-  next.playerHp = Math.max(0, next.playerHp - dmg);
+  const defense = next.playerDefense ?? 0;
+  const baseDmg = Math.max(1, monster.attack - defense);
+  let finalDmg = baseDmg;
+  let skillName = '';
+
+  // 25% chance to use a skill
+  if (monster.skills && monster.skills.length > 0 && Math.random() < 0.25) {
+    const skill = pickRandomSkill(monster.skills);
+    skillName = skill.name;
+
+    // Apply skill multiplier
+    if (skill.multiplier) {
+      finalDmg = Math.max(1, Math.round(monster.attack * skill.multiplier - defense));
+    }
+
+    // Skill effects
+    if (skill.stun) {
+      next.stunTimer = 1;
+    }
+    if (skill.shield) {
+      next.invulnerable = (next.invulnerable || 0) + 1;
+    }
+    if (skill.heal && skill.healPercent) {
+      const healAmt = Math.round(next.monsterMaxHp * skill.healPercent);
+      next.monsterHp = Math.min(next.monsterHp + healAmt, next.monsterMaxHp);
+    }
+    if (skill.enrage && skill.enrageAttack) {
+      // For simplicity, enrage just adds a one-time flat damage bonus
+      finalDmg += skill.enrageAttack;
+    }
+  }
+
+  next.lastMonsterSkillName = skillName;
+  next.lastDamageTaken = finalDmg;
+  next.playerHp = Math.max(0, next.playerHp - finalDmg);
   next.turn += 1;
 
   if (next.playerHp <= 0) {

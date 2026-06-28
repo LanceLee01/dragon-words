@@ -90,7 +90,7 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
       ) : (
         <>
           {/* --- Word image --- */}
-          <div className="relative flex h-48 w-72 items-center justify-center overflow-hidden rounded-xl bg-white/10">
+          <div className="relative flex h-56 w-56 items-center justify-center overflow-hidden rounded-xl bg-white/10">
             {imageError ? (
               <span className="text-5xl">📜</span>
             ) : (
@@ -155,9 +155,13 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
               </>
             ) : (
               <>
-                <p className="text-center text-lg text-gray-300">请选择以下单词的意思：</p>
+                <p className="text-center text-lg text-gray-300">
+                  {question.type === 'meaning-word' ? '请选择以下意思对应的英文：' : '请选择以下单词的意思：'}
+                </p>
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl font-bold text-white">{question.word.english}</span>
+                  <span className="text-3xl font-bold text-white">
+                    {question.type === 'meaning-word' ? question.word.chinese : question.word.english}
+                  </span>
                   {isAvailable && (
                     <button
                       onClick={handlePlaySound}

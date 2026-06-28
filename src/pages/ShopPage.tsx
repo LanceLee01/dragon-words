@@ -1,27 +1,41 @@
 // ---------------------------------------------------------------------------
-// ShopPage — equipment shop where players buy and equip class-specific items
+// ShopPage — equipment shop with 3 slot categories (weapon/armor/accessory)
 // ---------------------------------------------------------------------------
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { usePlayerStore } from '@/stores/playerStore';
 import { EQUIPMENT } from '@/core/data/equipment';
 import type { Equipment } from '@/core/data/types';
 
+type SlotTab = 'weapon' | 'armor' | 'accessory';
+
+const SLOT_TABS: { key: SlotTab; label: string; icon: string }[] = [
+  { key: 'weapon', label: '武器', icon: '⚔️' },
+  { key: 'armor', label: '防具', icon: '🛡️' },
+  { key: 'accessory', label: '饰品', icon: '💍' },
+];
+
 export default function ShopPage() {
   const navigate = useNavigate();
   const player = usePlayerStore((s) => s.player);
   const equipWeapon = usePlayerStore((s) => s.equipWeapon);
+  const equipArmor = usePlayerStore((s) => s.equipArmor);
+  const equipAccessory = usePlayerStore((s) => s.equipAccessory);
   const buyEquipment = usePlayerStore((s) => s.buyEquipment);
 
+  const [activeTab, setActiveTab] = useState<SlotTab>('weapon');
+
   const ownedIds = new Set(player.equipment.map((e) => e.id));
-  const equippedId = player.equippedWeaponId;
 
-  // Filter equipment by player's class
-  const classEquipment = EQUIPMENT.filter((eq) => eq.classId === player.classId);
+  // Filter by slot and class (accessories are shared)
+  const filteredItems = EQUIPMENT.filter(
+    (eq) =>
+      eq.slot === activeTab &&
+      (eq.slot === 'accessory' || eq.classId === player.classId),
+  );
 
-  const handleBack = () => {
-    navigate(-1);
-  };
+  const handleBack = () => navigate(-1);
 
   const handleBuy = (item: Equipment) => {
     if (player.gold < item.cost) return;
@@ -29,10 +43,24 @@ export default function ShopPage() {
   };
 
   const handleEquip = (item: Equipment) => {
-    equipWeapon(item.id);
+    if (item.slot === 'weapon') equipWeapon(item.id);
+    else if (item.slot === 'armor') equipArmor(item.id);
+    else if (item.slot === 'accessory') equipAccessory(item.id);
   };
 
-  // If no class selected, prompt to go home
+  const handleUnequip = (item: Equipment) => {
+    if (item.slot === 'weapon') equipWeapon(null);
+    else if (item.slot === 'armor') equipArmor(null);
+    else if (item.slot === 'accessory') equipAccessory(null);
+  };
+
+  const getEquippedId = (slot: SlotTab): string | null => {
+    if (slot === 'weapon') return player.equippedWeaponId;
+    if (slot === 'armor') return player.equippedArmorId;
+    return player.equippedAccessoryId;
+  };
+
+  // If no class selected
   if (!player.classId) {
     return (
       <div
@@ -50,13 +78,15 @@ export default function ShopPage() {
     );
   }
 
+  const equippedId = getEquippedId(activeTab);
+
   return (
     <div
       className="min-h-screen px-4 py-8"
       style={{ background: 'linear-gradient(180deg, #1a0a2e 0%, #0a0a2e 100%)' }}
     >
       {/* Header */}
-      <div className="mx-auto mb-8 flex max-w-4xl items-center justify-between">
+      <div className="mx-auto mb-6 flex max-w-4xl items-center justify-between">
         <button
           onClick={handleBack}
           className="flex items-center gap-2 rounded-lg px-4 py-2 text-lg text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
@@ -75,9 +105,27 @@ export default function ShopPage() {
         </div>
       </div>
 
+      {/* Slot tabs */}
+      <div className="mx-auto mb-6 flex max-w-md justify-center gap-2">
+        {SLOT_TABS.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`flex items-center gap-1.5 rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
+              activeTab === tab.key
+                ? 'bg-blue-700 text-white shadow-lg'
+                : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white'
+            }`}
+          >
+            <span>{tab.icon}</span>
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
       {/* Equipment grid */}
       <div className="mx-auto grid max-w-4xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {classEquipment.map((item, i) => {
+        {filteredItems.map((item, i) => {
           const owned = ownedIds.has(item.id);
           const equipped = equippedId === item.id;
 
@@ -110,7 +158,7 @@ export default function ShopPage() {
                         : 'bg-gray-700/60 text-gray-300'
                   }`}
                 >
-                  第{getTierChinese(item.tier)}
+                  {getTierText(item.tier)}
                 </span>
               </div>
 
@@ -123,16 +171,19 @@ export default function ShopPage() {
                 )}
               </div>
 
-              {/* Action button */}
-              <div className="mt-4">
+              {/* Action buttons */}
+              <div className="mt-4 flex gap-2">
                 {equipped ? (
-                  <div className="flex items-center justify-center gap-2 rounded-lg border border-yellow-500 bg-yellow-900/20 px-4 py-2 text-sm text-yellow-400">
-                    ✅ 已装备
-                  </div>
+                  <button
+                    onClick={() => handleUnequip(item)}
+                    className="flex-1 rounded-lg border border-red-700 px-4 py-2 text-sm font-semibold text-red-400 transition-colors hover:bg-red-900/30"
+                  >
+                    🚫 卸下
+                  </button>
                 ) : owned ? (
                   <button
                     onClick={() => handleEquip(item)}
-                    className="w-full rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-600"
+                    className="flex-1 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-600"
                   >
                     装备
                   </button>
@@ -140,7 +191,7 @@ export default function ShopPage() {
                   <button
                     onClick={() => handleBuy(item)}
                     disabled={player.gold < item.cost}
-                    className={`w-full rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+                    className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
                       player.gold < item.cost
                         ? 'cursor-not-allowed bg-gray-700 text-gray-500'
                         : 'bg-amber-600 text-white hover:bg-amber-500'
@@ -156,8 +207,10 @@ export default function ShopPage() {
       </div>
 
       {/* Empty state */}
-      {classEquipment.length === 0 && (
-        <p className="mt-12 text-center text-gray-500">该职业暂无可用装备</p>
+      {filteredItems.length === 0 && (
+        <p className="mt-12 text-center text-gray-500">
+          {activeTab === 'accessory' ? '暂无可用饰品' : '该职业暂无可用装备'}
+        </p>
       )}
     </div>
   );
@@ -167,26 +220,12 @@ export default function ShopPage() {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const CLASS_ICONS: Record<string, string> = {
-  warrior: '⚔️',
-  mage: '🔮',
-  ranger: '🏹',
-  paladin: '🛡️',
-  rogue: '🗡️',
-  druid: '🌿',
-};
-
 function getItemIcon(item: Equipment): string {
-  const baseIcon = CLASS_ICONS[item.classId] || '❓';
+  const baseIcon = item.slot === 'weapon' ? '⚔️' : item.slot === 'armor' ? '🛡️' : '💍';
   if (item.tier >= 3) return `✨${baseIcon}`;
   return baseIcon;
 }
 
-function getTierChinese(tier: number): string {
-  switch (tier) {
-    case 1: return 'I';
-    case 2: return 'II';
-    case 3: return 'III';
-    default: return '';
-  }
+function getTierText(tier: number): string {
+  return ['', 'I', 'II', 'III'][tier] || '';
 }

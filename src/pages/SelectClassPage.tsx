@@ -197,7 +197,10 @@ function ClassCard({
       </div>
       <div className="mt-2 w-full rounded-md bg-blue-900/30 px-3 py-2 text-sm text-blue-300">
         <span className="font-semibold">技能：</span>
-        {cls.skill.name} — {cls.skill.description}
+        {cls.skills[0].name} — {cls.skills[0].description}
+        {cls.skills.length > 1 && (
+          <span className="ml-1 text-xs text-blue-400">+{cls.skills.length - 1} 更多</span>
+        )}
       </div>
     </motion.button>
   );

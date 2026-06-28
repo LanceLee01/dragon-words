@@ -81,8 +81,9 @@ export interface PassiveEffect {
 export interface SkillDef {
   name: string;
   description: string;
-  chargeNeeded: number;
-  /** Multi-hit count for multi-hit skills (e.g. ranger's 连射 = 3) */
+  /** Selection weight (higher = more likely). Default 1. */
+  weight?: number;
+  /** Multi-hit count for multi-hit skills */
   hits?: number;
   /** Whether the skill can stun */
   stun?: boolean;
@@ -120,7 +121,7 @@ export interface ClassDef {
   name: string;
   baseAttack: number;
   passive: PassiveEffect;
-  skill: SkillDef;
+  skills: SkillDef[];
   advancedTo: AdvancedClassId;
 }
 
@@ -130,26 +131,28 @@ export interface AdvancedClassDef {
   name: string;
   baseAttackBonus: number;
   passive: PassiveEffect;
-  skill: SkillDef;
+  skills: SkillDef[];
 }
 
-/** Boss-specific skill */
-export interface BossSkillDef {
+/** Monster skill used in battle (25% chance to trigger) */
+export interface MonsterSkillDef {
   name: string;
   description: string;
-  /** Damage multiplier (optional) */
+  /** Selection weight */
+  weight?: number;
+  /** Damage multiplier (applied to monster.attack) */
   multiplier?: number;
-  /** Whether it's an AoE attack */
-  aoe?: boolean;
-  /** Whether it can stun */
+  /** Whether it can stun the player */
   stun?: boolean;
-  /** Whether it can heal the boss */
+  /** Whether it heals the monster */
   heal?: boolean;
-  /** Whether it enrages the boss */
+  /** Heal percentage (0-1) of max HP */
+  healPercent?: number;
+  /** Whether it enrages the monster (increases attack) */
   enrage?: boolean;
-  /** Whether it summons minions */
-  summon?: boolean;
-  /** Whether it shields the boss */
+  /** Attack boost when enraged */
+  enrageAttack?: number;
+  /** Whether it shields the monster */
   shield?: boolean;
   /** Whether it poisons the player */
   poison?: boolean;
@@ -162,7 +165,8 @@ export interface MonsterDef {
   hp: number;
   attack: number;
   isBoss: boolean;
-  bossSkill?: BossSkillDef;
+  /** Monster skills — normal: 1, boss: 2 */
+  skills: MonsterSkillDef[];
 }
 
 /** A single level inside a chapter */
@@ -186,6 +190,7 @@ export interface Equipment {
   id: string;
   name: string;
   tier: number;        // 1-3
+  slot: 'weapon' | 'armor' | 'accessory';
   cost: number;
   classId: ClassId;
   attack: number;
@@ -209,6 +214,8 @@ export interface PlayerState {
   defense: number;
   equipment: Equipment[];
   equippedWeaponId: string | null;
+  equippedArmorId: string | null;
+  equippedAccessoryId: string | null;
   currentChapter: number;
   currentLevel: number;
   gold: number;
@@ -242,6 +249,12 @@ export interface BattleState {
   lastDamageTaken: number;
   /** Whether the last attack was a critical hit */
   lastCrit: boolean;
+  /** Player's defense (base + equipment) used to reduce monster damage */
+  playerDefense: number;
+  /** Name of the skill used in the last correct answer */
+  lastSkillName: string;
+  /** Name of the monster skill used in the last monster turn */
+  lastMonsterSkillName: string;
   /** Battle log entries accumulated during the fight */
   log: BattleLogEntry[];
 }
@@ -262,6 +275,10 @@ export interface BattleLogEntry {
   playerHpAfter: number;
   playerMaxHp: number;
   monsterName: string;
+  /** Skill used for correct answers */
+  skillName: string;
+  /** Monster skill name used in this turn */
+  monsterSkillName: string;
 }
 
 /** Base question fields shared by all question types */
