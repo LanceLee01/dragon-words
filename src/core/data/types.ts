@@ -197,7 +197,10 @@ export interface PlayerState {
   gold: number;
 }
 
-/** Snapshot of an active battle */
+/** Phase within an active battle */
+export type BattlePhase = 'question' | 'monster-turn';
+
+/** Snapshot of an active battle (runtime state for the battle engine) */
 export interface BattleState {
   playerHp: number;
   playerMaxHp: number;
@@ -206,6 +209,10 @@ export interface BattleState {
   monsterMaxHp: number;
   turn: number;
   charge: number;
+  combo: number;
+  phase: BattlePhase;
+  stunTimer: number;
+  invulnerable: number;
   isBoss: boolean;
   status: 'ongoing' | 'won' | 'lost';
   /** Status effects on player */

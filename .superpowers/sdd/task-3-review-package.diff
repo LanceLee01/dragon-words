@@ -1,0 +1,1144 @@
+diff --git a/src/core/data/classes.ts b/src/core/data/classes.ts
+new file mode 100644
+index 0000000..34a3c5d
+--- /dev/null
++++ b/src/core/data/classes.ts
+@@ -0,0 +1,224 @@
++// ---------------------------------------------------------------------------
++// Class definitions — 6 base classes + 6 advanced classes
++// ---------------------------------------------------------------------------
++import type { ClassDef, AdvancedClassDef } from './types';
++
++// ---------------------------------------------------------------------------
++// Base classes
++// ---------------------------------------------------------------------------
++
++export const BASE_CLASSES: Record<string, ClassDef> = {
++  warrior: {
++    id: 'warrior',
++    name: '战士',
++    baseAttack: 12,
++    passive: {
++      type: 'attackPerk',
++      value: 0.2,       // +20% attack
++    },
++    skill: {
++      name: '猛击',
++      description: '造成3倍伤害',
++      chargeNeeded: 5,
++      multiplier: 3,
++    },
++    advancedTo: 'dragon-knight',
++  },
++  mage: {
++    id: 'mage',
++    name: '法师',
++    baseAttack: 8,
++    passive: {
++      type: 'comboStart',
++      value: 1.5,       // first skill use ×1.5
++    },
++    skill: {
++      name: '火球术',
++      description: '造成2倍伤害并眩晕',
++      chargeNeeded: 5,
++      multiplier: 2,
++      stun: true,
++      stunDuration: 1,
++    },
++    advancedTo: 'archmage',
++  },
++  ranger: {
++    id: 'ranger',
++    name: '游侠',
++    baseAttack: 9,
++    passive: {
++      type: 'critAfterWrong',
++      value: 0.3,       // 30% chance crit after player answers wrong
++    },
++    skill: {
++      name: '连射',
++      description: '连续射击3次',
++      chargeNeeded: 5,
++      hits: 3,
++    },
++    advancedTo: 'elf-lord',
++  },
++  paladin: {
++    id: 'paladin',
++    name: '圣骑士',
++    baseAttack: 7,
++    passive: {
++      type: 'damageReduction',
++      value: 0.3,       // -30% damage taken
++    },
++    skill: {
++      name: '圣光',
++      description: '恢复40%生命值',
++      chargeNeeded: 5,
++      heal: true,
++      healPercent: 0.4,
++    },
++    advancedTo: 'light-lord',
++  },
++  rogue: {
++    id: 'rogue',
++    name: '盗贼',
++    baseAttack: 10,
++    passive: {
++      type: 'critBonus',
++      value: 0.15,      // +15% crit chance
++    },
++    skill: {
++      name: '暗杀',
++      description: '对生命低于50%的敌人即死',
++      chargeNeeded: 5,
++      multiplier: 999,   // instant-kill
++    },
++    advancedTo: 'shadow-master',
++  },
++  druid: {
++    id: 'druid',
++    name: '德鲁伊',
++    baseAttack: 6,
++    passive: {
++      type: 'regen',
++      value: 0.05,      // regen 5% HP per turn
++    },
++    skill: {
++      name: '自然之怒',
++      description: '造成伤害并眩晕2回合',
++      chargeNeeded: 5,
++      multiplier: 2,
++      stun: true,
++      stunDuration: 2,
++    },
++    advancedTo: 'nature-spirit',
++  },
++};
++
++// ---------------------------------------------------------------------------
++// Advanced classes
++// ---------------------------------------------------------------------------
++
++export const ADVANCED_CLASSES: Record<string, AdvancedClassDef> = {
++  'dragon-knight': {
++    id: 'dragon-knight',
++    name: '龙骑士',
++    baseAttackBonus: 8,
++    passive: {
++      type: 'atkPlusDmgReduce',
++      value: 0.3,       // attack +30%
++      extra: '0.5',     // damage -50%
++    },
++    skill: {
++      name: '龙息',
++      description: '造成4倍伤害并获得1回合护盾',
++      chargeNeeded: 5,
++      multiplier: 4,
++      shield: true,
++      shieldDuration: 1,
++    },
++  },
++  archmage: {
++    id: 'archmage',
++    name: '大法师',
++    baseAttackBonus: 7,
++    passive: {
++      type: 'comboX2FreeSkill',
++      value: 2,         // combo ×2
++      extra: 'free',    // plus free skill use
++    },
++    skill: {
++      name: '暴风雪',
++      description: '造成3倍伤害并冰冻3回合',
++      chargeNeeded: 5,
++      multiplier: 3,
++      freeze: true,
++      freezeDuration: 3,
++    },
++  },
++  'elf-lord': {
++    id: 'elf-lord',
++    name: '精灵领主',
++    baseAttackBonus: 6,
++    passive: {
++      type: 'critX3',
++      value: 0.5,       // 50% crit ×3 damage
++    },
++    skill: {
++      name: '穿心箭',
++      description: '5连击并闪避下回合攻击',
++      chargeNeeded: 5,
++      hits: 5,
++      dodge: true,
++    },
++  },
++  'light-lord': {
++    id: 'light-lord',
++    name: '光明领主',
++    baseAttackBonus: 4,
++    passive: {
++      type: 'dmgReduceRegen',
++      value: 0.5,       // -50% damage
++      extra: '0.05',    // +5% regen
++    },
++    skill: {
++      name: '神圣裁决',
++      description: '完全恢复生命值，攻击减半持续3回合',
++      chargeNeeded: 5,
++      heal: true,
++      healPercent: 1.0,
++      multiplier: 0.5,
++    },
++  },
++  'shadow-master': {
++    id: 'shadow-master',
++    name: '暗影大师',
++    baseAttackBonus: 7,
++    passive: {
++      type: 'critKillHeal',
++      value: 0.3,       // 30% crit
++      extra: '0.3',     // kill heal 30%
++    },
++    skill: {
++      name: '暗影标记',
++      description: '标记目标后即死',
++      chargeNeeded: 5,
++      mark: true,
++      multiplier: 999,
++    },
++  },
++  'nature-spirit': {
++    id: 'nature-spirit',
++    name: '自然之灵',
++    baseAttackBonus: 5,
++    passive: {
++      type: 'regenImmune',
++      value: 0.1,       // regen 10%
++      extra: 'immune',  // immune to status effects
++    },
++    skill: {
++      name: '自然复苏',
++      description: '3回合持续伤害并复活队友',
++      chargeNeeded: 5,
++      dot: true,
++      dotDuration: 3,
++      resurrect: true,
++    },
++  },
++};
+diff --git a/src/core/data/equipment.ts b/src/core/data/equipment.ts
+new file mode 100644
+index 0000000..d2156ff
+--- /dev/null
++++ b/src/core/data/equipment.ts
+@@ -0,0 +1,189 @@
++// ---------------------------------------------------------------------------
++// Equipment definitions — 18 items (3 tiers × 6 classes)
++// ---------------------------------------------------------------------------
++import type { Equipment } from './types';
++
++/**
++ * 18 equipment items: 3 tiers per class.
++ *
++ * Tier 1: cost 100,  attack +3,  defense 0-2
++ * Tier 2: cost 500,  attack +7,  defense 1-5
++ * Tier 3: cost 1500, attack 10-18, defense 2-20
++ *
++ * Paladin shields are defense-focused; rogue daggers are attack-focused.
++ */
++export const EQUIPMENT: Equipment[] = [
++  // ---- Warrior ----
++  {
++    id: 'warrior-tier1',
++    name: '铁剑',
++    tier: 1,
++    cost: 100,
++    classId: 'warrior',
++    attack: 3,
++    defense: 0,
++  },
++  {
++    id: 'warrior-tier2',
++    name: '钢刃大剑',
++    tier: 2,
++    cost: 500,
++    classId: 'warrior',
++    attack: 7,
++    defense: 2,
++  },
++  {
++    id: 'warrior-tier3',
++    name: '龙牙巨剑',
++    tier: 3,
++    cost: 1500,
++    classId: 'warrior',
++    attack: 15,
++    defense: 5,
++  },
++
++  // ---- Mage ----
++  {
++    id: 'mage-tier1',
++    name: '木质法杖',
++    tier: 1,
++    cost: 100,
++    classId: 'mage',
++    attack: 3,
++    defense: 0,
++  },
++  {
++    id: 'mage-tier2',
++    name: '水晶法杖',
++    tier: 2,
++    cost: 500,
++    classId: 'mage',
++    attack: 7,
++    defense: 1,
++  },
++  {
++    id: 'mage-tier3',
++    name: '星辰魔杖',
++    tier: 3,
++    cost: 1500,
++    classId: 'mage',
++    attack: 14,
++    defense: 3,
++  },
++
++  // ---- Ranger ----
++  {
++    id: 'ranger-tier1',
++    name: '短弓',
++    tier: 1,
++    cost: 100,
++    classId: 'ranger',
++    attack: 3,
++    defense: 0,
++  },
++  {
++    id: 'ranger-tier2',
++    name: '长弓',
++    tier: 2,
++    cost: 500,
++    classId: 'ranger',
++    attack: 7,
++    defense: 1,
++  },
++  {
++    id: 'ranger-tier3',
++    name: '精灵之弓',
++    tier: 3,
++    cost: 1500,
++    classId: 'ranger',
++    attack: 16,
++    defense: 4,
++  },
++
++  // ---- Paladin (defense-focused shields) ----
++  {
++    id: 'paladin-tier1',
++    name: '木盾',
++    tier: 1,
++    cost: 100,
++    classId: 'paladin',
++    attack: 3,
++    defense: 2,
++  },
++  {
++    id: 'paladin-tier2',
++    name: '钢盾',
++    tier: 2,
++    cost: 500,
++    classId: 'paladin',
++    attack: 7,
++    defense: 5,
++  },
++  {
++    id: 'paladin-tier3',
++    name: '圣光之盾',
++    tier: 3,
++    cost: 1500,
++    classId: 'paladin',
++    attack: 10,
++    defense: 20,
++  },
++
++  // ---- Rogue (attack-focused daggers) ----
++  {
++    id: 'rogue-tier1',
++    name: '匕首',
++    tier: 1,
++    cost: 100,
++    classId: 'rogue',
++    attack: 3,
++    defense: 0,
++  },
++  {
++    id: 'rogue-tier2',
++    name: '淬毒匕首',
++    tier: 2,
++    cost: 500,
++    classId: 'rogue',
++    attack: 7,
++    defense: 1,
++  },
++  {
++    id: 'rogue-tier3',
++    name: '暗影之刃',
++    tier: 3,
++    cost: 1500,
++    classId: 'rogue',
++    attack: 18,
++    defense: 2,
++  },
++
++  // ---- Druid ----
++  {
++    id: 'druid-tier1',
++    name: '藤蔓鞭',
++    tier: 1,
++    cost: 100,
++    classId: 'druid',
++    attack: 3,
++    defense: 0,
++  },
++  {
++    id: 'druid-tier2',
++    name: '荆棘法杖',
++    tier: 2,
++    cost: 500,
++    classId: 'druid',
++    attack: 7,
++    defense: 3,
++  },
++  {
++    id: 'druid-tier3',
++    name: '自然之杖',
++    tier: 3,
++    cost: 1500,
++    classId: 'druid',
++    attack: 12,
++    defense: 8,
++  },
++];
+diff --git a/src/core/data/levels.ts b/src/core/data/levels.ts
+new file mode 100644
+index 0000000..34e3385
+--- /dev/null
++++ b/src/core/data/levels.ts
+@@ -0,0 +1,148 @@
++// ---------------------------------------------------------------------------
++// Level / Chapter definitions and helper functions
++// ---------------------------------------------------------------------------
++import type { ChapterDef, Difficulty, WordLevel } from './types';
++import { CHAPTER_MONSTERS } from './monsters';
++
++// ---------------------------------------------------------------------------
++// 15 chapters
++// ---------------------------------------------------------------------------
++
++const CHAPTER_NAMES: string[] = [
++  '森林小径',
++  '城堡大厅',
++  '魔法学院',
++  '精灵森林',
++  '矮人矿坑',
++  '幽暗地域',
++  '龙脊山脉',
++  '亡灵沼泽',
++  '巨人平原',
++  '终焉之塔',
++  '深渊裂口',
++  '天堂之门',
++  '时光回廊',
++  '龙之圣殿',
++  '龙王之巢',
++];
++
++function buildChapters(): ChapterDef[] {
++  const chapters: ChapterDef[] = [];
++
++  for (let i = 1; i <= 15; i++) {
++    const wordCount = i <= 5 ? 101 : i <= 14 ? 110 : 108;
++    const wordLevel: WordLevel = i <= 5 ? 'primary' : 'middle';
++    const monsterEntry = CHAPTER_MONSTERS[i];
++
++    const levels = [];
++    // Levels 1-4: normal monsters
++    for (let lvl = 1; lvl <= 4; lvl++) {
++      levels.push({
++        level: lvl,
++        monsterId: monsterEntry.normal,
++        isBoss: false,
++      });
++    }
++    // Level 5: boss
++    levels.push({
++      level: 5,
++      monsterId: monsterEntry.boss,
++      isBoss: true,
++    });
++
++    chapters.push({
++      id: i,
++      name: CHAPTER_NAMES[i - 1],
++      wordCount,
++      wordLevel,
++      levels,
++    });
++  }
++
++  return chapters;
++}
++
++export const CHAPTERS: ChapterDef[] = buildChapters();
++
++// ---------------------------------------------------------------------------
++// Helper functions
++// ---------------------------------------------------------------------------
++
++/**
++ * Determine the difficulty phase based on chapter number.
++ * Chapters 1-3:  beginner
++ * Chapters 4-7:  intermediate
++ * Chapters 8-12: challenge
++ * Chapters 13-15: ultimate
++ */
++export function getDifficultyPhase(chapter: number): Difficulty {
++  if (chapter >= 1 && chapter <= 3) return 'beginner';
++  if (chapter >= 4 && chapter <= 7) return 'intermediate';
++  if (chapter >= 8 && chapter <= 12) return 'challenge';
++  return 'ultimate';
++}
++
++/**
++ * Get the time limit (in seconds) for answering a question.
++ * Normal/boss time limits differ by phase.
++ *   beginner:      12 / 14
++ *   intermediate:  10 / 12
++ *   challenge:      9 / 10
++ *   ultimate:       8 / 9
++ */
++export function getTimeLimit(chapter: number, type: 'normal' | 'boss'): number {
++  const phase = getDifficultyPhase(chapter);
++  const limits: Record<Difficulty, { normal: number; boss: number }> = {
++    beginner:     { normal: 12, boss: 14 },
++    intermediate: { normal: 10, boss: 12 },
++    challenge:    { normal: 9,  boss: 10 },
++    ultimate:     { normal: 8,  boss: 9 },
++  };
++  return limits[phase][type];
++}
++
++/**
++ * Get the HP range for normal monsters in a given chapter (phase-based).
++ *   beginner:      30-50
++ *   intermediate:  60-100
++ *   challenge:     120-180
++ *   ultimate:      200-300  (ch15 → 500)
++ */
++export function getMonsterHpRange(chapter: number): [number, number] {
++  if (chapter === 15) return [500, 500];
++  const phase = getDifficultyPhase(chapter);
++  const ranges: Record<Difficulty, [number, number]> = {
++    beginner:     [30, 50],
++    intermediate: [60, 100],
++    challenge:    [120, 180],
++    ultimate:     [200, 300],
++  };
++  return ranges[phase];
++}
++
++/**
++ * Get the attack range for normal monsters in a given chapter (phase-based).
++ *   beginner:      5-8
++ *   intermediate:  10-15
++ *   challenge:     18-25
++ *   ultimate:      28-40  (ch15 → 60)
++ */
++export function getMonsterAttackRange(chapter: number): [number, number] {
++  if (chapter === 15) return [60, 60];
++  const phase = getDifficultyPhase(chapter);
++  const ranges: Record<Difficulty, [number, number]> = {
++    beginner:     [5, 8],
++    intermediate: [10, 15],
++    challenge:    [18, 25],
++    ultimate:     [28, 40],
++  };
++  return ranges[phase];
++}
++
++/**
++ * Get the XP required to reach a given player level.
++ * Formula: level * 100
++ */
++export function getXpForLevel(level: number): number {
++  return level * 100;
++}
+diff --git a/src/core/data/monsters.ts b/src/core/data/monsters.ts
+new file mode 100644
+index 0000000..02921a1
+--- /dev/null
++++ b/src/core/data/monsters.ts
+@@ -0,0 +1,330 @@
++// ---------------------------------------------------------------------------
++// Monster definitions — 15 normal + 15 boss monsters
++// ---------------------------------------------------------------------------
++import type { MonsterDef } from './types';
++
++// ---------------------------------------------------------------------------
++// Normal monsters
++// ---------------------------------------------------------------------------
++
++export const MONSTERS: Record<string, MonsterDef> = {
++  goblin: {
++    id: 'goblin',
++    name: '哥布林',
++    hp: 40,
++    attack: 6,
++    isBoss: false,
++  },
++  skeleton: {
++    id: 'skeleton',
++    name: '骷髅兵',
++    hp: 45,
++    attack: 7,
++    isBoss: false,
++  },
++  apprentice: {
++    id: 'apprentice',
++    name: '学徒法师',
++    hp: 50,
++    attack: 8,
++    isBoss: false,
++  },
++  shadowwolf: {
++    id: 'shadowwolf',
++    name: '影狼',
++    hp: 55,
++    attack: 8,
++    isBoss: false,
++  },
++  gargoyle: {
++    id: 'gargoyle',
++    name: '石像鬼',
++    hp: 55,
++    attack: 8,
++    isBoss: false,
++  },
++  troglodyte: {
++    id: 'troglodyte',
++    name: '穴居人',
++    hp: 75,
++    attack: 12,
++    isBoss: false,
++  },
++  harpy: {
++    id: 'harpy',
++    name: '鹰身女妖',
++    hp: 80,
++    attack: 13,
++    isBoss: false,
++  },
++  ghost: {
++    id: 'ghost',
++    name: '幽灵',
++    hp: 85,
++    attack: 14,
++    isBoss: false,
++  },
++  ogre: {
++    id: 'ogre',
++    name: '食人魔',
++    hp: 90,
++    attack: 15,
++    isBoss: false,
++  },
++  succubus: {
++    id: 'succubus',
++    name: '魅魔',
++    hp: 95,
++    attack: 16,
++    isBoss: false,
++  },
++  demonhound: {
++    id: 'demonhound',
++    name: '地狱猎犬',
++    hp: 100,
++    attack: 17,
++    isBoss: false,
++  },
++  fallenAngel: {
++    id: 'fallenAngel',
++    name: '堕天使',
++    hp: 110,
++    attack: 18,
++    isBoss: false,
++  },
++  timeGhost: {
++    id: 'timeGhost',
++    name: '时光幽灵',
++    hp: 120,
++    attack: 20,
++    isBoss: false,
++  },
++  dragonborn: {
++    id: 'dragonborn',
++    name: '龙裔',
++    hp: 130,
++    attack: 22,
++    isBoss: false,
++  },
++  eliteGuard: {
++    id: 'eliteGuard',
++    name: '精英卫兵',
++    hp: 150,
++    attack: 25,
++    isBoss: false,
++  },
++
++  // -----------------------------------------------------------------------
++  // Bosses
++  // -----------------------------------------------------------------------
++
++  goblinKing: {
++    id: 'goblinKing',
++    name: '哥布林王',
++    hp: 50,
++    attack: 8,
++    isBoss: true,
++    bossSkill: {
++      name: '王之号令',
++      description: '召唤哥布林增援',
++      summon: true,
++    },
++  },
++  deathKnight: {
++    id: 'deathKnight',
++    name: '死亡骑士',
++    hp: 55,
++    attack: 9,
++    isBoss: true,
++    bossSkill: {
++      name: '死亡缠绕',
++      description: '造成暗影伤害并吸血',
++      heal: true,
++    },
++  },
++  archmage_boss: {
++    id: 'archmage_boss',
++    name: '大法师',
++    hp: 60,
++    attack: 10,
++    isBoss: true,
++    bossSkill: {
++      name: '魔力风暴',
++      description: '全体魔法攻击',
++      aoe: true,
++    },
++  },
++  treantElder: {
++    id: 'treantElder',
++    name: '树精长老',
++    hp: 65,
++    attack: 11,
++    isBoss: true,
++    bossSkill: {
++      name: '自然屏障',
++      description: '为自己恢复生命值',
++      heal: true,
++    },
++  },
++  lavaGiant: {
++    id: 'lavaGiant',
++    name: '熔岩巨人',
++    hp: 70,
++    attack: 12,
++    isBoss: true,
++    bossSkill: {
++      name: '熔岩爆发',
++      description: '造成全体伤害并灼烧',
++      aoe: true,
++      poison: true,
++    },
++  },
++  drowElf: {
++    id: 'drowElf',
++    name: '黑暗精灵',
++    hp: 100,
++    attack: 15,
++    isBoss: true,
++    bossSkill: {
++      name: '暗影突袭',
++      description: '造成2倍伤害',
++      multiplier: 2,
++    },
++  },
++  wyvern: {
++    id: 'wyvern',
++    name: '双足飞龙',
++    hp: 110,
++    attack: 16,
++    isBoss: true,
++    bossSkill: {
++      name: '毒液喷射',
++      description: '造成伤害并使其中毒',
++      poison: true,
++    },
++  },
++  lichKing: {
++    id: 'lichKing',
++    name: '巫妖王',
++    hp: 120,
++    attack: 18,
++    isBoss: true,
++    bossSkill: {
++      name: '亡灵天灾',
++      description: '召唤亡灵大军',
++      summon: true,
++    },
++  },
++  stormGiant: {
++    id: 'stormGiant',
++    name: '风暴巨人',
++    hp: 140,
++    attack: 20,
++    isBoss: true,
++    bossSkill: {
++      name: '雷霆之怒',
++      description: '造成全体伤害并眩晕',
++      aoe: true,
++      stun: true,
++    },
++  },
++  darkKnight: {
++    id: 'darkKnight',
++    name: '暗黑骑士',
++    hp: 160,
++    attack: 22,
++    isBoss: true,
++    bossSkill: {
++      name: '黑暗护盾',
++      description: '获得护盾减少伤害',
++      shield: true,
++    },
++  },
++  abyssalLord: {
++    id: 'abyssalLord',
++    name: '深渊领主',
++    hp: 180,
++    attack: 25,
++    isBoss: true,
++    bossSkill: {
++      name: '深渊凝视',
++      description: '造成3倍伤害并使目标恐惧',
++      multiplier: 3,
++      stun: true,
++    },
++  },
++  archangel: {
++    id: 'archangel',
++    name: '大天使',
++    hp: 200,
++    attack: 28,
++    isBoss: true,
++    bossSkill: {
++      name: '圣光审判',
++      description: '全体攻击并恢复自身生命',
++      aoe: true,
++      heal: true,
++    },
++  },
++  timeKeeper: {
++    id: 'timeKeeper',
++    name: '时空守护者',
++    hp: 230,
++    attack: 30,
++    isBoss: true,
++    bossSkill: {
++      name: '时光倒流',
++      description: '恢复大量生命值',
++      heal: true,
++      multiplier: 0.5,
++    },
++  },
++  dracolich: {
++    id: 'dracolich',
++    name: '龙巫妖',
++    hp: 260,
++    attack: 35,
++    isBoss: true,
++    bossSkill: {
++      name: '龙息亡者',
++      description: '造成毁灭性伤害并召唤骷髅',
++      aoe: true,
++      summon: true,
++    },
++  },
++  ancientRed: {
++    id: 'ancientRed',
++    name: '远古红龙',
++    hp: 500,
++    attack: 60,
++    isBoss: true,
++    bossSkill: {
++      name: '灭世龙息',
++      description: '全体5倍伤害',
++      aoe: true,
++      multiplier: 5,
++    },
++  },
++};
++
++// ---------------------------------------------------------------------------
++// Chapter-to-monster mapping (chapters 1-15)
++// ---------------------------------------------------------------------------
++
++export const CHAPTER_MONSTERS: Record<number, { normal: string; boss: string }> = {
++  1:  { normal: 'goblin',      boss: 'goblinKing' },
++  2:  { normal: 'skeleton',    boss: 'deathKnight' },
++  3:  { normal: 'apprentice',  boss: 'archmage_boss' },
++  4:  { normal: 'shadowwolf',  boss: 'treantElder' },
++  5:  { normal: 'gargoyle',    boss: 'lavaGiant' },
++  6:  { normal: 'troglodyte',  boss: 'drowElf' },
++  7:  { normal: 'harpy',       boss: 'wyvern' },
++  8:  { normal: 'ghost',       boss: 'lichKing' },
++  9:  { normal: 'ogre',        boss: 'stormGiant' },
++  10: { normal: 'succubus',    boss: 'darkKnight' },
++  11: { normal: 'demonhound',  boss: 'abyssalLord' },
++  12: { normal: 'fallenAngel', boss: 'archangel' },
++  13: { normal: 'timeGhost',   boss: 'timeKeeper' },
++  14: { normal: 'dragonborn',  boss: 'dracolich' },
++  15: { normal: 'eliteGuard',  boss: 'ancientRed' },
++};
+diff --git a/src/core/data/types.ts b/src/core/data/types.ts
+new file mode 100644
+index 0000000..85d8a7a
+--- /dev/null
++++ b/src/core/data/types.ts
+@@ -0,0 +1,223 @@
++// ---------------------------------------------------------------------------
++// Core Type Definitions & Static Data — pure TypeScript, no React
++// ---------------------------------------------------------------------------
++
++/** Top-level game phase enum */
++export type GamePhase =
++  | 'menu'
++  | 'adventure'
++  | 'battle'
++  | 'reward'
++  | 'gameover'
++  | 'classSelect'
++  | 'shop';
++
++/** Kinds of questions the player can be asked */
++export type QuestionType =
++  | 'word-meaning'   // see English → pick Chinese
++  | 'meaning-word'   // see Chinese → pick English
++  | 'fill-blank'     // complete the English word
++  | 'listening';     // hear word → pick meaning
++
++/** Base class identifiers */
++export type ClassId =
++  | 'warrior'
++  | 'mage'
++  | 'ranger'
++  | 'paladin'
++  | 'rogue'
++  | 'druid';
++
++/** Advanced class identifiers */
++export type AdvancedClassId =
++  | 'dragon-knight'
++  | 'archmage'
++  | 'elf-lord'
++  | 'light-lord'
++  | 'shadow-master'
++  | 'nature-spirit';
++
++/** Difficulty / phase of the game */
++export type Difficulty = 'beginner' | 'intermediate' | 'challenge' | 'ultimate';
++
++/** Which word bank a level draws from */
++export type WordLevel = 'primary' | 'middle';
++
++// ---------------------------------------------------------------------------
++// Domain models
++// ---------------------------------------------------------------------------
++
++/** A single vocabulary word */
++export interface Word {
++  english: string;
++  chinese: string;
++  level: WordLevel;
++}
++
++/** A passive ability effect descriptor */
++export interface PassiveEffect {
++  type: string;   // e.g. 'attackPerk', 'comboStart', 'critAfterWrong', 'damageReduction', 'critBonus', 'regen', 'atkPlusDmgReduce', 'comboX2FreeSkill', 'critX3', 'dmgReduceRegen', 'critKillHeal', 'regenImmune'
++  value: number;  // magnitude (percentage or flat)
++  extra?: string; // optional extra description / sub-value
++}
++
++/** A skill definition */
++export interface SkillDef {
++  name: string;
++  description: string;
++  chargeNeeded: number;
++  /** Multi-hit count for multi-hit skills (e.g. ranger's 连射 = 3) */
++  hits?: number;
++  /** Whether the skill can stun */
++  stun?: boolean;
++  /** Stun duration in turns */
++  stunDuration?: number;
++  /** Whether the skill can heal */
++  heal?: boolean;
++  /** Heal percentage (0-1) */
++  healPercent?: number;
++  /** Whether the skill can freeze */
++  freeze?: boolean;
++  /** Freeze duration in turns */
++  freezeDuration?: number;
++  /** Whether the skill provides a shield */
++  shield?: boolean;
++  /** Shield duration in turns */
++  shieldDuration?: number;
++  /** Whether the skill grants dodge */
++  dodge?: boolean;
++  /** Whether the skill marks target */
++  mark?: boolean;
++  /** Whether the skill can resurrect */
++  resurrect?: boolean;
++  /** Whether the skill deals damage over multiple turns */
++  dot?: boolean;
++  /** Damage over time duration */
++  dotDuration?: number;
++  /** Attack power multiplier */
++  multiplier?: number;
++}
++
++/** Base class definition */
++export interface ClassDef {
++  id: ClassId;
++  name: string;
++  baseAttack: number;
++  passive: PassiveEffect;
++  skill: SkillDef;
++  advancedTo: AdvancedClassId;
++}
++
++/** Advanced class definition */
++export interface AdvancedClassDef {
++  id: AdvancedClassId;
++  name: string;
++  baseAttackBonus: number;
++  passive: PassiveEffect;
++  skill: SkillDef;
++}
++
++/** Boss-specific skill */
++export interface BossSkillDef {
++  name: string;
++  description: string;
++  /** Damage multiplier (optional) */
++  multiplier?: number;
++  /** Whether it's an AoE attack */
++  aoe?: boolean;
++  /** Whether it can stun */
++  stun?: boolean;
++  /** Whether it can heal the boss */
++  heal?: boolean;
++  /** Whether it enrages the boss */
++  enrage?: boolean;
++  /** Whether it summons minions */
++  summon?: boolean;
++  /** Whether it shields the boss */
++  shield?: boolean;
++  /** Whether it poisons the player */
++  poison?: boolean;
++}
++
++/** Definition for a monster (normal or boss) */
++export interface MonsterDef {
++  id: string;
++  name: string;
++  hp: number;
++  attack: number;
++  isBoss: boolean;
++  bossSkill?: BossSkillDef;
++}
++
++/** A single level inside a chapter */
++export interface ChapterLevel {
++  level: number;       // 1-5 (5 = boss)
++  monsterId: string;
++  isBoss: boolean;
++}
++
++/** Chapter / level-set definition */
++export interface ChapterDef {
++  id: number;          // 1-15
++  name: string;
++  wordCount: number;
++  wordLevel: WordLevel;
++  levels: ChapterLevel[];
++}
++
++/** Equipment item */
++export interface Equipment {
++  id: string;
++  name: string;
++  tier: number;        // 1-3
++  cost: number;
++  classId: ClassId;
++  attack: number;
++  defense: number;
++}
++
++// ---------------------------------------------------------------------------
++// Runtime state interfaces (consumed by stores and battle engine)
++// ---------------------------------------------------------------------------
++
++/** Persistent player state */
++export interface PlayerState {
++  classId: ClassId;
++  advancedClassId: AdvancedClassId | null;
++  level: number;
++  xp: number;
++  hp: number;
++  maxHp: number;
++  baseAttack: number;
++  attack: number;
++  defense: number;
++  equipment: Equipment[];
++  currentChapter: number;
++  currentLevel: number;
++  gold: number;
++}
++
++/** Snapshot of an active battle */
++export interface BattleState {
++  playerHp: number;
++  playerMaxHp: number;
++  monsterId: string;
++  monsterHp: number;
++  monsterMaxHp: number;
++  turn: number;
++  charge: number;
++  isBoss: boolean;
++  status: 'ongoing' | 'won' | 'lost';
++  /** Status effects on player */
++  playerEffects: string[];
++  /** Status effects on monster */
++  monsterEffects: string[];
++}
++
++/** A question presented to the player during battle */
++export interface Question {
++  type: QuestionType;
++  word: Word;
++  options: string[];
++  correctAnswer: string;
++}
