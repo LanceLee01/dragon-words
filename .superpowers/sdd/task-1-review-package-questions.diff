@@ -1,0 +1,517 @@
+diff --git a/src/assets/images/word-images/primary/a.png b/src/assets/images/word-images/primary/a.png
+deleted file mode 100644
+index e9591eb..0000000
+Binary files a/src/assets/images/word-images/primary/a.png and /dev/null differ
+diff --git a/src/assets/images/word-images/primary/about.png b/src/assets/images/word-images/primary/about.png
+deleted file mode 100644
+index 0c48ed3..0000000
+Binary files a/src/assets/images/word-images/primary/about.png and /dev/null differ
+diff --git a/src/assets/images/word-images/primary/after.png b/src/assets/images/word-images/primary/after.png
+deleted file mode 100644
+index ec999ed..0000000
+Binary files a/src/assets/images/word-images/primary/after.png and /dev/null differ
+diff --git a/src/assets/images/word-images/primary/apple.png b/src/assets/images/word-images/primary/apple.png
+new file mode 100644
+index 0000000..243edef
+Binary files /dev/null and b/src/assets/images/word-images/primary/apple.png differ
+diff --git a/src/assets/images/word-images/primary/ball.png b/src/assets/images/word-images/primary/ball.png
+new file mode 100644
+index 0000000..3ddb49d
+Binary files /dev/null and b/src/assets/images/word-images/primary/ball.png differ
+diff --git a/src/assets/images/word-images/primary/blue.png b/src/assets/images/word-images/primary/blue.png
+new file mode 100644
+index 0000000..98eb962
+Binary files /dev/null and b/src/assets/images/word-images/primary/blue.png differ
+diff --git a/src/assets/images/word-images/primary/book.png b/src/assets/images/word-images/primary/book.png
+new file mode 100644
+index 0000000..af6a944
+Binary files /dev/null and b/src/assets/images/word-images/primary/book.png differ
+diff --git a/src/assets/images/word-images/primary/cake.png b/src/assets/images/word-images/primary/cake.png
+new file mode 100644
+index 0000000..e03e3b9
+Binary files /dev/null and b/src/assets/images/word-images/primary/cake.png differ
+diff --git a/src/assets/images/word-images/primary/cat.png b/src/assets/images/word-images/primary/cat.png
+new file mode 100644
+index 0000000..b6ee136
+Binary files /dev/null and b/src/assets/images/word-images/primary/cat.png differ
+diff --git a/src/assets/images/word-images/primary/clock.png b/src/assets/images/word-images/primary/clock.png
+new file mode 100644
+index 0000000..98c4c84
+Binary files /dev/null and b/src/assets/images/word-images/primary/clock.png differ
+diff --git a/src/assets/images/word-images/primary/dance.png b/src/assets/images/word-images/primary/dance.png
+new file mode 100644
+index 0000000..3a3ad57
+Binary files /dev/null and b/src/assets/images/word-images/primary/dance.png differ
+diff --git a/src/assets/images/word-images/primary/doctor.png b/src/assets/images/word-images/primary/doctor.png
+new file mode 100644
+index 0000000..5c9bdb9
+Binary files /dev/null and b/src/assets/images/word-images/primary/doctor.png differ
+diff --git a/src/assets/images/word-images/primary/dog.png b/src/assets/images/word-images/primary/dog.png
+new file mode 100644
+index 0000000..2cce995
+Binary files /dev/null and b/src/assets/images/word-images/primary/dog.png differ
+diff --git a/src/assets/images/word-images/primary/elephant.png b/src/assets/images/word-images/primary/elephant.png
+new file mode 100644
+index 0000000..a9821e3
+Binary files /dev/null and b/src/assets/images/word-images/primary/elephant.png differ
+diff --git a/src/assets/images/word-images/primary/fire.png b/src/assets/images/word-images/primary/fire.png
+new file mode 100644
+index 0000000..810240d
+Binary files /dev/null and b/src/assets/images/word-images/primary/fire.png differ
+diff --git a/src/assets/images/word-images/primary/fly.png b/src/assets/images/word-images/primary/fly.png
+new file mode 100644
+index 0000000..12c16b1
+Binary files /dev/null and b/src/assets/images/word-images/primary/fly.png differ
+diff --git a/src/assets/images/word-images/primary/happy.png b/src/assets/images/word-images/primary/happy.png
+new file mode 100644
+index 0000000..46609bc
+Binary files /dev/null and b/src/assets/images/word-images/primary/happy.png differ
+diff --git a/src/assets/images/word-images/primary/hello.png b/src/assets/images/word-images/primary/hello.png
+new file mode 100644
+index 0000000..909f675
+Binary files /dev/null and b/src/assets/images/word-images/primary/hello.png differ
+diff --git a/src/assets/images/word-images/primary/in.png b/src/assets/images/word-images/primary/in.png
+new file mode 100644
+index 0000000..9a87ba1
+Binary files /dev/null and b/src/assets/images/word-images/primary/in.png differ
+diff --git a/src/assets/images/word-images/primary/love.png b/src/assets/images/word-images/primary/love.png
+new file mode 100644
+index 0000000..4d5ef15
+Binary files /dev/null and b/src/assets/images/word-images/primary/love.png differ
+diff --git a/src/assets/images/word-images/primary/milk.png b/src/assets/images/word-images/primary/milk.png
+new file mode 100644
+index 0000000..18062cc
+Binary files /dev/null and b/src/assets/images/word-images/primary/milk.png differ
+diff --git a/src/assets/images/word-images/primary/moon.png b/src/assets/images/word-images/primary/moon.png
+new file mode 100644
+index 0000000..bcbfe05
+Binary files /dev/null and b/src/assets/images/word-images/primary/moon.png differ
+diff --git a/src/assets/images/word-images/primary/on.png b/src/assets/images/word-images/primary/on.png
+new file mode 100644
+index 0000000..ca836de
+Binary files /dev/null and b/src/assets/images/word-images/primary/on.png differ
+diff --git a/src/assets/images/word-images/primary/red.png b/src/assets/images/word-images/primary/red.png
+new file mode 100644
+index 0000000..d5b562c
+Binary files /dev/null and b/src/assets/images/word-images/primary/red.png differ
+diff --git a/src/assets/images/word-images/primary/run.png b/src/assets/images/word-images/primary/run.png
+new file mode 100644
+index 0000000..8f041f6
+Binary files /dev/null and b/src/assets/images/word-images/primary/run.png differ
+diff --git a/src/assets/images/word-images/primary/star.png b/src/assets/images/word-images/primary/star.png
+new file mode 100644
+index 0000000..2ba336d
+Binary files /dev/null and b/src/assets/images/word-images/primary/star.png differ
+diff --git a/src/assets/images/word-images/primary/sun.png b/src/assets/images/word-images/primary/sun.png
+new file mode 100644
+index 0000000..8c3fecf
+Binary files /dev/null and b/src/assets/images/word-images/primary/sun.png differ
+diff --git a/src/assets/images/word-images/primary/swim.png b/src/assets/images/word-images/primary/swim.png
+new file mode 100644
+index 0000000..e20c010
+Binary files /dev/null and b/src/assets/images/word-images/primary/swim.png differ
+diff --git a/src/assets/images/word-images/primary/teacher.png b/src/assets/images/word-images/primary/teacher.png
+new file mode 100644
+index 0000000..f99f1fc
+Binary files /dev/null and b/src/assets/images/word-images/primary/teacher.png differ
+diff --git a/src/assets/images/word-images/primary/time.png b/src/assets/images/word-images/primary/time.png
+new file mode 100644
+index 0000000..6725de7
+Binary files /dev/null and b/src/assets/images/word-images/primary/time.png differ
+diff --git a/src/assets/images/word-images/primary/under.png b/src/assets/images/word-images/primary/under.png
+new file mode 100644
+index 0000000..6c74802
+Binary files /dev/null and b/src/assets/images/word-images/primary/under.png differ
+diff --git a/src/components/battle/QuestionCard.tsx b/src/components/battle/QuestionCard.tsx
+index bd4062a..06b9f8f 100644
+--- a/src/components/battle/QuestionCard.tsx
++++ b/src/components/battle/QuestionCard.tsx
+@@ -1,25 +1,44 @@
+ // ---------------------------------------------------------------------------
+ // QuestionCard — displays a word question with 4 options in a 2x2 grid
+ // ---------------------------------------------------------------------------
+ import { useState } from 'react';
+ import { motion } from 'framer-motion';
+ import { useSpeech } from '@/hooks/useSpeech';
+-import type { Question } from '@/core/data/types';
++import type { Question, TranslateQuestion } from '@/core/data/types';
++
++function isTranslateQuestion(q: Question): q is TranslateQuestion {
++  return (
++    q.type === 'word-meaning' ||
++    q.type === 'meaning-word' ||
++    q.type === 'fill-blank' ||
++    q.type === 'listening'
++  );
++}
+ 
+ interface QuestionCardProps {
+   question: Question;
+   onAnswer: (selected: string) => void;
+   disabled: boolean;
+ }
+ 
+ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps) {
++  // Narrow to TranslateQuestion — this component only supports translate-type questions
++  if (!isTranslateQuestion(question)) {
++    return (
++      <div className="flex flex-col items-center justify-center py-8 text-gray-400">
++        <span className="text-4xl">❓</span>
++        <p className="mt-2">不支持的题目类型</p>
++      </div>
++    );
++  }
++
+   const { speak, isAvailable } = useSpeech();
+   const [imageError, setImageError] = useState(false);
+   const [replayCount, setReplayCount] = useState(0);
+ 
+   const handleOptionClick = (option: string) => {
+     if (disabled) return;
+     onAnswer(option);
+   };
+ 
+   const handlePlaySound = () => {
+diff --git a/src/core/data/types.ts b/src/core/data/types.ts
+index 8871e8f..435cb7d 100644
+--- a/src/core/data/types.ts
++++ b/src/core/data/types.ts
+@@ -10,21 +10,24 @@ export type GamePhase =
+   | 'reward'
+   | 'gameover'
+   | 'classSelect'
+   | 'shop';
+ 
+ /** Kinds of questions the player can be asked */
+ export type QuestionType =
+   | 'word-meaning'   // see English → pick Chinese
+   | 'meaning-word'   // see Chinese → pick English
+   | 'fill-blank'     // complete the English word
+-  | 'listening';     // hear word → pick meaning
++  | 'listening'      // hear word → pick meaning
++  | 'spell'          // spell the word
++  | 'pos'            // part of speech / collocation
++  | 'match';         // match pairs
+ 
+ /** Base class identifiers */
+ export type ClassId =
+   | 'warrior'
+   | 'mage'
+   | 'ranger'
+   | 'paladin'
+   | 'rogue'
+   | 'druid';
+ 
+@@ -42,23 +45,36 @@ export type Difficulty = 'beginner' | 'intermediate' | 'challenge' | 'ultimate';
+ 
+ /** Which word bank a level draws from */
+ export type WordLevel = 'primary' | 'middle';
+ 
+ // ---------------------------------------------------------------------------
+ // Domain models
+ // ---------------------------------------------------------------------------
+ 
+ /** A single vocabulary word */
+ export interface Word {
++  id: number;
+   english: string;
+   chinese: string;
+   level: WordLevel;
++  difficulty: 1 | 2 | 3;
++  imagePath: string;
++  correctCount: number;
++  wrongCount: number;
++  lastSeenAt: number;
++  collocations?: string[];
++  posVariants?: {
++    noun?: string;
++    verb?: string;
++    adj?: string;
++    adv?: string;
++  };
+ }
+ 
+ /** A passive ability effect descriptor */
+ export interface PassiveEffect {
+   type: string;   // e.g. 'attackPerk', 'comboStart', 'critAfterWrong', 'damageReduction', 'critBonus', 'regen', 'atkPlusDmgReduce', 'comboX2FreeSkill', 'critX3', 'dmgReduceRegen', 'critKillHeal', 'regenImmune'
+   value: number;  // magnitude (percentage or flat)
+   extra?: string; // optional extra description / sub-value
+ }
+ 
+ /** A skill definition */
+@@ -219,21 +235,67 @@ export interface BattleState {
+   /** Status effects on player */
+   playerEffects: string[];
+   /** Status effects on monster */
+   monsterEffects: string[];
+   /** Damage dealt to monster in last action (for UI floating number) */
+   lastDamageDealt: number;
+   /** Damage taken by player in last monster action (for UI floating number) */
+   lastDamageTaken: number;
+ }
+ 
+-/** A question presented to the player during battle */
+-export interface Question {
++/** Base question fields shared by all question types */
++export interface BaseQuestion {
+   type: QuestionType;
++  timeLimit: number;
++}
++
++/** Translate-type question (word-meaning, meaning-word, listening, fill-blank) */
++export interface TranslateQuestion extends BaseQuestion {
++  type: 'word-meaning' | 'meaning-word' | 'listening' | 'fill-blank';
+   word: Word;
+   options: string[];
+   correctAnswer: string;
+-  /** Time limit in seconds for answering */
+-  timeLimit: number;
+-  /** Path to the word image asset */
+   imagePath: string;
+ }
++
++/** Spelling question */
++export interface SpellQuestion extends BaseQuestion {
++  type: 'spell';
++  word: Word;
++  targetLetters: string[];
++  maxLength: number;
++  chineseHint: string;
++  audioPath?: string;
++}
++
++/** Part-of-speech question (collocation or wordForm) */
++export interface PosQuestion extends BaseQuestion {
++  type: 'pos';
++  subtype: 'collocation' | 'wordForm';
++  word: Word;
++  stem: string;
++  options: string[];
++  correctIndex: number;
++  explanation: string;
++}
++
++/** A single match pair for the match question type */
++export interface MatchPair {
++  id: string;
++  left: { type: 'text'; content: string; wordId: number };
++  right: { type: 'text' | 'image'; content: string; wordId: number };
++  locked: boolean;
++}
++
++/** Match question */
++export interface MatchQuestion extends BaseQuestion {
++  type: 'match';
++  pairs: MatchPair[];
++  reward: { goldBase: number; goldMultiplier: number; shieldBonus: number };
++}
++
++/** A question presented to the player during battle (discriminated union) */
++export type Question =
++  | TranslateQuestion
++  | SpellQuestion
++  | PosQuestion
++  | MatchQuestion;
+diff --git a/src/core/utils/question.test.ts b/src/core/utils/question.test.ts
+index 3b474ac..0a9bc64 100644
+--- a/src/core/utils/question.test.ts
++++ b/src/core/utils/question.test.ts
+@@ -11,21 +11,31 @@ import {
+ 
+ // ---------------------------------------------------------------------------
+ // Helpers
+ // ---------------------------------------------------------------------------
+ 
+ function makeWord(
+   english: string,
+   chinese: string,
+   level: 'primary' | 'middle' = 'primary',
+ ): Word {
+-  return { english, chinese, level };
++  return {
++    id: 0,
++    english,
++    chinese,
++    level,
++    difficulty: 1,
++    imagePath: `/assets/images/word-images/${english}.png`,
++    correctCount: 0,
++    wrongCount: 0,
++    lastSeenAt: 0,
++  };
+ }
+ 
+ const SAMPLE_WORDS: Word[] = [
+   makeWord('apple', '苹果'),
+   makeWord('book', '书'),
+   makeWord('cat', '猫'),
+   makeWord('dog', '狗'),
+   makeWord('egg', '蛋'),
+   makeWord('fish', '鱼'),
+   makeWord('goat', '山羊'),
+diff --git a/src/core/utils/question.ts b/src/core/utils/question.ts
+index 367ec89..729e012 100644
+--- a/src/core/utils/question.ts
++++ b/src/core/utils/question.ts
+@@ -120,12 +120,12 @@ export function generateQuestion(
+   const options = generateOptions(wordPool, word.chinese, wordIndex);
+ 
+   // Build the question
+   return {
+     type,
+     word,
+     options,
+     correctAnswer: word.chinese,
+     timeLimit,
+     imagePath: `/assets/images/word-images/${word.english}.png`,
+-  };
++  } as Question;
+ }
+diff --git a/src/pages/BattlePage.tsx b/src/pages/BattlePage.tsx
+index 00cfd6e..77daa42 100644
+--- a/src/pages/BattlePage.tsx
++++ b/src/pages/BattlePage.tsx
+@@ -52,20 +52,21 @@ const monsterNames = [
+   'archmage_boss','treantElder','lavaGiant','drowElf','wyvern',
+   'lichKing','stormGiant','darkKnight','abyssalLord','archangel',
+   'timeKeeper','dracolich','ancientRed',
+ ];
+ for (const name of monsterNames) {
+   MONSTER_PORTRAITS[name] = `/assets/images/monsters/${name}.png`;
+ }
+ import { QuestionCard } from '@/components/battle/QuestionCard';
+ import { VictoryScreen } from '@/components/battle/VictoryScreen';
+ import { DefeatScreen } from '@/components/battle/DefeatScreen';
++import type { TranslateQuestion } from '@/core/data/types';
+ 
+ export default function BattlePage() {
+   const { chapter: chapterParam, level: levelParam } = useParams<{
+     chapter: string;
+     level: string;
+   }>();
+   const navigate = useNavigate();
+ 
+   const ch = Number(chapterParam) || 1;
+   const lv = Number(levelParam) || 1;
+@@ -386,26 +387,29 @@ export default function BattlePage() {
+               key="result"
+               className="flex flex-col items-center gap-4"
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               exit={{ opacity: 0, y: -20 }}
+             >
+               <span className="text-6xl">✅</span>
+               <p className="text-2xl font-bold text-green-400">正确!</p>
+ 
+               {/* Word card */}
+-              {currentQuestion && (
+-                <div className="w-full max-w-xs rounded-xl border border-green-800/40 bg-black/30 p-4 text-center">
+-                  <p className="text-xl font-bold text-white">{currentQuestion.word.english}</p>
+-                  <p className="mt-1 text-lg text-gray-400">{currentQuestion.word.chinese}</p>
+-                </div>
+-              )}
++              {currentQuestion && (() => {
++                const q = currentQuestion as TranslateQuestion;
++                return (
++                  <div className="w-full max-w-xs rounded-xl border border-green-800/40 bg-black/30 p-4 text-center">
++                    <p className="text-xl font-bold text-white">{q.word.english}</p>
++                    <p className="mt-1 text-lg text-gray-400">{q.word.chinese}</p>
++                  </div>
++                );
++              })()}
+ 
+               {/* Damage info */}
+               <p className="text-lg text-yellow-300">
+                 ⚔️ 造成 <span className="font-bold text-white">{battle.lastDamageDealt}</span> 点伤害
+               </p>
+ 
+               {/* Combo */}
+               <p className={`text-lg ${battle.combo >= 3 ? 'font-bold text-orange-400' : 'text-gray-400'}`}>
+                 🔥 连击 x{battle.combo}
+               </p>
+@@ -419,29 +423,32 @@ export default function BattlePage() {
+             <motion.div
+               key="monster-turn"
+               className="flex flex-col items-center gap-5"
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               exit={{ opacity: 0, y: -20 }}
+             >
+               <span className="text-6xl">❌</span>
+               <p className="text-2xl font-bold text-red-400">答错了!</p>
+ 
+-              {currentQuestion && (
+-                <p className="rounded-xl border border-yellow-700/40 bg-yellow-900/20 px-6 py-3 text-center">
+-                  <span className="text-sm text-gray-400">正确答案：</span>
+-                  <br />
+-                  <span className="text-xl font-bold text-yellow-300">
+-                    {currentQuestion.correctAnswer}
+-                  </span>
+-                </p>
+-              )}
++              {currentQuestion && (() => {
++                const q = currentQuestion as TranslateQuestion;
++                return (
++                  <p className="rounded-xl border border-yellow-700/40 bg-yellow-900/20 px-6 py-3 text-center">
++                    <span className="text-sm text-gray-400">正确答案：</span>
++                    <br />
++                    <span className="text-xl font-bold text-yellow-300">
++                      {q.correctAnswer}
++                    </span>
++                  </p>
++                );
++              })()}
+ 
+               <p className="text-sm text-gray-400">
+                 ⚔️ {monster.name} 对你造成了 <span className="font-bold text-red-400">{monster.attack}</span> 点伤害！
+               </p>
+ 
+               <button
+                 onClick={handleContinue}
+                 className="rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-8 py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+               >
+                 继续 →
+diff --git a/src/stores/battleStore.ts b/src/stores/battleStore.ts
+index 7964da8..1bfc4b2 100644
+--- a/src/stores/battleStore.ts
++++ b/src/stores/battleStore.ts
+@@ -1,15 +1,15 @@
+ // ---------------------------------------------------------------------------
+ // Battle Store — Zustand
+ // ---------------------------------------------------------------------------
+ import { create } from 'zustand';
+-import type { BattleState, MonsterDef, Word, Question } from '@/core/data/types';
++import type { BattleState, MonsterDef, Word, Question, TranslateQuestion } from '@/core/data/types';
+ import { CHAPTERS } from '@/core/data/levels';
+ import { CHAPTER_MONSTERS, MONSTERS } from '@/core/data/monsters';
+ import { createBattle, answerQuestion, monsterTurn } from '@/core/engine/battle';
+ import { generateQuestion, getQuestionTypeForRound } from '@/core/utils/question';
+ import { getTimeLimit } from '@/core/data/levels';
+ import { usePlayerStore } from '@/stores/playerStore';
+ import { useGameStore } from '@/stores/gameStore';
+ 
+ // ---------------------------------------------------------------------------
+ // Types
+@@ -122,21 +122,21 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
+ 
+   // -----------------------------------------------------------------------
+   // submitAnswer
+   // -----------------------------------------------------------------------
+ 
+   submitAnswer: (selected) => {
+     const { battle, monster, currentQuestion } = get();
+     if (!battle || !monster || !currentQuestion) return false;
+ 
+     const player = usePlayerStore.getState().player;
+-    const correct = selected === currentQuestion.correctAnswer;
++    const correct = selected === (currentQuestion as TranslateQuestion).correctAnswer;
+ 
+     // Process the answer through the battle engine
+     const wasLastWrong = get().lastAnswerCorrect === false;
+     const nextBattle = answerQuestion(battle, player, monster, correct, wasLastWrong);
+ 
+     // Award gold for correct answer
+     if (correct) {
+       usePlayerStore.getState().addGold(10);
+     }
+ 
