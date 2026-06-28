@@ -134,7 +134,7 @@ export const QUESTION_TYPE_WEIGHTS: Record<QuestionType, number> = {
 };
 ```
 
-`pickQuestionType` 使用伪随机轮盘算法，Boss 关卡排除 `match` 类型，确保每次战斗至少 1 次 spell（保底机制）。
+`pickQuestionType` 使用伪随机轮盘算法。**Spell 保底：** 每场战斗前 3 题中，如轮盘未抽到 spell，第 3 题强制转为 spell。**Boss 关排除：** Boss 关卡权重中 `match` 的 5% 重新分配给 `word-meaning`（+3%）和 `listening`（+2%）。
 
 ### 3.2 生成器注册表
 
@@ -174,6 +174,7 @@ function generateSpellQuestion(word: Word, timeLimit: number): SpellQuestion {
 - 60% 概率出搭配题：从 `word.collocations` 取正确搭配 + 3 个干扰项
 - 40% 概率出词性题：给句子填空，4 个同根词选 1
 - 干扰项策略：替换动词、同义词误配、语法错误
+- **兜底策略：** 如果 `word.collocations` 为空且 `word.posVariants` 为空（数据未录入），回退到 `word-meaning` 题型
 
 ### 3.5 Match 生成算法
 
