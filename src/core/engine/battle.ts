@@ -102,6 +102,8 @@ export function createBattle(
     monsterEffects: [],
     lastDamageDealt: 0,
     lastDamageTaken: 0,
+    lastCrit: false,
+    log: [],
   };
 }
 
@@ -126,6 +128,7 @@ export function answerQuestion(
   if (correct) {
     const base = getPlayerAttack(player);
     const crit = isCrit(player, wasLastWrong);
+    next.lastCrit = crit;
 
     let damage = 0;
 
@@ -177,6 +180,7 @@ export function answerQuestion(
   } else {
     const base = getPlayerAttack(player);
     const crit = isCrit(player, wasLastWrong);
+    next.lastCrit = crit;
     const damage = calculateDamage(base, next.combo, crit);
     next.lastDamageDealt = damage;
     next.monsterHp = Math.max(0, next.monsterHp - damage);
