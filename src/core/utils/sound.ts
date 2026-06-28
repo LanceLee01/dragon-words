@@ -112,56 +112,42 @@ export class SoundEngine {
   }
 
   /**
-   * Preload all sound files into Howler pools.
-   * Call once at app startup (e.g. in App.tsx useEffect).
+   * Preload all sound files. Now a no-op — sounds are lazy-loaded on play.
+   * Kept for API compatibility.
    */
   preload(): Promise<void> {
-    if (this.loaded) return Promise.resolve();
-
-    const events = Object.keys(this.soundMap) as SoundEvent[];
-    const promises: Promise<void>[] = [];
-
-    for (const event of events) {
-      const { files, volume = 1, rate = 1 } = this.soundMap[event];
-      this.pools[event] = files.map((src) => {
-        const howl = new Howl({
-          src: [src],
-          volume,
-          rate,
-          preload: true,
-        });
-        // Wrap the 'load' event
-        promises.push(new Promise<void>((resolve) => {
-          if (howl.state() === 'loaded') {
-            resolve();
-          } else {
-            howl.once('load', () => resolve());
-            howl.once('loaderror', () => resolve()); // don't block on missing files
-          }
-        }));
-        return howl;
-      });
-    }
-
-    return Promise.all(promises).then(() => { this.loaded = true; });
+    this.loaded = true;
+    return Promise.resolve();
   }
 
   /**
    * Play a sound event.
+   * Lazily creates Howl instances — no preload needed.
    * @param event  The sound event to play.
    * @param opts   Optional: rate override, volume override.
    */
   play(event: SoundEvent, opts?: { rate?: number; volume?: number }): void {
-    const pool = this.pools[event];
-    if (!pool || pool.length === 0) return;
+    const def = this.soundMap[event];
+    if (!def) return;
 
-    // Pick a random variant from the pool
-    const idx = Math.floor(Math.random() * pool.length);
-    const howl = pool[idx];
+    const { files, volume = 1 } = def;
 
-    howl.rate(opts?.rate ?? 1);
-    howl.volume(opts?.volume ?? howl.volume());
+    // Pick a random variant from the file list
+    const idx = Math.floor(Math.random() * files.length);
+    const src = files[idx];
+
+    // Create a temporary Howl, play immediately, auto-unload on end
+    const howl = new Howl({
+      src: [src],
+      volume: opts?.volume ?? volume,
+      rate: opts?.rate ?? 1,
+      preload: true,
+    });
     howl.play();
+
+    // Auto-cleanup after sound finishes
+    howl.once('end', () => howl.unload());
+    howl.once('loaderror', () => howl.unload());
   }
 
   /**
