@@ -1,0 +1,449 @@
+diff --git a/src/core/data/types.ts b/src/core/data/types.ts
+index 04aa30f..f8f326b 100644
+--- a/src/core/data/types.ts
++++ b/src/core/data/types.ts
+@@ -227,4 +227,8 @@ export interface Question {
+   word: Word;
+   options: string[];
+   correctAnswer: string;
++  /** Time limit in seconds for answering */
++  timeLimit: number;
++  /** Path to the word image asset */
++  imagePath: string;
+ }
+diff --git a/src/core/utils/question.test.ts b/src/core/utils/question.test.ts
+new file mode 100644
+index 0000000..3b474ac
+--- /dev/null
++++ b/src/core/utils/question.test.ts
+@@ -0,0 +1,173 @@
++// ---------------------------------------------------------------------------
++// Tests for question engine
++// ---------------------------------------------------------------------------
++import { describe, it, expect } from 'vitest';
++import type { Word, Question } from '@/core/data/types';
++import {
++  getQuestionTypeForRound,
++  generateOptions,
++  generateQuestion,
++} from './question';
++
++// ---------------------------------------------------------------------------
++// Helpers
++// ---------------------------------------------------------------------------
++
++function makeWord(
++  english: string,
++  chinese: string,
++  level: 'primary' | 'middle' = 'primary',
++): Word {
++  return { english, chinese, level };
++}
++
++const SAMPLE_WORDS: Word[] = [
++  makeWord('apple', '苹果'),
++  makeWord('book', '书'),
++  makeWord('cat', '猫'),
++  makeWord('dog', '狗'),
++  makeWord('egg', '蛋'),
++  makeWord('fish', '鱼'),
++  makeWord('goat', '山羊'),
++  makeWord('house', '房子'),
++  makeWord('ice', '冰'),
++  makeWord('juice', '果汁'),
++];
++
++// ---------------------------------------------------------------------------
++// getQuestionTypeForRound
++// ---------------------------------------------------------------------------
++
++describe('getQuestionTypeForRound', () => {
++  it('returns en-to-cn (word-meaning) roughly 60 % of the time over 1000 rounds', () => {
++    let enToCnCount = 0;
++    const trials = 1000;
++    for (let round = 0; round < trials; round++) {
++      const qtype = getQuestionTypeForRound(round);
++      if (qtype === 'word-meaning') enToCnCount++;
++    }
++    // Expect between 500-700 out of 1000
++    expect(enToCnCount).toBeGreaterThanOrEqual(500);
++    expect(enToCnCount).toBeLessThanOrEqual(700);
++  });
++
++  it('returns listen-to-cn (listening) roughly 40 % of the time', () => {
++    let listenCount = 0;
++    const trials = 1000;
++    for (let round = 0; round < trials; round++) {
++      const qtype = getQuestionTypeForRound(round);
++      if (qtype === 'listening') listenCount++;
++    }
++    // Expect between 300-500 out of 1000
++    expect(listenCount).toBeGreaterThanOrEqual(300);
++    expect(listenCount).toBeLessThanOrEqual(500);
++  });
++});
++
++// ---------------------------------------------------------------------------
++// generateOptions
++// ---------------------------------------------------------------------------
++
++describe('generateOptions', () => {
++  it('returns exactly 4 options', () => {
++    const options = generateOptions(SAMPLE_WORDS, '苹果', 0);
++    expect(options).toHaveLength(4);
++  });
++
++  it('includes the correct answer', () => {
++    const options = generateOptions(SAMPLE_WORDS, '苹果', 0);
++    expect(options).toContain('苹果');
++  });
++
++  it('does not contain duplicate values', () => {
++    // Run many times to be confident
++    for (let i = 0; i < 20; i++) {
++      const options = generateOptions(SAMPLE_WORDS, '苹果', 0);
++      const unique = new Set(options);
++      expect(unique.size).toBe(4);
++    }
++  });
++
++  it('pads with ??? when fewer than 3 distractors are available', () => {
++    // Only 1 word in pool, so we can get at most 0 distractors
++    const tiny: Word[] = [makeWord('only', '唯一')];
++    const options = generateOptions(tiny, '唯一', 0);
++    expect(options).toHaveLength(4);
++    expect(options.filter(o => o === '???').length).toBe(3);
++  });
++
++  it('excludes the correct word from distractors and avoids duplicate chinese', () => {
++    // Words with duplicate chinese "苹果"
++    const words: Word[] = [
++      makeWord('apple', '苹果'),
++      makeWord('app1e', '苹果'),  // duplicate chinese
++      makeWord('book', '书'),
++      makeWord('cat', '猫'),
++      makeWord('dog', '狗'),
++    ];
++    const options = generateOptions(words, '苹果', 0);
++    // Should have exactly 1 '苹果' (the correct answer)
++    expect(options.filter(o => o === '苹果').length).toBe(1);
++    expect(options).toHaveLength(4);
++  });
++});
++
++// ---------------------------------------------------------------------------
++// generateQuestion
++// ---------------------------------------------------------------------------
++
++describe('generateQuestion', () => {
++  it('returns a valid Question with 4 options and timeLimit ≥ 8', () => {
++    const question = generateQuestion(
++      SAMPLE_WORDS,
++      new Set<number>(),
++      15,
++      1,
++    );
++    expect(question).not.toBeNull();
++    expect(question!.type).toMatch(/^(word-meaning|listening)$/);
++    expect(question!.options).toHaveLength(4);
++    expect(question!.correctAnswer).toBe(question!.word.chinese);
++    expect(question!.timeLimit).toBeGreaterThanOrEqual(8);
++    expect(question!.imagePath).toMatch(/^\/assets\/images\/word-images\/.+\.png$/);
++  });
++
++  it('returns null when the word pool is exhausted', () => {
++    // Mark all 10 words as used
++    const used = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
++    const question = generateQuestion(SAMPLE_WORDS, used, 10, 1);
++    expect(question).toBeNull();
++  });
++
++  it('picks from mistakeWords roughly 30 % of the time when available', () => {
++    const mistakeWords: Word[] = [makeWord('mistake', '错误')];
++    let mistakePicks = 0;
++    const trials = 1000;
++    for (let i = 0; i < trials; i++) {
++      const question = generateQuestion(
++        SAMPLE_WORDS,
++        new Set<number>(),
++        10,
++        1,
++        mistakeWords,
++      );
++      if (question && question.word.chinese === '错误') {
++        mistakePicks++;
++      }
++    }
++    // ~30% of 1000 = 300, allow 100-500 range
++    expect(mistakePicks).toBeGreaterThan(50);
++    expect(mistakePicks).toBeLessThan(500);
++  });
++
++  it('returns an imagePath matching the word', () => {
++    const question = generateQuestion(
++      [makeWord('hello', '你好')],
++      new Set<number>(),
++      10,
++      1,
++    );
++    expect(question).not.toBeNull();
++    expect(question!.imagePath).toBe('/assets/images/word-images/hello.png');
++  });
++});
+diff --git a/src/core/utils/question.ts b/src/core/utils/question.ts
+new file mode 100644
+index 0000000..367ec89
+--- /dev/null
++++ b/src/core/utils/question.ts
+@@ -0,0 +1,131 @@
++// ---------------------------------------------------------------------------
++// Question Engine — pure TypeScript, no React
++// ---------------------------------------------------------------------------
++import type { Word, Question, QuestionType } from '@/core/data/types';
++
++// ---------------------------------------------------------------------------
++// Helpers
++// ---------------------------------------------------------------------------
++
++/**
++ * Fisher-Yates shuffle (in-place, returns same array).
++ */
++function shuffle<T>(arr: T[]): T[] {
++  for (let i = arr.length - 1; i > 0; i--) {
++    const j = Math.floor(Math.random() * (i + 1));
++    [arr[i], arr[j]] = [arr[j], arr[i]];
++  }
++  return arr;
++}
++
++/**
++ * Pick a random element from an array.
++ */
++function pickRandom<T>(arr: T[]): T {
++  return arr[Math.floor(Math.random() * arr.length)];
++}
++
++// ---------------------------------------------------------------------------
++// Public API
++// ---------------------------------------------------------------------------
++
++/**
++ * Determine the question type for a given round number.
++ * Returns 'word-meaning' ~60% of the time, 'listening' ~40%.
++ * Uses a seeded approach: (round * 2654435761) % 100 < 60
++ */
++export function getQuestionTypeForRound(round: number): QuestionType {
++  return (round * 2654435761) % 100 < 60 ? 'word-meaning' : 'listening';
++}
++
++/**
++ * Generate 4 answer options (1 correct + 3 distractors) and shuffle them.
++ *
++ * @param allWords       Full word pool to draw distractors from.
++ * @param correctChinese The correct Chinese translation.
++ * @param excludeWordId  Index of the correct word in allWords (excluded from distractors).
++ * @returns A shuffled array of 4 strings.
++ */
++export function generateOptions(
++  allWords: Word[],
++  correctChinese: string,
++  excludeWordId: number,
++): string[] {
++  // Build distractor pool: exclude the correct word + any word with
++  // the same Chinese translation (duplicates).
++  const distractors = allWords.filter(
++    (w, i) => i !== excludeWordId && w.chinese !== correctChinese,
++  );
++
++  // Randomly select up to 3
++  shuffle(distractors);
++  const selected = distractors.slice(0, 3).map(w => w.chinese);
++
++  // Pad with '???' if fewer than 3 distractors
++  while (selected.length < 3) {
++    selected.push('???');
++  }
++
++  // Combine correct answer + 3 distractors, shuffle, return
++  return shuffle([correctChinese, ...selected]);
++}
++
++/**
++ * Generate a question for the current battle round.
++ *
++ * @param wordPool      The pool of available words for this chapter.
++ * @param usedWordIds   Set of word indices already used (from wordPool).
++ * @param timeLimit     Time limit in seconds for answering.
++ * @param chapter       Current chapter number (reserved for future use).
++ * @param mistakeWords  Words previously answered incorrectly (optional).
++ * @returns A Question object, or null if the word pool is exhausted.
++ */
++export function generateQuestion(
++  wordPool: Word[],
++  usedWordIds: Set<number>,
++  timeLimit: number,
++  chapter: number,
++  mistakeWords?: Word[],
++): Question | null {
++  // Determine which word to use
++  let word: Word;
++  let wordIndex: number;
++
++  const useMistake =
++    mistakeWords !== undefined &&
++    mistakeWords.length > 0 &&
++    Math.random() < 0.3;
++
++  if (useMistake) {
++    // Pick a random word from mistakeWords
++    word = pickRandom(mistakeWords);
++    wordIndex = -1; // not applicable
++  } else {
++    // Find an unused word from wordPool
++    const available = wordPool
++      .map((w, i) => ({ word: w, index: i }))
++      .filter(({ index }) => !usedWordIds.has(index));
++
++    if (available.length === 0) return null;
++
++    const picked = pickRandom(available);
++    word = picked.word;
++    wordIndex = picked.index;
++  }
++
++  // Determine the question type
++  const type = getQuestionTypeForRound(usedWordIds.size);
++
++  // Generate options
++  const options = generateOptions(wordPool, word.chinese, wordIndex);
++
++  // Build the question
++  return {
++    type,
++    word,
++    options,
++    correctAnswer: word.chinese,
++    timeLimit,
++    imagePath: `/assets/images/word-images/${word.english}.png`,
++  };
++}
+diff --git a/src/core/utils/speech.ts b/src/core/utils/speech.ts
+new file mode 100644
+index 0000000..ffc047e
+--- /dev/null
++++ b/src/core/utils/speech.ts
+@@ -0,0 +1,79 @@
++// ---------------------------------------------------------------------------
++// Speech Engine — browser-only TTS wrapper
++// ---------------------------------------------------------------------------
++
++/**
++ * Thin wrapper around the Web Speech API (SpeechSynthesis).
++ *
++ * Safe to import in Node/SSR contexts — the constructor checks for the
++ * presence of `window.speechSynthesis` and sets `available` accordingly.
++ */
++export class SpeechEngine {
++  private synth: SpeechSynthesis | null = null;
++  private rate: number = 0.8;
++  private available: boolean = false;
++
++  constructor() {
++    this.available =
++      typeof window !== 'undefined' &&
++      typeof window.speechSynthesis !== 'undefined' &&
++      window.speechSynthesis !== null;
++
++    if (this.available) {
++      this.synth = window.speechSynthesis;
++    }
++  }
++
++  /** Whether speech synthesis is supported in the current environment. */
++  isAvailable(): boolean {
++    return this.available;
++  }
++
++  /**
++   * Set the speaking rate (clamped to 0.5–1.5).
++   */
++  setRate(rate: number): void {
++    this.rate = Math.min(1.5, Math.max(0.5, rate));
++  }
++
++  /**
++   * Speak a word or phrase aloud.
++   * Returns a promise that resolves when speech completes or rejects on error.
++   */
++  speak(word: string): Promise<void> {
++    return new Promise((resolve, reject) => {
++      if (!this.available || !this.synth) {
++        reject(new Error('Speech synthesis not available'));
++        return;
++      }
++
++      // Cancel any ongoing speech
++      this.synth.cancel();
++
++      const utterance = new SpeechSynthesisUtterance(word);
++      utterance.rate = this.rate;
++
++      utterance.onend = () => resolve();
++      utterance.onerror = (event) => {
++        // "interrupted" happens when cancel() is called — treat as success
++        if (event.error === 'interrupted') {
++          resolve();
++        } else {
++          reject(new Error(`Speech error: ${event.error}`));
++        }
++      };
++
++      this.synth.speak(utterance);
++    });
++  }
++
++  /** Cancel any ongoing speech immediately. */
++  cancel(): void {
++    if (this.available && this.synth) {
++      this.synth.cancel();
++    }
++  }
++}
++
++/** Singleton instance */
++export const speechEngine = new SpeechEngine();
+diff --git a/src/hooks/useSpeech.ts b/src/hooks/useSpeech.ts
+new file mode 100644
+index 0000000..59b4174
+--- /dev/null
++++ b/src/hooks/useSpeech.ts
+@@ -0,0 +1,29 @@
++// ---------------------------------------------------------------------------
++// React hook wrapping the SpeechEngine singleton
++// ---------------------------------------------------------------------------
++import { useCallback, useRef } from 'react';
++import { speechEngine } from '@/core/utils/speech';
++
++/**
++ * React hook providing a `speak` function and `isAvailable` flag.
++ *
++ * Uses a ref to prevent overlapping speech calls — if a word is already
++ * being spoken, subsequent calls are silently ignored.
++ */
++export function useSpeech() {
++  const speakingRef = useRef(false);
++
++  const speak = useCallback(async (word: string) => {
++    if (speakingRef.current) return;
++    speakingRef.current = true;
++    try {
++      await speechEngine.speak(word);
++    } catch {
++      /* silently fail */
++    } finally {
++      speakingRef.current = false;
++    }
++  }, []);
++
++  return { speak, isAvailable: speechEngine.isAvailable() };
++}
