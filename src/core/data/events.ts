@@ -25,6 +25,10 @@ export interface EventChoice {
   failPenalty?: EventReward[];
   nextEventId?: string;
   setFlag?: string;
+  /** If set, triggers a special action instead of just resolving rewards */
+  action?: 'battle';
+  /** Parameters for the action (e.g. battle chapter/level) */
+  actionPayload?: { chapter: number; level: number };
 }
 
 export interface RandomEvent {
@@ -263,14 +267,14 @@ export const EVENT_POOL: RandomEvent[] = [
         id: 'fight',
         text: '迎戰巨狼',
         icon: '⚔️',
-        outcome: 'random',
-        successRate: 0.55,
+        outcome: 'success',
+        action: 'battle',
+        actionPayload: { chapter: 1, level: 6 },
         successRewards: [
           { type: 'xp', amount: 120 },
           { type: 'gold', amount: 60 },
           { type: 'item', id: 'wolf_fang', amount: 1 },
         ],
-        failPenalty: [{ type: 'hp', amount: 40 }],
       },
       {
         id: 'sneak',

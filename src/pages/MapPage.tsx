@@ -90,10 +90,19 @@ export default function MapPage() {
       eventHistory,
       onSaveHistory: (history) => { if (history.length > 0) { const last = history[history.length - 1]; addEventToHistory({ id: last.id, choice: last.choice }); } },
     });
+    // Check for battle action
+    const choice = chapterEvent.choices.find(c => c.id === choiceId);
+    if (choice?.action === 'battle' && choice.actionPayload) {
+      await engine.executeChoice(chapterEvent, choiceId);
+      setShowChapterEvent(false);
+      setChapterEvent(null);
+      navigate(`/battle/${choice.actionPayload.chapter}/${choice.actionPayload.level}`);
+      return;
+    }
     await engine.executeChoice(chapterEvent, choiceId);
     setShowChapterEvent(false);
     setChapterEvent(null);
-  }, [chapterEvent, player, globalFlags, eventHistory, addEventToHistory]);
+  }, [chapterEvent, player, globalFlags, eventHistory, addEventToHistory, navigate]);
 
   useEffect(() => {
     setProgress(loadProgress());

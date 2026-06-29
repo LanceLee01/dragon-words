@@ -475,6 +475,7 @@ export default function BattlePage() {
                 xp={100}
                 isBoss={battle?.isBoss ?? false}
                 onContinue={handleVictoryContinue}
+                onStartBattle={(ch, lv) => navigate(`/battle/${ch}/${lv}`)}
               />
             </motion.div>
           )}

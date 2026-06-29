@@ -16,6 +16,7 @@ interface VictoryScreenProps {
   xp: number;
   isBoss: boolean;
   onContinue: () => void;
+  onStartBattle?: (chapter: number, level: number) => void;
 }
 
 export function VictoryScreen({ gold, xp, isBoss, onContinue }: VictoryScreenProps) {
@@ -82,11 +83,21 @@ export function VictoryScreen({ gold, xp, isBoss, onContinue }: VictoryScreenPro
   const handleChoice = useCallback(
     async (choiceId: string) => {
       if (!engineRef.current || !pendingEvent) return;
+      // Check if the chosen action triggers a battle
+      const choice = pendingEvent.choices.find(c => c.id === choiceId);
+      if (choice?.action === 'battle' && choice.actionPayload) {
+        // Execute side effects (rewards, flags) but close event and start battle
+        await engineRef.current.executeChoice(pendingEvent, choiceId);
+        setShowEvent(false);
+        setPendingEvent(null);
+        onStartBattle?.(choice.actionPayload.chapter, choice.actionPayload.level);
+        return;
+      }
       await engineRef.current.executeChoice(pendingEvent, choiceId);
       setShowEvent(false);
       setPendingEvent(null);
     },
-    [pendingEvent],
+    [pendingEvent, onStartBattle],
   );
 
   return (
