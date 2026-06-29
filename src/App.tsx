@@ -27,6 +27,21 @@ export default function App() {
     initWords();
   }, [initPlayer, initWords]);
 
+  return (
+    <BrowserRouter>
+      {!loaded ? (
+        <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">
+          <p className="text-xl">Loading…</p>
+        </div>
+      ) : (
+        <AppContent />
+      )}
+    </BrowserRouter>
+  );
+}
+
+/** Inner component that sits inside BrowserRouter context (so useNavigate works) */
+function AppContent() {
   const eventHistory = useGameStore((s) => s.eventHistory);
   const addEventToHistory = useGameStore((s) => s.addEventToHistory);
   const globalFlags = useGameStore((s) => s.globalFlags);
@@ -40,9 +55,11 @@ export default function App() {
   const [showLoginEvent, setShowLoginEvent] = useState(false);
   const loginCheckedRef = useRef(false);
 
+  const navigate = useNavigate();
+
   // Daily login event trigger (runs once after player loads)
   useEffect(() => {
-    if (!loaded || loginCheckedRef.current) return;
+    if (loginCheckedRef.current) return;
     loginCheckedRef.current = true;
 
     const loginResult = checkDailyLogin();
@@ -91,9 +108,7 @@ export default function App() {
       setLoginEvent(triggered);
       setShowLoginEvent(true);
     }
-  }, [loaded]);
-
-  const navigate = useNavigate();
+  }, []);
 
   const handleLoginChoice = useCallback(async (choiceId: string) => {
     if (!loginEvent) return;
@@ -118,14 +133,6 @@ export default function App() {
     }
   }, [loginEvent, player, globalFlags, eventHistory, addGold, addXp, addEventToHistory, takeDamage, navigate]);
 
-  if (!loaded) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">
-        <p className="text-xl">Loading…</p>
-      </div>
-    );
-  }
-
   return (
     <>
       {showLoginEvent && loginEvent && (
@@ -136,7 +143,6 @@ export default function App() {
           onClose={() => setShowLoginEvent(false)}
         />
       )}
-      <BrowserRouter>
       <div className="min-h-screen bg-gray-900 text-white game-active">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -147,7 +153,6 @@ export default function App() {
           <Route path="/gallery" element={<GalleryPage />} />
         </Routes>
       </div>
-    </BrowserRouter>
     </>
   );
 }
