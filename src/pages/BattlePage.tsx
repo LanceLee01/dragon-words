@@ -66,7 +66,7 @@ import { EQUIPMENT } from '@/core/data/equipment';
 import { BASE_CLASSES, ADVANCED_CLASSES } from '@/core/data/classes';
 import { getPlayerAttack, getPlayerDefense } from '@/core/engine/battle';
 import { StoryPlayer } from '@/components/adventure/StoryPlayer';
-import { getStoryBeatForTrigger, STORY_BEATS } from '@/core/data/story';
+import { getStoryBeatForTrigger } from '@/core/data/story';
 import type { StoryBeat } from '@/core/data/story';
 
 export default function BattlePage() {
@@ -223,6 +223,25 @@ export default function BattlePage() {
     finishMonsterTurn();
   }, [finishMonsterTurn]);
 
+  // Pre-compute story beat when battle is won (before user clicks continue)
+  const wonRef = useRef(false);
+  useEffect(() => {
+    if (!battle) return;
+    if (battle.status === 'won' && !wonRef.current) {
+      wonRef.current = true;
+      let beat: StoryBeat | undefined;
+      if (lv >= 1 && lv <= 4) {
+        beat = getStoryBeatForTrigger(`level_${lv}_clear`, ch);
+      } else if (lv === 5) {
+        beat = getStoryBeatForTrigger('first_clear', ch)
+          ?? getStoryBeatForTrigger('boss_post', ch);
+      }
+      if (beat) {
+        setPendingStoryBeat(beat);
+      }
+    }
+  }, [battle?.status, ch, lv]);
+
   const handleVictoryContinue = useCallback(() => {
     // Award rewards
     const goldReward = 50 + lv * 10;
@@ -238,25 +257,13 @@ export default function BattlePage() {
     // Send event
     sendEvent('BATTLE_WIN');
 
-    // Check for a story beat to play after this level
-    let storyBeat: StoryBeat | undefined;
-    if (lv >= 1 && lv <= 4) {
-      // Use new level_clear triggers for normal levels
-      storyBeat = getStoryBeatForTrigger(`level_${lv}_clear`, ch);
-    } else if (lv === 5) {
-      // Boss: check first_clear then boss_post
-      storyBeat = getStoryBeatForTrigger('first_clear', ch)
-        ?? getStoryBeatForTrigger('boss_post', ch);
-    }
-
-    if (storyBeat) {
-      setPendingStoryBeat(storyBeat);
+    // Check for pending story beat (pre-computed by effect)
+    if (pendingStoryBeat) {
       setShowStory(true);
-      // Navigation deferred to handleStoryComplete
     } else {
       navigate('/map');
     }
-  }, [ch, lv, addGold, addXp, completeLevel, healToFull, sendEvent, navigate]);
+  }, [ch, lv, addGold, addXp, completeLevel, healToFull, sendEvent, navigate, pendingStoryBeat]);
 
   /** Called after story beat finishes playing */
   const handleStoryComplete = useCallback(() => {
