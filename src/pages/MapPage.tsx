@@ -15,6 +15,9 @@ import { EventEngine } from '@/core/engine/eventEngine';
 import { EVENT_POOL } from '@/core/data/events';
 import type { RandomEvent } from '@/core/data/events';
 import { EventModal } from '@/components/adventure/EventModal';
+import { StoryPlayer } from '@/components/adventure/StoryPlayer';
+import { getStoryBeatForTrigger } from '@/core/data/story';
+import type { StoryBeat } from '@/core/data/story';
 
 export default function MapPage() {
   const navigate = useNavigate();
@@ -32,6 +35,37 @@ export default function MapPage() {
   const [chapterEvent, setChapterEvent] = useState<RandomEvent | null>(null);
   const [showChapterEvent, setShowChapterEvent] = useState(false);
   const eventCheckedRef = useRef(new Set<number>());
+
+  const setFlag = useGameStore((s) => s.setFlag);
+  const hasFlag = useGameStore((s) => s.hasFlag);
+  const [pendingStoryBeat, setPendingStoryBeat] = useState<StoryBeat | null>(null);
+  const [showStory, setShowStory] = useState(false);
+
+  // Check for unplayed chapter_start stories on mount / chapter unlock
+  useEffect(() => {
+    // Find the highest possible chapter (either all visible or first unlocked)
+    const maxCh = player.currentChapter || 1;
+    for (let ch = 1; ch <= maxCh; ch++) {
+      const flag = `story_ch${ch}_seen`;
+      if (!hasFlag(flag)) {
+        const beat = getStoryBeatForTrigger('chapter_start', ch);
+        if (beat) {
+          setPendingStoryBeat(beat);
+          setShowStory(true);
+          break; // play one at a time
+        }
+      }
+    }
+  }, []); // only on mount
+
+  /** Called after story beat finishes playing */
+  const handleStoryComplete = useCallback(() => {
+    if (pendingStoryBeat) {
+      setFlag(`story_ch${pendingStoryBeat.chapter}_seen`);
+    }
+    setShowStory(false);
+    setPendingStoryBeat(null);
+  }, [pendingStoryBeat, setFlag]);
 
   // Check for newly completed chapters → trigger chapter_first_clear event
   useEffect(() => {
@@ -151,6 +185,22 @@ export default function MapPage() {
           open={showChapterEvent}
           onChoice={handleChapterChoice}
           onClose={() => setShowChapterEvent(false)}
+        />
+      )}
+      {pendingStoryBeat && (
+        <StoryPlayer
+          beat={pendingStoryBeat}
+          open={showStory}
+          onComplete={handleStoryComplete}
+          onChoice={(flag) => {
+            if (flag) {
+              useGameStore.getState().setFlag(flag);
+            }
+          }}
+          onClose={() => {
+            setShowStory(false);
+            setPendingStoryBeat(null);
+          }}
         />
       )}
       <div
