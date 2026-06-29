@@ -61,20 +61,30 @@ export interface PlayerStore {
 
   // === P1: Equipment Affixes ===
   equipmentWithAffixes: {
-    weapon: (Equipment & { affixes: Array<{ id: string; stat: string; value: number }> }) | null;
-    armor: (Equipment & { affixes: Array<{ id: string; stat: string; value: number }> }) | null;
-    accessory: (Equipment & { affixes: Array<{ id: string; stat: string; value: number }> }) | null;
+    weapon: AffixEquipmentItem | null;
+    armor: AffixEquipmentItem | null;
+    accessory: AffixEquipmentItem | null;
   };
   lockedAffixIds: string[];
 
+  /** Inventory of purchased affix equipment (not currently equipped) */
+  affixEquipmentInventory: AffixEquipmentItem[];
+
   equipWithAffixes: (
     slot: 'weapon' | 'armor' | 'accessory',
-    item: Equipment & { affixes: Array<{ id: string; stat: string; value: number }> },
+    item: AffixEquipmentItem,
   ) => void;
+  /** Buy an affix equipment item (subtract gold, add to inventory) */
+  buyAffixEquipment: (item: AffixEquipmentItem) => void;
   lockAffix: (affixId: string) => void;
   unlockAffix: (affixId: string) => void;
   isAffixLocked: (affixId: string) => boolean;
 }
+
+/** An equipment item plus its affixes */
+export type AffixEquipmentItem = Equipment & {
+  affixes: Array<{ id: string; stat: string; value: number }>;
+};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -269,10 +279,29 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   // === P1: Equipment Affixes ===
   equipmentWithAffixes: { weapon: null, armor: null, accessory: null },
   lockedAffixIds: [],
+  affixEquipmentInventory: [],
 
   equipWithAffixes: (slot, item) => set((s) => ({
     equipmentWithAffixes: { ...s.equipmentWithAffixes, [slot]: item },
   })),
+
+  buyAffixEquipment: (item) => set((s) => {
+    // Check if already owned
+    const alreadyOwned = s.affixEquipmentInventory.some((e) => e.id === item.id) ||
+      Object.values(s.equipmentWithAffixes).some((e) => e?.id === item.id);
+    if (alreadyOwned || s.player.gold < item.cost) return s;
+
+    const nextPlayer: PlayerState = {
+      ...s.player,
+      gold: s.player.gold - item.cost,
+    };
+    savePlayer(nextPlayer);
+
+    return {
+      player: nextPlayer,
+      affixEquipmentInventory: [...s.affixEquipmentInventory, item],
+    };
+  }),
 
   lockAffix: (affixId) => set((s) => ({
     lockedAffixIds: s.lockedAffixIds.includes(affixId)
