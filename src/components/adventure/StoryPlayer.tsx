@@ -187,16 +187,16 @@ function SinglePageContent({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex flex-col items-center gap-6 overflow-y-auto max-h-[80vh]"
+      className="flex flex-col items-center gap-8 overflow-y-auto max-h-[80vh]"
     >
       {/* Enlarged images */}
       {beat.panels.filter(p => p.type === 'image').map((panel, i) => (
-        <div key={i} className="flex w-full max-w-3xl items-center justify-center overflow-hidden rounded-xl bg-gray-800">
+        <div key={i} className="flex w-full max-w-3xl shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-800" style={{ minHeight: '30vh' }}>>
           {panel.imagePath ? (
             <img
               src={`/assets/images/${panel.imagePath}.png`}
               alt={panel.text ?? ''}
-              className="max-h-[70vh] w-full object-contain"
+              className="max-h-[50vh] w-full object-contain"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
                 (e.target as HTMLImageElement).parentElement!.classList.add('flex', 'items-center', 'justify-center');
