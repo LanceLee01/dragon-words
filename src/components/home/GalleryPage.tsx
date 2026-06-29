@@ -299,6 +299,7 @@ export default function GalleryPage() {
           onComplete={handleStoryComplete}
           onChoice={handleStoryChoice}
           onClose={() => setSelectedBeat(null)}
+          singlePage={true}
         />
       )}
     </div>

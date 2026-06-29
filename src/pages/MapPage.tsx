@@ -201,6 +201,7 @@ export default function MapPage() {
             setShowStory(false);
             setPendingStoryBeat(null);
           }}
+          singlePage={true}
         />
       )}
       <div
