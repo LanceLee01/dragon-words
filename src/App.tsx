@@ -10,16 +10,12 @@ import { EVENT_POOL } from '@/core/data/events';
 import { EventModal } from '@/components/adventure/EventModal';
 import type { RandomEvent } from '@/core/data/events';
 
-// @ts-ignore — page modules created in later tasks
 import HomePage from '@/pages/HomePage';
-// @ts-ignore — page modules created in later tasks
 import SelectClassPage from '@/pages/SelectClassPage';
-// @ts-ignore — page modules created in later tasks
 import MapPage from '@/pages/MapPage';
-// @ts-ignore — page modules created in later tasks
 import BattlePage from '@/pages/BattlePage';
-// @ts-ignore — page modules created in later tasks
 import ShopPage from '@/pages/ShopPage';
+import GalleryPage from '@/components/home/GalleryPage';
 
 export default function App() {
   const initPlayer = usePlayerStore((s) => s.init);
@@ -138,6 +134,7 @@ export default function App() {
           <Route path="/map" element={<MapPage />} />
           <Route path="/battle/:chapter/:level" element={<BattlePage />} />
           <Route path="/shop" element={<ShopPage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
         </Routes>
       </div>
     </BrowserRouter>
