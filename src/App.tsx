@@ -56,8 +56,9 @@ function AppContent() {
   const loginCheckedRef = useRef(false);
 
   const navigate = useNavigate();
+  const [deferredLoginEvent, setDeferredLoginEvent] = useState<RandomEvent | null>(null);
 
-  // Daily login event trigger (runs once after player loads)
+  // Daily login event trigger (runs once) — deferred 500ms to let story modal take priority
   useEffect(() => {
     if (loginCheckedRef.current) return;
     loginCheckedRef.current = true;
@@ -65,7 +66,6 @@ function AppContent() {
     const loginResult = checkDailyLogin();
     if (loginResult === 'already_checked') return;
 
-    // Determine trigger point based on streak
     const loginStreak = useGameStore.getState().loginStreak;
     let triggerPoint = 'daily_login' as const;
     if (loginStreak >= 3) {
@@ -105,10 +105,19 @@ function AppContent() {
 
     const triggered = engine.checkTrigger(triggerPoint);
     if (triggered) {
-      setLoginEvent(triggered);
-      setShowLoginEvent(true);
+      setDeferredLoginEvent(triggered);
     }
   }, []);
+
+  // Show deferred login event after a short delay (so story modal can take priority)
+  useEffect(() => {
+    if (!deferredLoginEvent) return;
+    const timer = setTimeout(() => {
+      setLoginEvent(deferredLoginEvent);
+      setShowLoginEvent(true);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [deferredLoginEvent]);
 
   const handleLoginChoice = useCallback(async (choiceId: string) => {
     if (!loginEvent) return;
