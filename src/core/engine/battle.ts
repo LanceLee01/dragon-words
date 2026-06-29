@@ -1,9 +1,11 @@
 // ---------------------------------------------------------------------------
 // Core Battle Engine — pure TypeScript, no React
 // ---------------------------------------------------------------------------
-import type { PlayerState, MonsterDef, BattleState, SkillDef } from '@/core/data/types';
+import type { PlayerState, MonsterDef, BattleState, SkillDef, BattleStats, Equipment } from '@/core/data/types';
 import { BASE_CLASSES, ADVANCED_CLASSES } from '@/core/data/classes';
 import { EQUIPMENT } from '@/core/data/equipment';
+import { applyAffixes } from './equipment';
+import type { AffixInstance } from '../data/affixes';
 
 
 // ---------------------------------------------------------------------------
@@ -29,9 +31,10 @@ export function calculateDamage(
   baseAttack: number,
   combo: number,
   isCrit: boolean,
+  critDmgMultiplier: number = 2,  // default 2x, affixes can increase this
 ): number {
   let damage = baseAttack * getComboMultiplier(combo);
-  if (isCrit) damage *= 2;
+  if (isCrit) damage *= critDmgMultiplier;
   return Math.round(damage);
 }
 
@@ -40,7 +43,10 @@ export function calculateDamage(
  * Base class baseAttack + player.attack + advanced class baseAttackBonus
  * + all equipped items' attack bonuses.
  */
-export function getPlayerAttack(player: PlayerState): number {
+export function getPlayerAttack(
+  player: PlayerState,
+  battleStats?: BattleStats,
+): number {
   const base = BASE_CLASSES[player.classId]?.baseAttack ?? 0;
   const bonus = player.advancedClassId
     ? (ADVANCED_CLASSES[player.advancedClassId]?.baseAttackBonus ?? 0)
@@ -54,7 +60,39 @@ export function getPlayerAttack(player: PlayerState): number {
     const item = EQUIPMENT.find((e) => e.id === id);
     return sum + (item?.attack ?? 0);
   }, 0);
-  return base + player.attack + bonus + eqAtk;
+  let affixAtk = 0;
+  if (battleStats) {
+    // elementalDmg adds to base attack
+    affixAtk += battleStats.elementalDmg;
+  }
+  return base + player.attack + bonus + eqAtk + affixAtk;
+}
+
+/**
+ * Collect all affixes from equipped items and compute total BattleStats.
+ * Returns a BattleStats object with all fields defaulting to 0/false.
+ */
+export function getPlayerBattleStats(
+  equippedWithAffixes: Record<string, (Equipment & { affixes: AffixInstance[] }) | null>
+): BattleStats {
+  const base: BattleStats = {
+    critRate: 0, critDmg: 0, elementalDmg: 0, armorPen: 0,
+    dotDmg: 0, shieldBreak: 0, maxHp: 0, hpRegen: 0,
+    dmgReduction: 0, shieldMax: 0, statusResist: 0, thorns: 0,
+    goldBonus: 0, xpBonus: 0, comboDecayReduction: 0,
+    skillChargeSpeed: 0, timeBonus: 0, autoRemoveDistractor: 0,
+    doubleCast: false, omniResist: 0, infiniteCombo: false,
+    cheatDeath: false, killHeal: 0, skillDoubleCast: false,
+  };
+
+  let result = { ...base };
+  for (const slot of ['weapon', 'armor', 'accessory'] as const) {
+    const item = equippedWithAffixes[slot];
+    if (item?.affixes) {
+      result = applyAffixes(result, item.affixes);
+    }
+  }
+  return result;
 }
 
 /**
@@ -82,6 +120,14 @@ export function isCrit(player: PlayerState, wasLastWrong: boolean): boolean {
   if (player.classId === 'rogue') return Math.random() < 0.15;
   if (player.classId === 'ranger' && wasLastWrong) return Math.random() < 0.3;
   return false;
+}
+
+/**
+ * Check if a crit occurs based on affix crit rate.
+ */
+export function rollAffixCrit(critRate: number): boolean {
+  if (critRate <= 0) return false;
+  return Math.random() < critRate;
 }
 
 /**
