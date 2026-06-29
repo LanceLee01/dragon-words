@@ -98,7 +98,7 @@ export default function ShopPage() {
     [],
   );
 
-  const ownedIds = new Set(player.equipment.map((e) => e.id));
+  const ownedIds = new Set((player.equipment || []).map((e: any) => e.id));
 
   // Filter by slot and class (accessories are shared)
   const filteredItems = EQUIPMENT.filter(
