@@ -702,6 +702,7 @@ export default function BattlePage() {
         <StoryPlayer
           beat={pendingStoryBeat}
           open={showStory}
+          singlePage={true}
           onComplete={handleStoryComplete}
           onChoice={(flag) => {
             if (flag) {

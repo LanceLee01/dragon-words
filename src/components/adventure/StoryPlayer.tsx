@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
 // StoryPlayer — panel-by-panel story playback component
 // ---------------------------------------------------------------------------
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Modal } from '@/components/ui/Modal';
 import { TypewriterText } from '@/components/ui/TypewriterText';
@@ -14,6 +14,7 @@ interface StoryPlayerProps {
   onComplete: (rewards: StoryBeat['rewards']) => void;
   onChoice?: (flag: string) => void;
   onClose: () => void;
+  singlePage?: boolean;
 }
 
 // ── Character emotion → emoji mapping ──────────────────────────────────
@@ -161,8 +162,99 @@ function PanelContent({
   );
 }
 
+// ── Single-page content (all panels at once) ────────────────────────────
+function SinglePageContent({
+  beat,
+  onChoice,
+  onContinue,
+}: {
+  beat: StoryBeat;
+  onChoice: (flag?: string) => void;
+  onContinue: () => void;
+}) {
+  const [textDone, setTextDone] = useState(false);
+  const allText = useMemo(() =>
+    beat.panels.filter(p => p.text).map(p => p.text!).join('\n\n'),
+    [beat.panels]
+  );
+  const choicePanel = useMemo(() =>
+    beat.panels.find(p => p.type === 'choice'),
+    [beat.panels]
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex flex-col items-center gap-6 overflow-y-auto max-h-[80vh]"
+    >
+      {/* Enlarged images */}
+      {beat.panels.filter(p => p.type === 'image').map((panel, i) => (
+        <div key={i} className="flex w-full max-w-3xl items-center justify-center overflow-hidden rounded-xl bg-gray-800">
+          {panel.imagePath ? (
+            <img
+              src={`/assets/images/${panel.imagePath}.png`}
+              alt={panel.text ?? ''}
+              className="max-h-[70vh] w-full object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+                (e.target as HTMLImageElement).parentElement!.classList.add('flex', 'items-center', 'justify-center');
+                (e.target as HTMLImageElement).parentElement!.innerHTML = '🎨';
+              }}
+            />
+          ) : (
+            <span className="text-5xl">🎨</span>
+          )}
+        </div>
+      ))}
+
+      {/* Single typewriter for all text */}
+      <div className="w-full max-w-2xl">
+        <TypewriterText
+          text={allText}
+          speed={25}
+          onComplete={() => setTextDone(true)}
+          className="text-lg leading-relaxed text-gray-100 whitespace-pre-line"
+        />
+      </div>
+
+      {/* Choices — show at bottom */}
+      {choicePanel?.type === 'choice' && choicePanel.choices && (
+        <div className="flex w-full max-w-md flex-col gap-4">
+          {choicePanel.text && (
+            <p className="mb-2 text-center text-lg text-gray-200">{choicePanel.text}</p>
+          )}
+          {choicePanel.choices.map((choice, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                if (choice.setFlag) onChoice(choice.setFlag);
+                onContinue();
+              }}
+              className="flex items-center justify-between rounded-lg border border-gray-600 bg-gray-800/60 px-5 py-3 text-left text-white transition hover:border-amber-500 hover:bg-gray-700"
+            >
+              <span>{choice.text}</span>
+              <span className="text-gray-500">→</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Continue button — only after text fully typed */}
+      {textDone && !choicePanel && (
+        <button
+          onClick={onContinue}
+          className="mt-4 rounded-lg bg-amber-600 px-10 py-3 text-lg font-bold text-white transition hover:bg-amber-500 active:scale-95"
+        >
+          继续 →
+        </button>
+      )}
+    </motion.div>
+  );
+}
+
 // ── StoryPlayer ─────────────────────────────────────────────────────────
-export function StoryPlayer({ beat, open, onComplete, onChoice, onClose }: StoryPlayerProps) {
+export function StoryPlayer({ beat, open, onComplete, onChoice, onClose, singlePage }: StoryPlayerProps) {
   const [panelIndex, setPanelIndex] = useState(0);
   const [showRewards, setShowRewards] = useState(false);
   const [autoAdvanceTimer, setAutoAdvanceTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
@@ -177,7 +269,7 @@ export function StoryPlayer({ beat, open, onComplete, onChoice, onClose }: Story
 
   // Auto-advance for panels with a duration
   useEffect(() => {
-    if (!open) return;
+    if (!open || singlePage) return;
 
     const currentPanel = beat.panels[panelIndex];
     if (!currentPanel || currentPanel.type === 'choice') return;
@@ -253,31 +345,36 @@ export function StoryPlayer({ beat, open, onComplete, onChoice, onClose }: Story
               onClick={handleSkip}
               className="rounded px-3 py-1 text-sm text-gray-400 transition hover:bg-gray-700 hover:text-white"
             >
-              跳過 ⏭️
+              跳过 ⏭️
             </button>
           )}
         </div>
 
         {/* Progress */}
-        {!showRewards && (
+        {!showRewards && !singlePage && (
           <ProgressBar current={panelIndex} total={beat.panels.length} />
         )}
 
         {/* Panel content */}
-        <AnimatePresence mode="wait">
-          {!showRewards && currentPanel && (
-            <PanelContent panel={currentPanel} onChoice={handleChoice} />
-          )}
-        </AnimatePresence>
+        {!singlePage && (
+          <AnimatePresence mode="wait">
+            {!showRewards && currentPanel && (
+              <PanelContent panel={currentPanel} onChoice={handleChoice} />
+            )}
+          </AnimatePresence>
+        )}
+        {singlePage && !showRewards && (
+          <SinglePageContent beat={beat} onChoice={handleChoice} onContinue={handleComplete} />
+        )}
 
         {/* Next / Close button (not for choice panels — choices auto-advance) */}
-        {!showRewards && currentPanel && currentPanel.type !== 'choice' && (
+        {!showRewards && !singlePage && currentPanel && currentPanel.type !== 'choice' && (
           <div className="mt-4 flex justify-center">
             <button
               onClick={handleNext}
               className="rounded-lg bg-amber-600 px-8 py-2 text-white transition hover:bg-amber-500"
             >
-              {isLastPanel ? '完成' : '下一頁 →'}
+              {isLastPanel ? '完成' : '下一页 →'}
             </button>
           </div>
         )}
@@ -285,7 +382,7 @@ export function StoryPlayer({ beat, open, onComplete, onChoice, onClose }: Story
         {/* Rewards fly-in */}
         {showRewards && (
           <div className="flex flex-col items-center gap-4">
-            <p className="text-lg text-gray-300">— 章節完成 —</p>
+            <p className="text-lg text-gray-300">— 章节完成 —</p>
             <FlyReward
               rewards={beat.rewards.map(r => ({
                 type: r.type,
