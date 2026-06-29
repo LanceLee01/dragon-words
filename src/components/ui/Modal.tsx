@@ -1,0 +1,58 @@
+import { type ReactNode } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+interface ModalProps {
+  open: boolean;
+  onClose?: () => void;
+  variant?: 'fullscreen' | 'centered';
+  children: ReactNode;
+}
+
+const overlayVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+};
+
+const fullscreenVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: { opacity: 1, scale: 1, transition: { type: 'spring', damping: 25, stiffness: 300 } },
+  exit: { opacity: 0, scale: 0.95, transition: { duration: 0.15 } },
+};
+
+const centeredVariants = {
+  hidden: { opacity: 0, scale: 0.9, y: 20 },
+  visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', damping: 20, stiffness: 300 } },
+  exit: { opacity: 0, scale: 0.9, y: 20, transition: { duration: 0.15 } },
+};
+
+export function Modal({ open, onClose, variant = 'centered', children }: ModalProps) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          variants={overlayVariants}
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+          onClick={onClose}
+        >
+          <motion.div
+            className={
+              variant === 'fullscreen'
+                ? 'relative max-h-[90vh] w-[90vw] overflow-auto rounded-xl bg-gray-900 p-6'
+                : 'relative max-h-[70vh] w-full max-w-md overflow-auto rounded-xl bg-gray-900 p-6 shadow-2xl'
+            }
+            variants={variant === 'fullscreen' ? fullscreenVariants : centeredVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {children}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
