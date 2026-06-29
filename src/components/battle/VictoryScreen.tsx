@@ -19,7 +19,7 @@ interface VictoryScreenProps {
   onStartBattle?: (chapter: number, level: number, monsterId?: string) => void;
 }
 
-export function VictoryScreen({ gold, xp, isBoss, onContinue }: VictoryScreenProps) {
+export function VictoryScreen({ gold, xp, isBoss, onContinue, onStartBattle }: VictoryScreenProps) {
   const player = usePlayerStore((s) => s.player);
   const addGold = usePlayerStore((s) => s.addGold);
   const addXpStore = usePlayerStore((s) => s.addXp);
