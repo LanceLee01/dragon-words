@@ -66,20 +66,20 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
   const optionLabels = ['A', 'B', 'C', 'D'];
 
   return (
-    <div className="flex flex-col items-center gap-6 px-4">
+    <div className="flex flex-col items-center gap-8 px-4">
       {/* --- Word image or stem (for pos) --- */}
       {isPos ? (
         <div className="flex w-full max-w-md flex-col items-center gap-2">
-          <p className="text-sm font-semibold uppercase tracking-wider text-gray-500">
+          <p className="text-xl font-semibold uppercase tracking-wider text-gray-500">
             {question.subtype === 'collocation' ? '词语搭配' : '词性变形'}
           </p>
           <div className="w-full rounded-xl border border-purple-700/40 bg-purple-900/20 px-6 py-4 text-center">
-            <p className="text-xl font-bold text-white">{question.stem}</p>
+            <p className="text-3xl font-bold text-white">{question.stem}</p>
           </div>
           {/* Explanation shown after answering */}
           {disabled && question.explanation && (
             <motion.p
-              className="mt-2 rounded-lg bg-blue-900/30 px-4 py-2 text-sm text-blue-200"
+              className="mt-2 rounded-lg bg-blue-900/30 px-4 py-2 text-xl text-blue-200"
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
             >
@@ -90,7 +90,7 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
       ) : (
         <>
           {/* --- Word image --- */}
-          <div className="relative flex h-56 w-56 items-center justify-center overflow-hidden rounded-xl bg-white/10">
+          <div className="relative flex h-64 w-64 items-center justify-center overflow-hidden rounded-xl bg-white/10">
             {imageError ? (
               <span className="text-5xl">📜</span>
             ) : (
@@ -155,11 +155,11 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
               </>
             ) : (
               <>
-                <p className="text-center text-lg text-gray-300">
+                <p className="text-center text-3xl text-gray-300">
                   {question.type === 'meaning-word' ? '请选择以下意思对应的英文：' : '请选择以下单词的意思：'}
                 </p>
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl font-bold text-white">
+                  <span className="text-5xl font-bold text-white">
                     {question.type === 'meaning-word' ? question.word.chinese : question.word.english}
                   </span>
                   {isAvailable && (
@@ -185,7 +185,7 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
             key={`${idx}-${option}`}
             onClick={() => handleOptionClick(option, idx)}
             disabled={disabled}
-            className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 rounded-xl border px-6 py-5 text-2xl font-medium transition-all ${
               disabled
                 ? 'cursor-not-allowed border-gray-700 bg-gray-800 text-gray-500'
                 : 'border-gray-600 bg-white/5 text-white hover:border-blue-500 hover:bg-white/10 active:scale-95'
@@ -193,7 +193,7 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
             whileHover={disabled ? undefined : { scale: 1.03 }}
             whileTap={disabled ? undefined : { scale: 0.97 }}
           >
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-900 text-xs font-bold text-blue-300">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-900 text-lg font-bold text-blue-300">
               {optionLabels[idx]}
             </span>
             <span className="text-left leading-tight">{option}</span>
