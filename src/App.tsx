@@ -2,7 +2,7 @@
 // App — root component with routing and store initialisation
 // ---------------------------------------------------------------------------
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useGameStore } from '@/stores/gameStore';
 import { EventEngine } from '@/core/engine/eventEngine';
@@ -93,6 +93,8 @@ export default function App() {
     }
   }, [loaded]);
 
+  const navigate = useNavigate();
+
   const handleLoginChoice = useCallback(async (choiceId: string) => {
     if (!loginEvent) return;
     const engine = new EventEngine({
@@ -104,9 +106,17 @@ export default function App() {
       onSaveHistory: (history) => { if (history.length > 0) { const last = history[history.length - 1]; addEventToHistory({ id: last.id, choice: last.choice }); } },
     });
     await engine.executeChoice(loginEvent, choiceId);
-    setShowLoginEvent(false);
-    setLoginEvent(null);
-  }, [loginEvent, player, globalFlags, eventHistory, addGold, addXp, addEventToHistory, takeDamage]);
+
+    const selectedChoice = loginEvent.choices.find((c) => c.id === choiceId);
+    if (selectedChoice?.action === 'battle' && selectedChoice.actionPayload) {
+      const { chapter, level, monsterId } = selectedChoice.actionPayload;
+      const params = monsterId ? `?monster=${monsterId}` : '';
+      navigate(`/battle/${chapter}/${level}${params}`);
+    } else {
+      setShowLoginEvent(false);
+      setLoginEvent(null);
+    }
+  }, [loginEvent, player, globalFlags, eventHistory, addGold, addXp, addEventToHistory, takeDamage, navigate]);
 
   if (!loaded) {
     return (
