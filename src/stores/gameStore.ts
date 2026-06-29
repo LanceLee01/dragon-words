@@ -40,6 +40,12 @@ export interface GameStore {
   hasFlag: (flag: string) => boolean;
   unlockStoryBeat: (beatId: string) => void;
   unlockGalleryEntry: (entryId: string) => void;
+
+  // === P1: Login Tracking ===
+  lastLoginDate: string | null;  // YYYY-MM-DD format
+  loginStreak: number;
+
+  checkDailyLogin: () => 'first_today' | 'streak_continue' | 'streak_broken' | 'already_checked';
 }
 
 // ---------------------------------------------------------------------------
@@ -116,5 +122,32 @@ export const useGameStore = create<GameStore>((set, get) => {
         galleryEntries: new Set(s.storyProgress.galleryEntries).add(entryId),
       },
     })),
+
+    // === P1: Login Tracking ===
+    lastLoginDate: localStorage.getItem('dw_last_login'),
+    loginStreak: Number(localStorage.getItem('dw_login_streak') || 0),
+
+    checkDailyLogin: () => {
+      const state = get();
+      const today = new Date().toISOString().slice(0, 10);
+      if (state.lastLoginDate === today) return 'already_checked';
+      
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      let newStreak = 1;
+      let result = 'first_today';
+      
+      if (state.lastLoginDate === yesterday) {
+        newStreak = state.loginStreak + 1;
+        result = 'streak_continue';
+      } else if (state.lastLoginDate !== null) {
+        result = 'streak_broken';
+      }
+      
+      localStorage.setItem('dw_last_login', today);
+      localStorage.setItem('dw_login_streak', String(newStreak));
+      
+      set({ lastLoginDate: today, loginStreak: newStreak });
+      return result as 'first_today' | 'streak_continue' | 'streak_broken' | 'already_checked';
+    },
   };
 });

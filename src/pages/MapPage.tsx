@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
 // MapPage — adventure map showing all 15 chapters with level buttons
 // ---------------------------------------------------------------------------
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { usePlayerStore } from '@/stores/playerStore';
@@ -11,16 +11,89 @@ import type { ChapterDef } from '@/core/data/types';
 import { CHAPTER_MONSTERS, MONSTERS } from '@/core/data/monsters';
 import { loadProgress, type GameProgress } from '@/core/utils/storage';
 import type { MonsterDef } from '@/core/data/types';
+import { EventEngine } from '@/core/engine/eventEngine';
+import { EVENT_POOL } from '@/core/data/events';
+import type { RandomEvent } from '@/core/data/events';
+import { EventModal } from '@/components/adventure/EventModal';
 
 export default function MapPage() {
   const navigate = useNavigate();
   const player = usePlayerStore((s) => s.player);
   const sendEvent = useGameStore((s) => s.sendEvent);
+  const eventHistory = useGameStore((s) => s.eventHistory);
+  const addEventToHistory = useGameStore((s) => s.addEventToHistory);
+  const globalFlags = useGameStore((s) => s.globalFlags);
 
   const [progress, setProgress] = useState<GameProgress>({
     completedLevels: [],
     completedChapters: [],
   });
+
+  const [chapterEvent, setChapterEvent] = useState<RandomEvent | null>(null);
+  const [showChapterEvent, setShowChapterEvent] = useState(false);
+  const eventCheckedRef = useRef(new Set<number>());
+
+  // Check for newly completed chapters → trigger chapter_first_clear event
+  useEffect(() => {
+    for (const ch of progress.completedChapters) {
+      if (eventCheckedRef.current.has(ch)) continue;
+      eventCheckedRef.current.add(ch);
+
+      // Only trigger if the chapter has levels with star rating >= 3
+      // (simplified: just trigger once per chapter completion)
+      const engine = new EventEngine({
+        events: EVENT_POOL,
+        playerState: {
+          level: player.level,
+          hasItem: () => false,
+          hasFlag: (flag) => globalFlags.has(flag),
+          gold: player.gold,
+          hp: player.hp,
+          shield: 0,
+        },
+        rewardDispatcher: {
+          addGold: (n) => {},
+          addXp: (n) => {},
+          addShield: () => {},
+          addItem: () => {},
+          addCosmetic: () => {},
+          takeDamage: () => {},
+          spendGold: () => true,
+          spendShield: () => true,
+          spendItem: () => true,
+        },
+        globalFlags,
+        eventHistory,
+        onSaveHistory: (history) => {
+          if (history.length > 0) {
+            const last = history[history.length - 1];
+            addEventToHistory({ id: last.id, choice: last.choice });
+          }
+        },
+      });
+
+      const triggered = engine.checkTrigger('chapter_first_clear');
+      if (triggered) {
+        setChapterEvent(triggered);
+        setShowChapterEvent(true);
+      }
+    }
+  }, [progress.completedChapters]);
+
+  const handleChapterChoice = useCallback(async (choiceId: string) => {
+    if (!chapterEvent) return;
+    const engine = new EventEngine({
+      events: EVENT_POOL,
+      playerState: { level: player.level, hasItem: () => false, hasFlag: (flag) => globalFlags.has(flag), gold: player.gold, hp: player.hp, shield: 0 },
+      rewardDispatcher: { addGold: () => {}, addXp: () => {}, addShield: () => {}, addItem: () => {}, addCosmetic: () => {}, takeDamage: () => {}, spendGold: () => true, spendShield: () => true, spendItem: () => true },
+      globalFlags,
+      eventHistory,
+      onSaveHistory: (history) => { if (history.length > 0) { const last = history[history.length - 1]; addEventToHistory({ id: last.id, choice: last.choice }); } },
+    });
+    await engine.executeChoice(chapterEvent, choiceId);
+    setShowChapterEvent(false);
+    setChapterEvent(null);
+  }, [chapterEvent, player, globalFlags, eventHistory, addEventToHistory]);
 
   useEffect(() => {
     setProgress(loadProgress());
@@ -62,7 +135,16 @@ export default function MapPage() {
   };
 
   return (
-    <div
+    <>
+      {showChapterEvent && chapterEvent && (
+        <EventModal
+          event={chapterEvent}
+          open={showChapterEvent}
+          onChoice={handleChapterChoice}
+          onClose={() => setShowChapterEvent(false)}
+        />
+      )}
+      <div
       className="min-h-screen px-4 py-6"
       style={{
         background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)',
@@ -121,6 +203,7 @@ export default function MapPage() {
         ))}
       </div>
     </div>
+    </>
   );
 }
 
