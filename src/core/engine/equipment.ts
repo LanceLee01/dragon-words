@@ -1,7 +1,8 @@
 // ---------------------------------------------------------------------------
 // Equipment Affix Engine — generation, merging, locking, & stat application
 // ---------------------------------------------------------------------------
-import { Affix, AffixInstance, AFFIX_POOLS, rollAffixValue } from '../data/affixes';
+import type { Affix, AffixInstance } from '../data/affixes';
+import { AFFIX_POOLS, rollAffixValue } from '../data/affixes';
 import { pickRandom } from '../utils/random';
 import type { Equipment, BattleStats } from '../data/types';
 
