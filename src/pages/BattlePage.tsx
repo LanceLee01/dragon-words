@@ -473,6 +473,7 @@ export default function BattlePage() {
               <VictoryScreen
                 gold={50 + lv * 10}
                 xp={100}
+                isBoss={battle?.isBoss ?? false}
                 onContinue={handleVictoryContinue}
               />
             </motion.div>
