@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
 // BattlePage — main battle gameplay screen
 // ---------------------------------------------------------------------------
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBattleStore } from '@/stores/battleStore';
@@ -65,6 +65,9 @@ import type { TranslateQuestion, SpellQuestion, PosQuestion } from '@/core/data/
 import { EQUIPMENT } from '@/core/data/equipment';
 import { BASE_CLASSES, ADVANCED_CLASSES } from '@/core/data/classes';
 import { getPlayerAttack, getPlayerDefense } from '@/core/engine/battle';
+import { StoryPlayer } from '@/components/adventure/StoryPlayer';
+import { getStoryBeatForTrigger, STORY_BEATS } from '@/core/data/story';
+import type { StoryBeat } from '@/core/data/story';
 
 export default function BattlePage() {
   const { chapter: chapterParam, level: levelParam } = useParams<{
@@ -97,6 +100,11 @@ export default function BattlePage() {
   const healToFull = usePlayerStore((s) => s.healToFull);
 
   const sendEvent = useGameStore((s) => s.sendEvent);
+  const unlockStoryBeat = useGameStore((s) => s.unlockStoryBeat);
+
+  // Pending story beat to show after level clear
+  const [pendingStoryBeat, setPendingStoryBeat] = useState<StoryBeat | null>(null);
+  const [showStory, setShowStory] = useState(false);
 
   // Sound
   const { play, playAttackSequence, setClass } = useSound();
@@ -227,10 +235,38 @@ export default function BattlePage() {
     completeLevel(levelKey, ch);
     healToFull();
 
-    // Send event and navigate
+    // Send event
     sendEvent('BATTLE_WIN');
-    navigate('/map');
+
+    // Check for a story beat to play after this level
+    let storyBeat: StoryBeat | undefined;
+    if (lv >= 1 && lv <= 4) {
+      // Use new level_clear triggers for normal levels
+      storyBeat = getStoryBeatForTrigger(`level_${lv}_clear`, ch);
+    } else if (lv === 5) {
+      // Boss: check first_clear then boss_post
+      storyBeat = getStoryBeatForTrigger('first_clear', ch)
+        ?? getStoryBeatForTrigger('boss_post', ch);
+    }
+
+    if (storyBeat) {
+      setPendingStoryBeat(storyBeat);
+      setShowStory(true);
+      // Navigation deferred to handleStoryComplete
+    } else {
+      navigate('/map');
+    }
   }, [ch, lv, addGold, addXp, completeLevel, healToFull, sendEvent, navigate]);
+
+  /** Called after story beat finishes playing */
+  const handleStoryComplete = useCallback(() => {
+    if (pendingStoryBeat) {
+      unlockStoryBeat(pendingStoryBeat.id);
+    }
+    setShowStory(false);
+    setPendingStoryBeat(null);
+    navigate('/map');
+  }, [pendingStoryBeat, unlockStoryBeat, navigate]);
 
   const handleRetry = useCallback(() => {
     resetBattle();
@@ -654,6 +690,24 @@ export default function BattlePage() {
         </div>
       </div>
 
+      {/* Story beat overlay — plays after level clear */}
+      {pendingStoryBeat && (
+        <StoryPlayer
+          beat={pendingStoryBeat}
+          open={showStory}
+          onComplete={handleStoryComplete}
+          onChoice={(flag) => {
+            if (flag) {
+              useGameStore.getState().setFlag(flag);
+            }
+          }}
+          onClose={() => {
+            setShowStory(false);
+            setPendingStoryBeat(null);
+            navigate('/map');
+          }}
+        />
+      )}
 
     </div>
   );

@@ -1,32 +1,130 @@
-# React + TypeScript + Vite
+# 龙之词汇 (Dragon Words / L9Eng)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+> **一款以英语词汇拼写为核心战斗机制的奇幻冒险 RPG。**
 
-Currently, two official plugins are available:
+玩家扮演一名从古老森林中苏醒的冒险者，在 **精灵向导** 的指引下，通过掌握词汇之力穿越 15 个章节，对抗暗黑骑士团，最终面对远古红龙伊格尼斯。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## ✨ 核心玩法
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **词汇战斗**：每场战斗需正确拼写/翻译英语单词来攻击怪物，答错则受到反击
+- **多职业系统**：战士、法师、游侠等基础职业 + 进阶转职
+- **装备系统**：武器、护甲、饰品，带随机词缀属性
+- **连击机制**：连续答对可叠加伤害倍率
+- **动态难度调整 (DDA)**：根据玩家表现自动调整怪物强度、时间限制和奖励
 
-## Expanding the Oxlint configuration
+## 📖 剧情系统
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+游戏采用 **剧情驱动** 设计，每通过一关都有剧情穿插连接：
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+| 时机 | 内容 |
+|------|------|
+| 进入章节 (`chapter_start`) | 场景描写、环境烘托 |
+| 每关过渡 (`level_1~4_clear`) | 角色互动、剧情推进、伏笔铺垫 |
+| BOSS 前 (`boss_pre`) | BOSS 登场、背景介绍、决战动员 |
+| 章节通关 (`first_clear`) | 胜利后剧情、关键信息揭露 |
+| 隐藏事件 (`hidden_event`) | 可选分支剧情（如龙蛋抉择） |
+| 结局 (`perfect_clear`) | 封印 / 驯服 双结局 |
+
+### 已完成的剧情章节
+
+| 章节 | 剧情段数 | 状态 |
+|------|---------|------|
+| Ch1 森林小径 | 6/6 | ✅ 完整 |
+| Ch2 城堡大厅 | 6/6 | ✅ 完整 |
+| Ch3 魔法学院 | 7/7 | ✅ 完整 |
+| Ch4 精灵森林 | 6/6 | ✅ 完整 |
+| Ch5 矮人矿坑 | 6/6 | ✅ 完整 |
+| Ch7 龙脊山脉 | 1 | 🔄 进行中 |
+| Ch10 终焉之塔 | 1 | 🔄 进行中 |
+| Ch15 龙王之巢 | 3 | 🔄 进行中 |
+
+> 剧情数据位于 `src/core/data/story.ts`，采用 StoryBeat 数据模型。
+
+## 🏰 15 章地图
+
+| 章节 | 名称 | 难度 | BOSS |
+|------|------|------|------|
+| 1 | 森林小径 | 初级 | 哥布林王 |
+| 2 | 城堡大厅 | 初级 | 死亡骑士 |
+| 3 | 魔法学院 | 初级 | 大法师（黑化） |
+| 4 | 精灵森林 | 中级 | 树精长老 |
+| 5 | 矮人矿坑 | 中级 | 熔岩巨人 |
+| 6 | 幽暗地域 | 中级 | 黑暗精灵 |
+| 7 | 龙脊山脉 | 中级 | 双足飞龙 |
+| 8 | 亡灵沼泽 | 挑战 | 巫妖王 |
+| 9 | 巨人平原 | 挑战 | 风暴巨人 |
+| 10 | 终焉之塔 | 挑战 | 暗黑骑士 |
+| 11 | 深渊裂口 | 挑战 | 深渊领主 |
+| 12 | 天堂之门 | 挑战 | 大天使 |
+| 13 | 时光回廊 | 终极 | 时光守护者 |
+| 14 | 龙之圣殿 | 终极 | 龙巫妖 |
+| 15 | 龙王之巢 | 终极 | 远古红龙 |
+
+## 🎲 随机事件系统
+
+通关后有概率触发随机事件：
+- 🧙 **流浪商人** — 消耗金币购买 buff
+- 🧩 **古老谜题** — 答对奖励，答错惩罚
+- ⚔️ **精英怪挑战** — 高风险高回报的额外战斗
+- 📦 **神秘宝箱** — 随机奖励或陷阱
+- 📜 **剧情片段** — 世界观碎片
+
+## 🛠️ 技术栈
+
+- **框架**: React 18 + TypeScript
+- **构建**: Vite
+- **状态管理**: Zustand
+- **动画**: Framer Motion
+- **路由**: React Router v6
+- **测试**: Vitest + Playwright
+- **后端**: Supabase (单词数据)
+
+## 🚀 快速开始
+
+```bash
+# 安装依赖
+npm install
+
+# 开发模式
+npm run dev
+
+# 构建
+npm run build
+
+# 预览构建产物
+npm run preview
+
+# 运行测试
+npx vitest run
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## 📦 项目结构
+
+```
+src/
+├── core/
+│   ├── data/          # 数据层（单词、怪物、装备、剧情、事件）
+│   ├── engine/        # 游戏引擎（战斗、DDA、事件、剧情解决）
+│   └── utils/         # 工具函数
+├── components/        # UI 组件
+│   ├── battle/        # 战斗界面组件
+│   ├── adventure/     # 冒险/剧情组件（StoryPlayer, EventModal）
+│   ├── home/          # 主界面组件（画廊、商店）
+│   └── shared/        # 通用组件
+├── pages/             # 页面
+├── stores/            # Zustand 状态管理
+└── hooks/             # 自定义 hooks
+
+docs/
+├── story-content-requirements.md  # 剧情内容与插图需求文档
+├── ch1.md                         # Ch1 文案
+├── ch2-3.md                       # Ch2-3 文案
+└── ch4-5.md                       # Ch4-5 文案
+```
+
+## 📜 版本历史
+
+- **v0.1.0** — 新增剧情系统：Ch1-5 完整每关过渡剧情、StoryPlayer 集成、双结局系统
+- **v0.0.0** — 初始版本：基础战斗、词汇、装备、职业系统
