@@ -42,6 +42,17 @@ export interface BattleStore {
 
   /** Reset battle state to null. */
   resetBattle: () => void;
+
+  // === P1: DDA State ===
+  ddaState: {
+    mistakeStreak: number;
+    correctStreak: number;
+    protectionLevel: number;
+    challengeMode: boolean;
+  };
+
+  updateDDA: (correct: boolean) => void;
+  resetDDA: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -330,4 +341,28 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
       lastAnswerCorrect: null,
     });
   },
+
+  // === P1: DDA State ===
+  ddaState: {
+    mistakeStreak: 0,
+    correctStreak: 0,
+    protectionLevel: 0,
+    challengeMode: false,
+  },
+
+  updateDDA: (correct) => set((s) => {
+    const next = { ...s.ddaState };
+    if (correct) {
+      next.mistakeStreak = Math.max(0, next.mistakeStreak - 2);
+      next.correctStreak++;
+    } else {
+      next.correctStreak = Math.max(0, next.correctStreak - 5);
+      next.mistakeStreak++;
+    }
+    return { ddaState: next };
+  }),
+
+  resetDDA: () => set({
+    ddaState: { mistakeStreak: 0, correctStreak: 0, protectionLevel: 0, challengeMode: false },
+  }),
 }));
