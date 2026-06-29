@@ -96,7 +96,7 @@ export default function MapPage() {
       await engine.executeChoice(chapterEvent, choiceId);
       setShowChapterEvent(false);
       setChapterEvent(null);
-      navigate(`/battle/${choice.actionPayload.chapter}/${choice.actionPayload.level}`);
+      navigate(`/battle/${choice.actionPayload.chapter}/${choice.actionPayload.level}${choice.actionPayload.monsterId ? `?monster=${choice.actionPayload.monsterId}` : ''}`);
       return;
     }
     await engine.executeChoice(chapterEvent, choiceId);

@@ -68,6 +68,20 @@ export const MONSTERS: Record<string, MonsterDef> = {
       { name: '重击', description: '造成1.5倍伤害', multiplier: 1.5, weight: 1 },
     ],
   },
+
+  // ── Elite monsters ─────────────────────────────────────────────────────
+  wolf_elite: {
+    id: 'wolf_elite',
+    name: '巨狼首領',
+    hp: 400,
+    attack: 18,
+    isBoss: true,
+    skills: [
+      { name: '狼嚎', description: '提升攻擊力', attackBuff: 1.3, weight: 1 },
+      { name: '撕裂', description: '造成1.5倍傷害', multiplier: 1.5, weight: 1 },
+    ],
+  },
+
   harpy: {
     id: 'harpy',
     name: '鹰身女妖',

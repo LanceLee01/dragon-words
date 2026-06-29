@@ -2,7 +2,7 @@
 // BattlePage — main battle gameplay screen
 // ---------------------------------------------------------------------------
 import { useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBattleStore } from '@/stores/battleStore';
 import { usePlayerStore } from '@/stores/playerStore';
@@ -72,9 +72,11 @@ export default function BattlePage() {
     level: string;
   }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const ch = Number(chapterParam) || 1;
   const lv = Number(levelParam) || 1;
+  const monsterOverride = searchParams.get('monster');
 
   // Stores
   const battle = useBattleStore((s) => s.battle);
@@ -107,7 +109,7 @@ export default function BattlePage() {
   // -----------------------------------------------------------------------
 
   useEffect(() => {
-    initBattle(ch, lv);
+    initBattle(ch, lv, monsterOverride || undefined);
     return () => {
       resetBattle();
     };
@@ -232,8 +234,8 @@ export default function BattlePage() {
 
   const handleRetry = useCallback(() => {
     resetBattle();
-    initBattle(ch, lv);
-  }, [ch, lv, resetBattle, initBattle]);
+    initBattle(ch, lv, monsterOverride || undefined);
+  }, [ch, lv, resetBattle, initBattle, monsterOverride]);
 
   const handleLeave = useCallback(() => {
     resetBattle();
@@ -475,7 +477,10 @@ export default function BattlePage() {
                 xp={100}
                 isBoss={battle?.isBoss ?? false}
                 onContinue={handleVictoryContinue}
-                onStartBattle={(ch, lv) => navigate(`/battle/${ch}/${lv}`)}
+                onStartBattle={(ch, lv, monsterId) => {
+                  const params = monsterId ? `?monster=${monsterId}` : '';
+                  navigate(`/battle/${ch}/${lv}${params}`);
+                }}
               />
             </motion.div>
           )}

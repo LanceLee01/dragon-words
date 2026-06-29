@@ -26,7 +26,7 @@ export interface BattleStore {
   lastAnswerCorrect: boolean | null;
 
   /** Initialise a new battle for the given chapter + level */
-  initBattle: (ch: number, lv: number) => void;
+  initBattle: (ch: number, lv: number, monsterIdOverride?: string) => void;
 
   /** Player submits an answer (the selected option string). Returns true if correct. */
   submitAnswer: (selected: string) => boolean;
@@ -121,15 +121,21 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
   // initBattle
   // -----------------------------------------------------------------------
 
-  initBattle: (ch, lv) => {
+  initBattle: (ch, lv, monsterIdOverride) => {
     const player = usePlayerStore.getState().player;
 
     // Look up the monster for this chapter/level
     const chMonsters = CHAPTER_MONSTERS[ch];
     if (!chMonsters) return;
 
-    const isBossLevel = lv === 5;
-    const monsterId = isBossLevel ? chMonsters.boss : chMonsters.normal;
+    // Use monster override (e.g. from elite event) or fall back to normal/boss
+    let monsterId: string;
+    if (monsterIdOverride) {
+      monsterId = monsterIdOverride;
+    } else {
+      const isBossLevel = lv === 5;
+      monsterId = isBossLevel ? chMonsters.boss : chMonsters.normal;
+    }
     const monsterDef = MONSTERS[monsterId];
     if (!monsterDef) return;
 

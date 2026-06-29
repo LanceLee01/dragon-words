@@ -16,7 +16,7 @@ interface VictoryScreenProps {
   xp: number;
   isBoss: boolean;
   onContinue: () => void;
-  onStartBattle?: (chapter: number, level: number) => void;
+  onStartBattle?: (chapter: number, level: number, monsterId?: string) => void;
 }
 
 export function VictoryScreen({ gold, xp, isBoss, onContinue }: VictoryScreenProps) {
@@ -90,7 +90,7 @@ export function VictoryScreen({ gold, xp, isBoss, onContinue }: VictoryScreenPro
         await engineRef.current.executeChoice(pendingEvent, choiceId);
         setShowEvent(false);
         setPendingEvent(null);
-        onStartBattle?.(choice.actionPayload.chapter, choice.actionPayload.level);
+        onStartBattle?.(choice.actionPayload.chapter, choice.actionPayload.level, choice.actionPayload.monsterId);
         return;
       }
       await engineRef.current.executeChoice(pendingEvent, choiceId);

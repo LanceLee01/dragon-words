@@ -28,7 +28,7 @@ export interface EventChoice {
   /** If set, triggers a special action instead of just resolving rewards */
   action?: 'battle';
   /** Parameters for the action (e.g. battle chapter/level) */
-  actionPayload?: { chapter: number; level: number };
+  actionPayload?: { chapter: number; level: number; monsterId?: string };
 }
 
 export interface RandomEvent {
@@ -269,7 +269,7 @@ export const EVENT_POOL: RandomEvent[] = [
         icon: '⚔️',
         outcome: 'success',
         action: 'battle',
-        actionPayload: { chapter: 1, level: 6 },
+        actionPayload: { chapter: 1, level: 1, monsterId: 'wolf_elite' },
         successRewards: [
           { type: 'xp', amount: 120 },
           { type: 'gold', amount: 60 },
