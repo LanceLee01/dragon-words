@@ -1,0 +1,259 @@
+{
+  "prompts": [
+    {
+      "id": "ch1_open_01",
+      "chapter": 1,
+      "scene": "Ch1 起始 - 古老森林晨光中冒险者苏醒",
+      "story_text": "在一片古老森林的晨光中，冒险者缓缓苏醒……",
+      "positive_base": "masterpiece, best quality, fantasy art, ancient forest at dawn, golden morning light filtering through dense canopy, moss-covered trees, mystical atmosphere, an adventurer waking up on the forest floor, elf guide standing nearby with gentle smile, glowing fireflies, ethereal blue light particles, epic fantasy RPG scene, detailed background, cinematic lighting, rich colors, 8k, highres",
+      "positive_refiner": "ancient forest at dawn, morning light filtering through trees, adventurer and elf guide, fantasy RPG illustration, cinematic lighting, rich colors, detailed forest environment"
+    },
+    {
+      "id": "ch1_open_04",
+      "chapter": 1,
+      "scene": "Ch1 起始 - 精灵伸出手微笑",
+      "story_text": "精灵伸出手，微笑着。「来吧，让我教你这个世界的第一词语。」",
+      "positive_base": "masterpiece, best quality, fantasy art, beautiful elf woman with pointed ears, flowing ethereal robes, extending hand with gentle smile, forest clearing background, golden sunlight, magical sparkles around hand, expression of kindness and wisdom, fantasy character portrait, detailed face, intricate clothing, warm atmosphere, 8k, highres",
+      "positive_refiner": "beautiful elf woman smiling, extending hand, fantasy character portrait, gentle expression, warm atmosphere, forest background"
+    },
+    {
+      "id": "ch1_lv1_clear",
+      "chapter": 1,
+      "scene": "Ch1 Lv1通关 - 清晨薄雾哥布林溃逃",
+      "story_text": "清晨的薄雾在林间散去，哥布林溃逃时遗落的粗糙木棍散落一地。阳光透过树叶的缝隙，在地面上拼写出斑驳的光影。",
+      "positive_base": "masterpiece, best quality, fantasy art, forest clearing at dawn, mist lifting, scattered wooden weapons and debris on ground, goblin footprints fading into woods, golden sunbeams through canopy, dappled light on forest floor, aftermath of battle, peaceful morning atmosphere, victory, epic fantasy scene, cinematic lighting, 8k, highres",
+      "positive_refiner": "forest clearing after battle, dawn mist, scattered weapons, sunbeams through trees, peaceful morning atmosphere"
+    },
+    {
+      "id": "ch1_lv2_clear",
+      "chapter": 1,
+      "scene": "Ch1 Lv2通关 - 被破坏的路牌",
+      "story_text": "前方的道路上，一块古老的橡木路牌歪斜地插在泥土中。上面的字迹被利爪抓得模糊不清，仿佛语言本身在这里受到了亵渎。",
+      "positive_base": "masterpiece, best quality, fantasy art, ancient forest path, a weathered oak signpost tilted in mud, claw marks obscuring carved letters, deep scratches on wood, dark mysterious forest background, eerie atmosphere, twilight, magical residue glowing faintly on scratched letters, sense of desecration, epic RPG scene, cinematic lighting, 8k, highres",
+      "positive_refiner": "ancient forest path, weathered signpost with claw marks, mysterious atmosphere, twilight forest"
+    },
+    {
+      "id": "ch1_lv3_clear",
+      "chapter": 1,
+      "scene": "Ch1 Lv3通关 - 密林暗影",
+      "story_text": "穿过灌木丛，一股令人不安的寂静笼罩了四周。树影在正午时分显得异常浓重，仿佛是用墨汁写就的阴影。",
+      "positive_base": "masterpiece, best quality, fantasy art, deep forest thicket, unnaturally dark shadows at noon, heavy twisted tree branches blocking sunlight, dark magic corruption visible as black tendrils on bark, eerie silence, ominous atmosphere, dense undergrowth, epic fantasy landscape, mysterious, unsettling mood, cinematic lighting, 8k, highres",
+      "positive_refiner": "deep forest, unnaturally dark shadows, ominous atmosphere, corrupted trees, mystery"
+    },
+    {
+      "id": "ch1_lv4_clear",
+      "chapter": 1,
+      "scene": "Ch1 Lv4通关 - 哥布林营地",
+      "story_text": "拨开最后一片藤蔓，你看到了令人愤怒的景象。哥布林王的营地里堆满了掠夺来的物资，几只森林生灵被关在粗糙的笼子里。",
+      "positive_base": "masterpiece, best quality, fantasy art, goblin king camp hidden in forest, piled loot and stolen goods, crude wooden cages trapping forest creatures, crude tents and bonfire, goblin banners, dark oppressive atmosphere, anger and injustice, epic fantasy scene, detailed environment, cinematic lighting, rich colors, 8k, highres",
+      "positive_refiner": "goblin camp in forest, piled loot, caged forest creatures, oppressive atmosphere"
+    },
+    {
+      "id": "ch1_first_clear",
+      "chapter": 1,
+      "scene": "Ch1 通关 - 发现词根碎片",
+      "story_text": "随着哥布林王的倒下，一阵微风吹过战场。在它王座的废墟中，一点微弱的蓝光吸引了你的注意。",
+      "positive_base": "masterpiece, best quality, fantasy art, goblin king's throne room after battle, rubble and debris, a faint glowing blue crystal shard among the ruins, magical blue light illumination, gentle wind effect, epic aftermath scene, sense of discovery, fantasy RPG, cinematic lighting, rich colors, 8k, highres",
+      "positive_refiner": "throne room ruins, glowing blue crystal shard, magical light, aftermath of battle"
+    },
+    {
+      "id": "ch2_chapter_start",
+      "chapter": 2,
+      "scene": "Ch2 起始 - 废弃的城堡语言学院",
+      "story_text": "穿过幽暗的森林，一座巍峨却破败的城堡矗立在荒原之上。曾经的白色石墙如今爬满了黑色的藤蔓，宛如一首被遗忘的挽歌。",
+      "positive_base": "masterpiece, best quality, fantasy art, a grand crumbling castle on a barren plain, white stone walls overgrown with black thorny vines, broken towers, shattered windows, dark clouds overhead, melancholic atmosphere, sense of fallen glory, abandoned academy, epic wide shot, dramatic sky, cinematic lighting, 8k, highres",
+      "positive_refiner": "crumbling castle on barren plain, black vines on white stone, melancholic atmosphere, dramatic sky"
+    },
+    {
+      "id": "ch2_lv1_clear",
+      "chapter": 2,
+      "scene": "Ch2 Lv1通关 - 残破魔法书",
+      "story_text": "大厅的地板上散落着破碎的骨骼和生锈的武器。在壁炉的灰烬中，你发现了一本烧了一半的魔法书，书页焦黑。",
+      "positive_base": "masterpiece, best quality, fantasy art, grand hall interior, scattered bones and rusted weapons on stone floor, fireplace with cold ashes, a half-burned magical book with blackened pages, faint embers still glowing, medieval castle interior, sense of tragedy and loss, epic fantasy scene, cinematic lighting, rich details, 8k, highres",
+      "positive_refiner": "castle grand hall, scattered bones, half-burned magical book in fireplace, tragic atmosphere"
+    },
+    {
+      "id": "ch2_lv2_clear",
+      "chapter": 2,
+      "scene": "Ch2 Lv2通关 - 发光铭文墙",
+      "story_text": "骷髅士兵从墙壁的阴影中消散。随着它们的倒下，墙壁上被尘封的铭文开始发出微弱的蓝光，仿佛在回应你的胜利。",
+      "positive_base": "masterpiece, best quality, fantasy art, ancient stone corridor, skeleton warriors dissolving into dark mist, glowing blue runic inscriptions on walls awakening, magical light emanating from carved symbols, dust motes in air, victorious atmosphere, mystery, fantasy RPG scene, cinematic lighting, 8k, highres",
+      "positive_refiner": "stone corridor, dissolving skeletons, blue glowing runes on walls, ancient magic awakening"
+    },
+    {
+      "id": "ch2_lv3_clear",
+      "chapter": 2,
+      "scene": "Ch2 Lv3通关 - 废弃教室",
+      "story_text": "推开一扇半掩的门，这是一间废弃的教室。黑板上还留着未擦去的练习题，桌椅东倒西歪，仿佛学生们是在一瞬间消失的。",
+      "positive_base": "masterpiece, best quality, fantasy art, abandoned magical classroom, chalkboard with half-erased exercises and spell diagrams, overturned desks and chairs, scattered papers, dust-covered bookshelves, window light casting long shadows, sense of sudden departure, melancholic, forgotten knowledge, epic fantasy interior, cinematic lighting, 8k, highres",
+      "positive_refiner": "abandoned magical classroom, chalkboard with writing, overturned furniture, melancholic atmosphere"
+    },
+    {
+      "id": "ch2_lv4_clear",
+      "chapter": 2,
+      "scene": "Ch2 Lv4通关 - 死亡骑士",
+      "story_text": "在大厅的尽头，死亡骑士手持一面被黑暗魔法污染的旗帜，挡住了去路。那面旗帜上的纹章已经被腐蚀，变成了狰狞的黑色。",
+      "positive_base": "masterpiece, best quality, fantasy art, dark castle hall, death knight in black armor holding a corrupted banner, banner emblem defiled with black ooze, glowing red eyes from helmet, dark aura, menacing pose, epic boss encounter, dramatic composition, fantasy RPG, cinematic lighting, 8k, highres",
+      "positive_refiner": "death knight in black armor, corrupted banner, dark hall, epic boss encounter"
+    },
+    {
+      "id": "ch2_first_clear",
+      "chapter": 2,
+      "scene": "Ch2 通关 - 发现密道",
+      "story_text": "随着死亡骑士的铠甲轰然倒地，那面被污染的旗帜化为灰烬。失去了邪恶力量的支撑，大厅中央的地板突然塌陷，露出了一条通往地下的幽暗密道。",
+      "positive_base": "masterpiece, best quality, fantasy art, grand hall after epic battle, fallen death knight armor on floor, corrupted banner burning to ashes, collapsed floor revealing dark staircase descending underground, mysterious passage, victorious atmosphere, epic aftermath, fantasy RPG, cinematic lighting, 8k, highres",
+      "positive_refiner": "hall after battle, fallen knight, collapsed floor revealing underground passage, mystery"
+    },
+    {
+      "id": "ch3_chapter_start",
+      "chapter": 3,
+      "scene": "Ch3 起始 - 被破坏的学院大门",
+      "story_text": "沿着密道前行，你们终于抵达了真正的魔法学院。然而，眼前的景象让人心碎。宏伟的大门被巨大的力量轰开，象征智慧的石柱倒在尘埃中。",
+      "positive_base": "masterpiece, best quality, fantasy art, destroyed magical academy entrance, massive doors blasted open by force, broken stone pillars representing wisdom lying in rubble, magical energy crackling in air, ruined grandeur, sense of loss, epic wide shot, dramatic lighting, fire and smoke, fantasy RPG, 8k, highres",
+      "positive_refiner": "destroyed magical academy entrance, broken pillars, rubble, sense of loss and grandeur"
+    },
+    {
+      "id": "ch3_lv1_clear",
+      "chapter": 3,
+      "scene": "Ch3 Lv1通关 - 混乱的庭院",
+      "story_text": "庭院里一片狼藉，喷泉干涸，魔法植物枯萎。散落的卷轴被踩进泥土里，上面记载的咒语永远无法完成了。",
+      "positive_base": "masterpiece, best quality, fantasy art, ruined courtyard of magical academy, dried fountain, withered magical plants, torn scrolls trampled into mud, broken pottery, overgrown vines on walls, melancholic atmosphere, tragedy of lost knowledge, epic fantasy scene, cinematic lighting, rich colors, 8k, highres",
+      "positive_refiner": "ruined courtyard, dried fountain, withered magical plants, trampled scrolls, tragic atmosphere"
+    },
+    {
+      "id": "ch3_lv2_clear",
+      "chapter": 3,
+      "scene": "Ch3 Lv2通关 - 受伤学徒",
+      "story_text": "在一堆瓦砾旁，你们发现了一名受伤的学徒。他紧紧抓着一块魔法水晶，眼神中充满了恐惧和希望。",
+      "positive_base": "masterpiece, best quality, fantasy art, young apprentice student in robes lying among rubble, wounded and bruised, clutching a glowing magical crystal tightly, expression of fear mixed with hope, destroyed classroom background, dust and debris, emotional scene, fantasy character portrait, cinematic lighting, 8k, highres",
+      "positive_refiner": "wounded young apprentice among rubble, clutching magical crystal, fear and hope in eyes"
+    },
+    {
+      "id": "ch3_lv3_clear",
+      "chapter": 3,
+      "scene": "Ch3 Lv3通关 - 大法师魔法残影",
+      "story_text": "走廊的空气中残留着强烈的魔力爆炸痕迹。大法师的警告魔法影像在空气中闪烁，像是一段无法消逝的回声。",
+      "positive_base": "masterpiece, best quality, fantasy art, corridor with traces of magical explosion, scorch marks on walls, a translucent magical projection of an archmage in mid-air, flickering like a hologram, urgent expression on the projection's face, magical energy sparks, dramatic scene, fantasy RPG, cinematic lighting, 8k, highres",
+      "positive_refiner": "corridor with magical explosion traces, flickering holographic archmage projection, urgent warning"
+    },
+    {
+      "id": "ch3_first_clear",
+      "chapter": 3,
+      "scene": "Ch3 通关 - 大法师的嘱托",
+      "story_text": "战斗结束了。大法师虚弱地坐在词根圣殿的废墟中，他的法袍破损，魔杖断成了两截。",
+      "positive_base": "masterpiece, best quality, fantasy art, ancient word sanctum in ruins, old archmage sitting weakly among rubble, torn robes, broken staff in two pieces, exhausted but dignified expression, magical energy fading around him, solemn and emotional moment, epic fantasy scene, cinematic lighting, rich colors, 8k, highres",
+      "positive_refiner": "archmage sitting in ruined sanctum, torn robes, broken staff, solemn emotional moment"
+    },
+    {
+      "id": "ch4_chapter_start",
+      "chapter": 4,
+      "scene": "Ch4 起始 - 精灵森林",
+      "story_text": "穿过阴冷的地底密道，你们终于重见天日。眼前是一片古老而幽深的森林，巨大的古树散发着微弱的荧光，照亮了前行的路。",
+      "positive_base": "masterpiece, best quality, fantasy art, ancient elven forest, massive glowing trees with bioluminescent bark, blue and green magical light illuminating the path, mystical atmosphere, fireflies dancing in air, thick moss on roots, ethereal beauty, fantasy landscape, epic scene, cinematic lighting, rich colors, 8k, highres",
+      "positive_refiner": "ancient elven forest, bioluminescent trees, mystical atmosphere, glowing magical forest"
+    },
+    {
+      "id": "ch4_lv1_clear",
+      "chapter": 4,
+      "scene": "Ch4 Lv1通关 - 影狼的阴影",
+      "story_text": "灌木丛中闪过几双猩红的眼睛，那是被黑暗魔法扭曲的影狼。它们的形态不再矫健，而是充满了暴戾与饥渴。",
+      "positive_base": "masterpiece, best quality, fantasy art, dark forest thicket, pairs of glowing red eyes in the bushes, shadow wolves with twisted forms, corrupted by dark magic, aggressive stance, drooling maws, fur rippling with dark energy, tense predator encounter, horror fantasy, cinematic lighting, dramatic shadows, 8k, highres",
+      "positive_refiner": "shadow wolves in dark forest, glowing red eyes, corrupted beasts, tense encounter"
+    },
+    {
+      "id": "ch4_lv2_clear",
+      "chapter": 4,
+      "scene": "Ch4 Lv2通关 - 枯萎林地",
+      "story_text": "你们踏入了一片诡异的林区。这里的树木不再发光，树皮干裂剥落，地面上刻满了扭曲、丑陋的文字，仿佛在流血。",
+      "positive_base": "masterpiece, best quality, fantasy art, eerie blighted forest, dead trees with peeling bark, no glowing light, ground carved with twisted runic symbols glowing dark red like bleeding wounds, corrupted land, dark magic ritual site, unsettling atmosphere, fantasy horror, cinematic lighting, 8k, highres",
+      "positive_refiner": "blighted forest, dead trees, bleeding runic symbols on ground, corrupted land, unsettling"
+    },
+    {
+      "id": "ch4_lv3_clear",
+      "chapter": 4,
+      "scene": "Ch4 Lv3通关 - 精灵斥候",
+      "story_text": "一名身穿绿叶铠甲的精灵斥候从树冠上轻盈地跃下，拦住了你们的去路。她的眼神警惕而锐利。",
+      "positive_base": "masterpiece, best quality, fantasy art, elven scout in leaf-themed green armor, leaping down from tree canopy, landing gracefully, alert and sharp-eyed expression, bow in hand, forest background, agile pose, fantasy character design, detailed armor, dynamic action, cinematic lighting, 8k, highres",
+      "positive_refiner": "elven scout in leaf armor, leaping from tree, alert expression, dynamic pose"
+    },
+    {
+      "id": "ch4_lv4_clear",
+      "chapter": 4,
+      "scene": "Ch4 Lv4通关 - 被侵蚀的树精长老",
+      "story_text": "在精灵斥候的带领下，你们来到了世界树最古老的根须处。然而，眼前的景象令人震惊——巨大的树精长老被黑气缠绕，双眼发出不祥的红光。",
+      "positive_base": "masterpiece, best quality, fantasy art, ancient world tree roots, massive treeant elder corrupted by dark energy, black mist swirling around its body, eyes glowing ominous red, twisted branches writhing like tentacles, dark corruption spreading through roots, epic boss reveal, dramatic scene, fantasy RPG, cinematic lighting, 8k, highres",
+      "positive_refiner": "corrupted treeant elder, black mist, glowing red eyes, world tree roots, epic boss reveal"
+    },
+    {
+      "id": "ch4_first_clear",
+      "chapter": 4,
+      "scene": "Ch4 通关 - 精灵护符",
+      "story_text": "树精长老的树枝轻轻触碰你的额头，一段古老的知识流入了你的脑海。精灵向导微笑着递给你一枚散发着清香的护符。",
+      "positive_base": "masterpiece, best quality, fantasy art, purified treeant elder touching adventurer's forehead with a glowing branch, transfer of ancient knowledge, magical blue light connecting them, elf guide standing beside with warm smile, holding out a glowing amulet, purified forest scene, healing light, peaceful resolution, emotional moment, cinematic lighting, 8k, highres",
+      "positive_refiner": "treeant elder blessing adventurer, glowing branch touching forehead, elf guide with amulet, peaceful"
+    },
+    {
+      "id": "ch5_chapter_start",
+      "chapter": 5,
+      "scene": "Ch5 起始 - 矮人矿坑入口",
+      "story_text": "告别了森林，北方的山脉在地平线上投下巨大的阴影。热气从矮人矿坑的入口滚滚涌出，空气中弥漫着硫磺的味道。",
+      "positive_base": "masterpiece, best quality, fantasy art, mountain landscape, massive dwarven mine entrance in cliff face, hot steam billowing out, glowing orange light from within, sulfurous atmosphere, rocky terrain, distant forest behind, dwarven architecture carved into stone, epic fantasy landscape, dramatic sky, cinematic lighting, 8k, highres",
+      "positive_refiner": "dwarven mine entrance in mountain, steam billowing, fiery glow, epic landscape"
+    },
+    {
+      "id": "ch5_lv1_clear",
+      "chapter": 5,
+      "scene": "Ch5 Lv1通关 - 碎裂的石像鬼",
+      "story_text": "几尊原本用于守护矿坑入口的石像鬼雕像碎裂在地。它们的碎片上残留着黑色的魔法余烬，仿佛是被从内部强行唤醒后打碎的。",
+      "positive_base": "masterpiece, best quality, fantasy art, underground mine tunnel, shattered gargoyle statues on ground, dark magical residue on broken pieces, crumbling stone, pickaxe marks on walls, lit by flickering torchlight, aftermath of magical awakening, dwarven architecture, fantasy scene, cinematic lighting, 8k, highres",
+      "positive_refiner": "shattered gargoyle statues in mine tunnel, dark magic residue, torchlight"
+    },
+    {
+      "id": "ch5_lv2_clear",
+      "chapter": 5,
+      "scene": "Ch5 Lv2通关 - 古代龙壁画",
+      "story_text": "你们深入矿坑，发现了一个被挖开的古代墓穴。墙壁上的壁画虽然年代久远，但依然清晰可见：画着巨大的有翼生物和被锁链束缚的太阳。",
+      "positive_base": "masterpiece, best quality, fantasy art, ancient tomb chamber opened by dwarven mining, walls covered in ancient frescoes, paintings of winged dragon-like creatures, a sun bound in chains, dwarven-style architecture, dust and age, mysterious discovery, archaeological wonder, epic fantasy scene, cinematic lighting, 8k, highres",
+      "positive_refiner": "ancient tomb with dragon frescoes, chained sun mural, dwarven mine discovery"
+    },
+    {
+      "id": "ch5_lv3_clear",
+      "chapter": 5,
+      "scene": "Ch5 Lv3通关 - 矮人工匠",
+      "story_text": "在一片被岩浆包围的工坊里，一位幸存的矮人工匠正绝望地试图修复一扇被破坏的铁门。他看到你们，眼中闪过一丝希望。",
+      "positive_base": "masterpiece, best quality, fantasy art, dwarven forge workshop surrounded by lava flows, surviving dwarf craftsman desperately trying to repair a damaged iron door, sweat on brow, tools scattered, molten glow, hope in his eyes as he sees the party, dramatic rescue scene, fantasy RPG, warm fire lighting, cinematic, 8k, highres",
+      "positive_refiner": "dwarven forge surrounded by lava, desperate craftsman repairing door, hope in eyes"
+    },
+    {
+      "id": "ch5_lv4_clear",
+      "chapter": 5,
+      "scene": "Ch5 Lv4通关 - 失控的熔岩巨人",
+      "story_text": "矮人工匠用颤抖的手打开了核心熔炉的最后一扇铁门。热浪扑面而来，眼前是一座巨大的熔炉核心，岩浆在下方翻涌沸腾。",
+      "positive_base": "masterpiece, best quality, fantasy art, massive forge core chamber, lava churning below, a colossal lava giant emerging from molten rock, chest embedded with a glowing red corrupted word fragment, intense heat, sparks and embers, epic boss fight scene, dwarven forge interior, dramatic scale, cinematic lighting, 8k, highres",
+      "positive_refiner": "lava giant emerging from molten core, corrupted gem in chest, epic boss encounter"
+    },
+    {
+      "id": "ch5_key",
+      "chapter": 5,
+      "scene": "Ch5 通关 - 符文钥匙",
+      "story_text": "一把闪烁着蓝色符文的厚重钥匙交到了你的手中。",
+      "positive_base": "masterpiece, best quality, fantasy art, close-up of a heavy dwarven key made of ancient metal, glowing blue runes on its surface, intricate craftsmanship, held in hands, dramatic lighting highlighting the runes, dark background to emphasize glow, magical artifact, epic fantasy item, 8k, highres",
+      "positive_refiner": "close-up of rune-etched dwarven key, blue glowing runes, magical artifact"
+    }
+  ],
+  "negative_prompt_base": "text, watermark, signature, ugly, deformed, blurry, low quality, bad anatomy, bad hands, extra fingers, nsfw, nude, modern clothing, realistic photo, horror, gore",
+  "negative_prompt_refiner": "text, watermark, signature, ugly, deformed, blurry, low quality, nsfw, modern",
+  "workflow_template": "scripts/sdxl_refiner_prompt_example.json",
+  "generation_params": {
+    "model_base": "sd_xl_base_1.0.safetensors",
+    "model_refiner": "sd_xl_refiner_1.0.safetensors",
+    "width": 1024,
+    "height": 1024,
+    "steps": 25,
+    "cfg": 8,
+    "sampler": "euler",
+    "scheduler": "normal",
+    "base_end_step": 20,
+    "refiner_start_step": 20
+  }
+}
