@@ -187,14 +187,12 @@ function SinglePageContent({
   );
 
   const handleTextComplete = useCallback(() => {
-    setActiveTextIdx(prev => {
-      const next = prev + 1;
-      if (next >= textPanels.length) {
-        setAllDone(true);
-      }
-      return next;
-    });
-  }, [textPanels.length]);
+    const next = activeTextIdx + 1;
+    setActiveTextIdx(next);
+    if (next >= textPanels.length) {
+      setAllDone(true);
+    }
+  }, [activeTextIdx, textPanels.length]);
 
   // Map each panel to its order in textPanels
   const panelTextOrder = useMemo(() => {
