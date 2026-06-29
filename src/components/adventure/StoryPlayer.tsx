@@ -172,10 +172,13 @@ function SinglePageContent({
   onChoice: (flag?: string) => void;
   onContinue: () => void;
 }) {
-  const [textDone, setTextDone] = useState(false);
+  const [activeTextIdx, setActiveTextIdx] = useState(0);
+  const [allDone, setAllDone] = useState(false);
   const [selected, setSelected] = useState(false);
-  const allText = useMemo(() =>
-    beat.panels.filter(p => p.text).map(p => p.text!).join('\n\n'),
+
+  // Panels that have text, in order (for sequential typewriter)
+  const textPanels = useMemo(() =>
+    beat.panels.filter(p => p.type === 'text' || (p.type === 'image' && p.text)),
     [beat.panels]
   );
   const choicePanel = useMemo(() =>
@@ -183,51 +186,109 @@ function SinglePageContent({
     [beat.panels]
   );
 
+  const handleTextComplete = useCallback(() => {
+    setActiveTextIdx(prev => {
+      const next = prev + 1;
+      if (next >= textPanels.length) {
+        setAllDone(true);
+      }
+      return next;
+    });
+  }, [textPanels.length]);
+
+  // Map each panel to its order in textPanels
+  const panelTextOrder = useMemo(() => {
+    const map = new Map<StoryPanel, number>();
+    let idx = 0;
+    for (const p of beat.panels) {
+      if (p.type === 'text' || (p.type === 'image' && p.text)) {
+        map.set(p, idx++);
+      }
+    }
+    return map;
+  }, [beat.panels]);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex flex-col items-center gap-8 overflow-y-auto max-h-[80vh]"
+      className="flex flex-col items-center gap-6 overflow-y-auto max-h-[80vh] w-full"
     >
-      {/* Enlarged images */}
-      {beat.panels.filter(p => p.type === 'image').map((panel, i) => (
-        <div key={i} className="flex w-full max-w-3xl shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-800" style={{ minHeight: '30vh' }}>
-          {panel.imagePath ? (
-            <img
-              src={`/assets/images/${panel.imagePath}.png`}
-              alt={panel.text ?? ''}
-              className="max-h-[70vh] w-full object-contain"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-                (e.target as HTMLImageElement).parentElement!.classList.add('flex', 'items-center', 'justify-center');
-                (e.target as HTMLImageElement).parentElement!.innerHTML = '🎨';
-              }}
-            />
-          ) : (
-            <span className="text-5xl">🎨</span>
-          )}
-        </div>
-      ))}
+      {beat.panels.map((panel, i) => {
+        const textOrder = panelTextOrder.get(panel); // undefined if no text
+        const isTextActive = textOrder === activeTextIdx;
+        const isTextPast = textOrder !== undefined && textOrder < activeTextIdx;
 
-      {/* Single typewriter for all text */}
-      <div className="w-full max-w-2xl">
-        <TypewriterText
-          text={allText}
-          speed={25}
-          onComplete={() => setTextDone(true)}
-          className="text-lg leading-relaxed text-gray-100 whitespace-pre-line"
-        />
-      </div>
+        return (
+          <div key={i} className="flex w-full max-w-5xl gap-6 items-start">
+            {/* Image (1:1 square, left side) */}
+            {panel.type === 'image' && (
+              <div className="w-1/2 shrink-0 aspect-square overflow-hidden rounded-xl bg-gray-800">
+                {panel.imagePath ? (
+                  <img
+                    src={`/assets/images/${panel.imagePath}.png`}
+                    alt={panel.text ?? ''}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).parentElement!.classList.add('flex', 'items-center', 'justify-center');
+                      (e.target as HTMLImageElement).parentElement!.innerHTML = '🎨';
+                    }}
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-5xl">🎨</div>
+                )}
+              </div>
+            )}
 
-      {/* Choices — show at bottom */}
+            {/* Text (right side) — only text-type panels get full width */}
+            {panel.text && panel.type === 'text' && (
+              <div className="flex-1 min-w-0">
+                {panel.character && (
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-700 text-xl">
+                      {panel.character === '精灵向导' && '🧝'}
+                      {panel.character === '大法师' && '🧙'}
+                      {panel.character === '矮人长老' && '⛏️'}
+                      {panel.character === '暗黑骑士' && '⚫'}
+                      {panel.character === '远古红龙' && '🐉'}
+                      {panel.character === '系统' && '📖'}
+                      {!['精灵向导', '大法师', '矮人长老', '暗黑骑士', '远古红龙', '系统'].includes(panel.character) && '👤'}
+                    </span>
+                    <span className="text-lg font-semibold text-amber-300">{panel.character}</span>
+                  </div>
+                )}
+                <div className="text-lg leading-relaxed text-gray-100">
+                  {isTextPast ? panel.text : isTextActive ? (
+                    <TypewriterText text={panel.text} speed={25} onComplete={handleTextComplete} />
+                  ) : null}
+                </div>
+              </div>
+            )}
+
+            {/* Image caption text (shown to the right of the image) */}
+            {panel.text && panel.type === 'image' && (
+              <div className="flex-1 min-w-0 self-center">
+                <div className="text-base leading-relaxed text-gray-200">
+                  {isTextPast ? panel.text : isTextActive ? (
+                    <TypewriterText text={panel.text} speed={25} onComplete={handleTextComplete} />
+                  ) : null}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      {/* Choices at bottom */}
       {choicePanel?.type === 'choice' && choicePanel.choices && (
-        <div className="flex w-full max-w-md flex-col gap-4">
+        <div className="flex w-full max-w-md flex-col gap-4 mt-4">
           {choicePanel.text && (
             <p className="mb-2 text-center text-lg text-gray-200">{choicePanel.text}</p>
           )}
-          {choicePanel.choices.map((choice, i) => (
+          {choicePanel.choices.map((choice, ci) => (
             <button
-              key={i}
+              key={ci}
               onClick={() => {
                 if (selected) return;
                 setSelected(true);
@@ -244,11 +305,11 @@ function SinglePageContent({
         </div>
       )}
 
-      {/* Continue button — only after text fully typed */}
-      {textDone && !choicePanel && (
+      {/* Continue button — after all text typed and no choices */}
+      {allDone && !choicePanel && (
         <button
           onClick={onContinue}
-          className="mt-4 rounded-lg bg-amber-600 px-10 py-3 text-lg font-bold text-white transition hover:bg-amber-500 active:scale-95"
+          className="mt-2 rounded-lg bg-amber-600 px-10 py-3 text-lg font-bold text-white transition hover:bg-amber-500 active:scale-95"
         >
           继续 →
         </button>
