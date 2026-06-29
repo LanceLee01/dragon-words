@@ -1,0 +1,28 @@
+diff --git a/src/components/ui/FlyReward.tsx b/src/components/ui/FlyReward.tsx
+index 16dec54..bc4e487 100644
+--- a/src/components/ui/FlyReward.tsx
++++ b/src/components/ui/FlyReward.tsx
+@@ -21,7 +21,7 @@ const TYPE_ICONS: Record<string, string> = {
+   cosmetic: '✨',
+ };
+ 
+-export function FlyReward({ rewards, onComplete }: FlyRewardProps) {
++export function FlyReward({ rewards, origin, onComplete }: FlyRewardProps) {
+   const [visible, setVisible] = useState(true);
+ 
+   useEffect(() => {
+@@ -39,12 +39,12 @@ export function FlyReward({ rewards, onComplete }: FlyRewardProps) {
+   return (
+     <AnimatePresence>
+       {visible && (
+-        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
++        <div key="fly-rewards" className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
+           {rewards.map((reward, i) => (
+             <motion.div
+               key={`${reward.type}-${i}`}
+               className="absolute flex items-center gap-2 rounded-full bg-gray-800/90 px-4 py-2 text-lg font-bold text-white shadow-lg"
+-              initial={{ opacity: 0, y: 0, scale: 0.5 }}
++              initial={{ opacity: 0, y: origin?.y ?? 0, scale: 0.5 }}
+               animate={{
+                 opacity: [0, 1, 1, 0],
+                 y: [0, -40 - i * 30, -80 - i * 30],

@@ -77,8 +77,8 @@ export const MONSTERS: Record<string, MonsterDef> = {
     attack: 18,
     isBoss: true,
     skills: [
-      { name: '狼嚎', description: '提升攻擊力', attackBuff: 1.3, weight: 1 },
-      { name: '撕裂', description: '造成1.5倍傷害', multiplier: 1.5, weight: 1 },
+      { name: '狼嚎', description: '提升攻击力', attackBuff: 1.3, weight: 1 },
+      { name: '撕裂', description: '造成1.5倍伤害', multiplier: 1.5, weight: 1 },
     ],
   },
 

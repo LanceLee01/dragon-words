@@ -1,0 +1,80 @@
+diff --git a/src/core/data/types.ts b/src/core/data/types.ts
+index f3dc672..65a5120 100644
+--- a/src/core/data/types.ts
++++ b/src/core/data/types.ts
+@@ -338,3 +338,75 @@ export type Question =
+   | SpellQuestion
+   | PosQuestion
+   | MatchQuestion;
++
++// =====================================================================
++// P1 Module Shared Types  (hidden random events, affixes, DDA, micro-story)
++// =====================================================================
++
++/** Points at which a random event may trigger */
++export type TriggerPoint =
++  | 'boss_victory'
++  | 'daily_login'
++  | 'login_streak'
++  | 'chapter_first_clear'
++  | 'achievement'
++  | 'game_start';
++
++/** Current DDA modifiers — all fields are serializable */
++export interface DDAModifiers {
++  monsterHpMul: number;
++  monsterAtkMul: number;
++  timeBonus: number;
++  easyWordBias: number;
++  hardWordBias: number;
++  forceEasyWord: boolean;
++  forceTutor: boolean;
++  extraShield: number;
++  rewardGoldMul: number;
++  rewardXpMul: number;
++  dropRarityBonus: number;
++  challengeMode: boolean;
++}
++
++/** Accumulated battle stats after applying all equipment affixes */
++export interface BattleStats {
++  critRate: number;
++  critDmg: number;
++  elementalDmg: number;
++  armorPen: number;
++  dotDmg: number;
++  shieldBreak: number;
++  maxHp: number;
++  hpRegen: number;
++  dmgReduction: number;
++  shieldMax: number;
++  statusResist: number;
++  thorns: number;
++  goldBonus: number;
++  xpBonus: number;
++  comboDecayReduction: number;
++  skillChargeSpeed: number;
++  timeBonus: number;
++  autoRemoveDistractor: number;
++  doubleCast: boolean;
++  omniResist: number;
++  infiniteCombo: boolean;
++  cheatDeath: boolean;
++  killHeal: number;
++  skillDoubleCast: boolean;
++}
++
++/** Union of all affix stat keys (keeps affixes and BattleStats in sync) */
++export type AffixStat = keyof BattleStats;
++
++/** Return type of EventEngine.executeChoice() */
++export interface EventResult {
++  rewards: Array<{ type: string; amount: number }>;
++  nextEvent: null | { id: string };
++  flags: string[];
++}
++
++/** Global flags container for story branching (Chapter 15 endings) */
++export interface GameFlags {
++  flags: Set<string>;
++}

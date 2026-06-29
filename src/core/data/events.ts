@@ -68,12 +68,12 @@ export const EVENT_POOL: RandomEvent[] = [
     triggerPoints: ['boss_victory', 'daily_login'],
     title: '流浪商人 — 盔甲商',
     description:
-      '一位身披斗篷的商人推著滿載盔甲的手推車緩緩走來。他掀開布簾，露出閃閃發光的護甲。「冒險者，這些可都是上等貨色。怎麼樣，有興趣嗎？」',
+      '一位身披斗篷的商人推着满载盔甲的手推车缓缓走来。他掀开布帘，露出闪闪发光的护甲。「冒险者，这些可都是上等货色。怎么样，有兴趣吗？」',
     illustration: 'merchant_armor',
     choices: [
       {
         id: 'buy_leather',
-        text: '購買皮甲（50金）',
+        text: '购买皮甲（50金）',
         icon: '🛒',
         cost: [{ type: 'gold', amount: 50 }],
         outcome: 'success',
@@ -81,7 +81,7 @@ export const EVENT_POOL: RandomEvent[] = [
       },
       {
         id: 'buy_chainmail',
-        text: '購買鎖子甲（120金）',
+        text: '购买锁子甲（120金）',
         icon: '🛒',
         cost: [{ type: 'gold', amount: 120 }],
         outcome: 'success',
@@ -89,7 +89,7 @@ export const EVENT_POOL: RandomEvent[] = [
       },
       {
         id: 'decline',
-        text: '暫時不需要',
+        text: '暂时不需要',
         icon: '🚶',
         outcome: 'success',
         successRewards: [],
@@ -106,12 +106,12 @@ export const EVENT_POOL: RandomEvent[] = [
     triggerPoints: ['boss_victory', 'daily_login'],
     title: '流浪商人 — 藥水商',
     description:
-      '一股草藥味撲鼻而來。一個滿頭白髮的老者坐在路邊，面前擺滿了各式各樣的瓶瓶罐罐。「年輕人啊，我看你氣色不太好，來瓶回血藥水吧？包你精神百倍！」',
+      '一股草药味扑鼻而来。一个满头白发的老者坐在路边，面前摆满了各式各样的瓶瓶罐罐。「年轻人啊，我看你气色不太好，来瓶回血药水吧？包你精神百倍！」',
     illustration: 'merchant_potion',
     choices: [
       {
         id: 'buy_hp_potion',
-        text: '購買回血藥水（30金）',
+        text: '购买回血药水（30金）',
         icon: '🧪',
         cost: [{ type: 'gold', amount: 30 }],
         outcome: 'success',
@@ -119,7 +119,7 @@ export const EVENT_POOL: RandomEvent[] = [
       },
       {
         id: 'buy_elixir',
-        text: '購買精力藥劑（80金）',
+        text: '购买精力药剂（80金）',
         icon: '⚗️',
         cost: [{ type: 'gold', amount: 80 }],
         outcome: 'success',
@@ -142,14 +142,14 @@ export const EVENT_POOL: RandomEvent[] = [
     minChapter: 3,
     cooldownDays: 2,
     triggerPoints: ['boss_victory'],
-    title: '流浪商人 — 地圖商',
+    title: '流浪商人 — 地图商',
     description:
-      '一名遮住半邊臉的商人神秘地招手。「嘿，我這裡有一張藏寶圖，據說標記了某個古老遺跡的位置。有興趣的話……價格好商量。」',
+      '一名遮住半边脸的商人神秘地招手。「嘿，我这里有一张藏宝图，据说标记了某个古老遗迹的位置。有兴趣的话……价格好商量。」',
     illustration: 'merchant_map',
     choices: [
       {
         id: 'buy_map',
-        text: '購買藏寶圖（100金）',
+        text: '购买藏宝图（100金）',
         icon: '🗺️',
         cost: [{ type: 'gold', amount: 100 }],
         outcome: 'random',
@@ -159,7 +159,7 @@ export const EVENT_POOL: RandomEvent[] = [
       },
       {
         id: 'refuse',
-        text: '覺得是騙局，離開',
+        text: '觉得是骗局，离开',
         icon: '🚶',
         outcome: 'success',
         successRewards: [],
@@ -168,7 +168,7 @@ export const EVENT_POOL: RandomEvent[] = [
     rewards: [],
   },
 
-  // ── Puzzle (古老謎題) ────────────────────────────────────────────────
+  // ── Puzzle (古老谜题) ────────────────────────────────────────────────
   {
     id: 'puzzle_rune',
     weight: 20,
@@ -177,14 +177,14 @@ export const EVENT_POOL: RandomEvent[] = [
     cooldownDays: 3,
     oncePerRun: true,
     triggerPoints: ['boss_victory', 'chapter_first_clear'],
-    title: '古老謎題 — 符文石',
+    title: '古老谜题 — 符文石',
     description:
-      '一塊巨大的符文石擋住了去路。石面上刻滿了發光的古代文字，似乎在考驗過路者的智慧。符文緩緩流轉，等待著你的答案。',
+      '一块巨大的符文石挡住了去路。石面上刻满了发光的古代文字，似乎在考验过路者的智慧。符文缓缓流转，等待着你的答案。',
     illustration: 'puzzle_rune',
     choices: [
       {
         id: 'solve',
-        text: '嘗試解讀符文（智力考驗）',
+        text: '尝试解读符文（智力考验）',
         icon: '🧠',
         outcome: 'random',
         successRate: 0.5,
@@ -196,7 +196,7 @@ export const EVENT_POOL: RandomEvent[] = [
       },
       {
         id: 'force',
-        text: '強行破壞符文',
+        text: '强行破坏符文',
         icon: '⚡',
         outcome: 'random',
         successRate: 0.3,
@@ -205,7 +205,7 @@ export const EVENT_POOL: RandomEvent[] = [
       },
       {
         id: 'bypass',
-        text: '繞路而行',
+        text: '绕路而行',
         icon: '🚶',
         outcome: 'success',
         successRewards: [],
@@ -221,14 +221,14 @@ export const EVENT_POOL: RandomEvent[] = [
     cooldownDays: 4,
     oncePerRun: true,
     triggerPoints: ['boss_victory'],
-    title: '古老謎題 — 守門人的問題',
+    title: '古老谜题 — 守门人的问题',
     description:
-      '一道巨大的鐵門前，一個由光影構成的守門人浮現。「回答我的問題，或者……承受後果。」他用空洞的聲音說道。',
+      '一道巨大的铁门前，一个由光影构成的守门人浮现。「回答我的问题，或者……承受后果。」他用空洞的声音说道。',
     illustration: 'puzzle_riddle',
     choices: [
       {
         id: 'answer',
-        text: '回答謎題',
+        text: '回答谜题',
         icon: '💬',
         outcome: 'random',
         successRate: 0.4,
@@ -240,7 +240,7 @@ export const EVENT_POOL: RandomEvent[] = [
       },
       {
         id: 'bribe',
-        text: '賄賂守門人（60金）',
+        text: '贿赂守门人（60金）',
         icon: '💰',
         cost: [{ type: 'gold', amount: 60 }],
         outcome: 'success',
@@ -250,7 +250,7 @@ export const EVENT_POOL: RandomEvent[] = [
     rewards: [],
   },
 
-  // ── Elite (精英怪挑戰) ──────────────────────────────────────────────
+  // ── Elite (精英怪挑战) ──────────────────────────────────────────────
   {
     id: 'elite_wolf',
     weight: 25,
@@ -258,14 +258,14 @@ export const EVENT_POOL: RandomEvent[] = [
     minChapter: 1,
     cooldownDays: 2,
     triggerPoints: ['boss_victory', 'chapter_first_clear'],
-    title: '精英怪 — 巨狼首領',
+    title: '精英怪 — 巨狼首领',
     description:
-      '草叢中傳來低沉的咆哮。一頭比同類大兩倍的巨狼緩緩步出，眼中閃爍著紅光。牠的牙齒上還掛著上一個挑戰者的布條。',
+      '草丛中传来低沉的咆哮。一头比同类大两倍的巨狼缓缓步出，眼中闪烁着红光。它的牙齿上还挂着上一个挑战者的布条。',
     illustration: 'elite_wolf',
     choices: [
       {
         id: 'fight',
-        text: '迎戰巨狼',
+        text: '迎战巨狼',
         icon: '⚔️',
         outcome: 'success',
         action: 'battle',
@@ -278,7 +278,7 @@ export const EVENT_POOL: RandomEvent[] = [
       },
       {
         id: 'sneak',
-        text: '悄悄繞過',
+        text: '悄悄绕过',
         icon: '👤',
         outcome: 'random',
         successRate: 0.7,
@@ -295,14 +295,14 @@ export const EVENT_POOL: RandomEvent[] = [
     minChapter: 5,
     cooldownDays: 3,
     triggerPoints: ['boss_victory'],
-    title: '精英怪 — 石像鬼守衛',
+    title: '精英怪 — 石像鬼守卫',
     description:
-      '一座古老的石像鬼突然從雕像底座上活了過來！牠伸展著石化翅膀，發出刺耳的尖叫聲，震得地面都在顫抖。',
+      '一座古老的石像鬼突然从雕像底座上活了过来！它伸展着石化翅膀，发出刺耳的尖叫声，震得地面都在颤抖。',
     illustration: 'elite_golem',
     choices: [
       {
         id: 'fight',
-        text: '與石像鬼戰鬥',
+        text: '与石像鬼战斗',
         icon: '⚔️',
         outcome: 'random',
         successRate: 0.45,
@@ -315,7 +315,7 @@ export const EVENT_POOL: RandomEvent[] = [
       },
       {
         id: 'parley',
-        text: '嘗試交涉',
+        text: '尝试交涉',
         icon: '💬',
         outcome: 'random',
         successRate: 0.3,
@@ -326,7 +326,7 @@ export const EVENT_POOL: RandomEvent[] = [
     rewards: [],
   },
 
-  // ── Chest (神秘寶箱) ────────────────────────────────────────────────
+  // ── Chest (神秘宝箱) ────────────────────────────────────────────────
   {
     id: 'chest_wooden',
     weight: 35,
@@ -334,14 +334,14 @@ export const EVENT_POOL: RandomEvent[] = [
     minChapter: 1,
     cooldownDays: 1,
     triggerPoints: ['boss_victory', 'daily_login'],
-    title: '神秘寶箱 — 木箱',
+    title: '神秘宝箱 — 木箱',
     description:
-      '一個樸素的木箱出現在路中央，沒有上鎖，卻散發著淡淡的魔法氣息。裡面可能裝著有用的物資……也可能什麼都沒有。',
+      '一个朴素的木箱出现在路中央，没有上锁，却散发着淡淡的魔法气息。里面可能装着有用的物资……也可能什么都没有。',
     illustration: 'chest_wooden',
     choices: [
       {
         id: 'open',
-        text: '打開寶箱',
+        text: '打开宝箱',
         icon: '📦',
         outcome: 'random',
         successRate: 0.7,
@@ -353,7 +353,7 @@ export const EVENT_POOL: RandomEvent[] = [
       },
       {
         id: 'leave',
-        text: '無視寶箱',
+        text: '无视宝箱',
         icon: '🚶',
         outcome: 'success',
         successRewards: [],
@@ -369,14 +369,14 @@ export const EVENT_POOL: RandomEvent[] = [
     cooldownDays: 4,
     oncePerRun: true,
     triggerPoints: ['boss_victory', 'chapter_first_clear'],
-    title: '神秘寶箱 — 黃金寶箱',
+    title: '神秘宝箱 — 黄金宝箱',
     description:
-      '一個華麗的黃金寶箱鑲嵌著各種寶石，靜靜地放在祭壇上。週圍刻著警告符文：『貪婪者，慎之。』',
+      '一个华丽的黄金宝箱镶嵌着各种宝石，静静地放在祭坛上。周围刻着警告符文：『贪婪者，慎之。』',
     illustration: 'chest_golden',
     choices: [
       {
         id: 'open',
-        text: '打開黃金寶箱',
+        text: '打开黄金宝箱',
         icon: '📦',
         outcome: 'random',
         successRate: 0.35,
@@ -392,7 +392,7 @@ export const EVENT_POOL: RandomEvent[] = [
       },
       {
         id: 'examine',
-        text: '仔細檢查符文',
+        text: '仔细检查符文',
         icon: '🔍',
         outcome: 'success',
         successRewards: [{ type: 'xp', amount: 30 }],
@@ -401,7 +401,7 @@ export const EVENT_POOL: RandomEvent[] = [
     rewards: [],
   },
 
-  // ── Lore (劇情片段) ─────────────────────────────────────────────────
+  // ── Lore (剧情片段) ─────────────────────────────────────────────────
   {
     id: 'lore_ancient_shrine',
     weight: 20,
@@ -410,14 +410,14 @@ export const EVENT_POOL: RandomEvent[] = [
     cooldownDays: 3,
     oncePerRun: true,
     triggerPoints: ['boss_victory', 'chapter_first_clear', 'achievement'],
-    title: '劇情 — 遠古神廟',
+    title: '剧情 — 远古神庙',
     description:
-      '在密林深處，你發現了一座被藤蔓覆蓋的遠古神廟。石門上刻著一段銘文：「語言是萬物的鑰匙，掌握語言者掌握世界。」',
+      '在密林深处，你发现了一座被藤蔓覆盖的远古神庙。石门上刻着一段铭文：「语言是万物的钥匙，掌握语言者掌握世界。」',
     illustration: 'lore_ancient_shrine',
     choices: [
       {
         id: 'enter',
-        text: '進入神廟探索',
+        text: '进入神庙探索',
         icon: '🚪',
         outcome: 'random',
         successRate: 0.6,
@@ -429,14 +429,14 @@ export const EVENT_POOL: RandomEvent[] = [
       },
       {
         id: 'pray',
-        text: '在門前祈禱',
+        text: '在门前祈祷',
         icon: '🙏',
         outcome: 'success',
         successRewards: [{ type: 'shield', amount: 15 }],
       },
       {
         id: 'record',
-        text: '記錄銘文後離開',
+        text: '记录铭文後离开',
         icon: '📝',
         outcome: 'success',
         successRewards: [{ type: 'xp', amount: 20 }],
@@ -452,14 +452,14 @@ export const EVENT_POOL: RandomEvent[] = [
     cooldownDays: 4,
     oncePerRun: true,
     triggerPoints: ['boss_victory', 'achievement', 'daily_login'],
-    title: '劇情 — 流浪詩人',
+    title: '剧情 — 流浪诗人',
     description:
-      '一個背著豎琴的詩人坐在路邊的火堆旁。他微笑著向你招手：「來，坐下來聽我說個故事吧。這是關於一個勇敢的語言學者的傳說……」',
+      '一个背着竖琴的诗人坐在路边的火堆旁。他微笑着向你招手：「来，坐下来听我说个故事吧。这是关于一个勇敢的语言学者的传说……」',
     illustration: 'lore_wanderer',
     choices: [
       {
         id: 'listen',
-        text: '坐下來聽故事',
+        text: '坐下来听故事',
         icon: '🎵',
         outcome: 'success',
         successRewards: [
@@ -469,7 +469,7 @@ export const EVENT_POOL: RandomEvent[] = [
       },
       {
         id: 'donate',
-        text: '捐贈金幣支持詩人（20金）',
+        text: '捐赠金币支持诗人（20金）',
         icon: '🪙',
         cost: [{ type: 'gold', amount: 20 }],
         outcome: 'success',

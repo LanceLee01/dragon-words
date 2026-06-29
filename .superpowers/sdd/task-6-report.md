@@ -1,30 +1,29 @@
-# Task 6: UI Foundation — Shared Components & Hooks
+# Task 6 Report: Three-Column Battle Layout & Enlarge Images
 
-**Status:** Completed
+## Status: ✅ Complete
 
-## Files Created
+## Files Changed
 
-| File | Description |
+| File | Changes |
 |---|---|
-| `src/hooks/useTimer.ts` | Countdown hook with `remaining`, `reset`, `isUrgent` |
-| `src/components/shared/HealthBar.tsx` | Animated HP bar (Framer Motion spring width) |
-| `src/components/shared/Timer.tsx` | Timer display with urgent pulsing |
-| `src/components/shared/DamageNumber.tsx` | Floating damage/heal number (AnimatePresence) |
-| `src/components/shared/ComboDisplay.tsx` | Combo tier labels + counter (spring animation) |
-
-## File Modified
-
-- `src/App.tsx` — routes for all 5 pages, store init (`usePlayerStore.init()`, `useGameStore.initWords()`), loading state, `bg-gray-900 text-white game-active` background
+| `src/pages/BattlePage.tsx` | Added imports for `AnswerLog` and `CombatLog`; enlarged player/monster portraits (`h-48 w-48` → `h-56 w-56`); refactored main content area into three-column layout with left (AnswerLog), center (battle content), right (CombatLog) columns |
+| `src/components/battle/QuestionCard.tsx` | Enlarged word image container (`h-40 w-56` → `h-48 w-72`) |
 
 ## Verification
 
-- `npx tsc --noEmit` — **pass** (no errors; page imports guarded with `// @ts-ignore`)
-- `npx vitest run` — **69 tests pass** (all existing tests)
+### TypeScript (`npx tsc --noEmit`)
+```
+✅ Passed (no errors)
+```
 
-## Shared Component Details
+### Build (`npx vite build`)
+```
+✓ 477 modules transformed.
+✓ built in 2.22s
+```
 
-- **HealthBar:** `current`, `max`, `label`, optional `color` (default `bg-red-600`), optional `className`
-- **Timer:** `remaining`, `isUrgent` — gold background normally, red + pulsing scale when ≤3s
-- **DamageNumber:** `value`, `isCrit?`, `isHeal?`, `key` — floats up and fades over 0.8s; green for heal, yellow for crit, red for damage
-- **ComboDisplay:** `combo` — tiered labels: 1→Nice!, 3→Great!!, 5→AMAZING!!!, 7+→LEGENDARY!!!!; spring scale animation
-- **useTimer:** `initialSeconds`, `onExpire` callback — returns `{ remaining, reset, isUrgent }`
+## Commit
+
+```
+c3e1a0f feat: three-column battle layout and enlarge images
+```

@@ -1,80 +1,58 @@
-# Task 4: Question Engine & Speech Engine
+# Task 4: Question Type Weight Adjustment
 
-Create the question generation system and the speech (TTS) engine.
+## Context
 
-## Files
+Adjust question type weights per user request: spell to 0.1%, match to 25%, and remove boss-level match exclusion.
 
-### 1. `src/core/utils/question.ts`
-Pure functions (no React):
+## Requirements
 
-**`getQuestionTypeForRound(round: number): QuestionType`**
-Returns 'en-to-cn' ~60% of the time, 'listen-to-cn' ~40%. Use a seeded approach based on `(round * 2654435761) % 100 < 60`.
+**File to modify:** `src/core/data/balance.ts`
 
-**`generateOptions(allWords: Word[], correctChinese: string, excludeWordId: number): string[]`**
-- Filter out the correct word + duplicates by chinese
-- Randomly select 3 distractors
-- If fewer than 3 available, pad with '???'
-- Combine correct + 3 distractors, shuffle, return 4 items
+### 1. Update QUESTION_TYPE_WEIGHTS
 
-**`generateQuestion(wordPool: Word[], usedWordIds: Set<number>, timeLimit: number, chapter: number, mistakeWords?: Word[]): Question | null`**
-- If mistakeWords.length > 0 and Math.random() < 0.3: pick a random unused word from mistakeWords
-- Otherwise: pick a random unused word from wordPool
-- Generate 4 options via generateOptions
-- `imagePath` = `/assets/images/word-images/${word.english}.png`
-- Return Question or null if pool exhausted
+Replace the current weights with:
 
-### 2. `src/core/utils/question.test.ts`
-Tests (TDD):
-- `generateOptions` returns 4 options, includes correct answer, no duplicates
-- `getQuestionTypeForRound` over 1000 calls: en-to-cn between 500-700
-- `generateQuestion` returns valid Question with 4 options, timeLimit ≥ 8
-- `generateQuestion` returns null when pool exhausted
-- `generateQuestion` picks from mistakeWords ~30% of the time when available
-
-### 3. `src/core/utils/speech.ts`
-`SpeechEngine` class:
 ```typescript
-class SpeechEngine {
-  private synth: SpeechSynthesis | null
-  private rate: number = 0.8
-  private available: boolean
-
-  constructor() // check window.speechSynthesis
-  isAvailable(): boolean
-  setRate(rate: number) // clamp 0.5-1.5
-  speak(word: string): Promise<void> // synth.speak, onend/onerror wrapping
-  cancel(): void
-}
-```
-Export singleton: `export const speechEngine = new SpeechEngine()`
-
-### 4. `src/hooks/useSpeech.ts`
-React hook wrapping speechEngine:
-```typescript
-export function useSpeech() {
-  const speakingRef = useRef(false);
-  const speak = useCallback(async (word: string) => {
-    if (speakingRef.current) return;
-    speakingRef.current = true;
-    try { await speechEngine.speak(word); }
-    catch { /* silently fail */ }
-    finally { speakingRef.current = false; }
-  }, []);
-  return { speak, isAvailable: speechEngine.isAvailable() };
-}
+export const QUESTION_TYPE_WEIGHTS: Record<QuestionType, number> = {
+  'word-meaning': 0.104,
+  'meaning-word': 0.303,
+  'fill-blank':   0.057,
+  'listening':    0.190,
+  'spell':        0.001,   // 0.1%
+  'pos':          0.095,
+  'match':        0.250,   // 25%
+};
+// Sum: 0.104+0.303+0.057+0.190+0.001+0.095+0.250 = 1.000 ✓
 ```
 
-## Global Constraints
-- question.ts: pure TypeScript, no React
-- speech.ts: browser-only (import guarded by singleton constructor)
-- Path alias `@/` → `src/`
+### 2. Remove boss-level match exclusion
 
-## Steps
-1. Write `src/core/utils/question.test.ts`
-2. `npx vitest run src/core/utils/question.test.ts` — FAIL
-3. Write `src/core/utils/question.ts`
-4. `npx vitest run src/core/utils/question.test.ts` — PASS
-5. Write `src/core/utils/speech.ts`
-6. Write `src/hooks/useSpeech.ts`
-7. `npx tsc --noEmit` — zero errors
-8. Commit: `feat: implement question engine and speech engine`
+In `pickQuestionType`, change the filter:
+
+Old:
+```typescript
+const available = Object.entries(weights).filter(
+  ([type]) => !(isBoss && type === 'match'),
+);
+```
+
+New:
+```typescript
+const available = Object.entries(weights);
+```
+
+The `isBoss` parameter can remain in the function signature for future use.
+
+### Global constraints
+- All changes must compile with `tsc -b` without errors
+- No new dependencies
+- Follow existing code patterns
+- Keep all existing functionality working
+
+## Deliverable
+
+Apply both changes, verify `npx tsc --noEmit` passes, and commit:
+```
+git add src/core/data/balance.ts
+git commit -m "feat: adjust question weights — spell 0.1%, match 25%, remove boss exclusion"
+```

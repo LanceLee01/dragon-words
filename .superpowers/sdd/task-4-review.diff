@@ -1,0 +1,44 @@
+diff --git a/src/core/data/balance.ts b/src/core/data/balance.ts
+index 17b4879..7b5d407 100644
+--- a/src/core/data/balance.ts
++++ b/src/core/data/balance.ts
+@@ -3,17 +3,17 @@
+ // ---------------------------------------------------------------------------
+ import type { QuestionType } from './types';
+ 
+ /** Probability weights for each question type (must sum to 1.0) */
+ export const QUESTION_TYPE_WEIGHTS: Record<QuestionType, number> = {
+-  'word-meaning': 0.11,
+-  'meaning-word': 0.32,
+-  'fill-blank':   0.06,
+-  'listening':    0.20,
+-  'spell':        0.15,
+-  'pos':          0.10,
+-  'match':        0.06,
++  'word-meaning': 0.104,
++  'meaning-word': 0.303,
++  'fill-blank':   0.057,
++  'listening':    0.190,
++  'spell':        0.001,
++  'pos':          0.095,
++  'match':        0.250,
+ };
+ 
+ /**
+  * Pick a question type using a deterministic pseudo-random value based on
+  * the round number.  Uses the multiplicative LCG hash
+@@ -24,13 +24,11 @@ export const QUESTION_TYPE_WEIGHTS: Record<QuestionType, number> = {
+ export function pickQuestionType(
+   weights: Record<string, number>,
+   round: number,
+   isBoss: boolean,
+ ): QuestionType {
+-  const available = Object.entries(weights).filter(
+-    ([type]) => !(isBoss && type === 'match'),
+-  );
++  const available = Object.entries(weights);
+   const rand = ((round * 2654435761) % 1000) / 1000;
+   let cumulative = 0;
+   for (const [type, weight] of available) {
+     cumulative += weight;
+     if (rand < cumulative) return type as QuestionType;

@@ -1,0 +1,69 @@
+diff --git a/src/App.tsx b/src/App.tsx
+index 100352b..ddbaee3 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -1,15 +1,15 @@
+ // ---------------------------------------------------------------------------
+ // App — root component with routing and store initialisation
+ // ---------------------------------------------------------------------------
+ import { useEffect, useRef, useCallback, useState } from 'react';
+-import { BrowserRouter, Routes, Route } from 'react-router-dom';
++import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+ import { usePlayerStore } from '@/stores/playerStore';
+ import { useGameStore } from '@/stores/gameStore';
+ import { EventEngine } from '@/core/engine/eventEngine';
+ import { EVENT_POOL } from '@/core/data/events';
+ import { EventModal } from '@/components/adventure/EventModal';
+ import type { RandomEvent } from '@/core/data/events';
+ 
+ import HomePage from '@/pages/HomePage';
+ import SelectClassPage from '@/pages/SelectClassPage';
+ import MapPage from '@/pages/MapPage';
+@@ -86,34 +86,44 @@ export default function App() {
+       },
+     });
+ 
+     const triggered = engine.checkTrigger(triggerPoint);
+     if (triggered) {
+       setLoginEvent(triggered);
+       setShowLoginEvent(true);
+     }
+   }, [loaded]);
+ 
++  const navigate = useNavigate();
++
+   const handleLoginChoice = useCallback(async (choiceId: string) => {
+     if (!loginEvent) return;
+     const engine = new EventEngine({
+       events: EVENT_POOL,
+       playerState: { level: player.level, hasItem: () => false, hasFlag: (flag) => globalFlags.has(flag), gold: player.gold, hp: player.hp, shield: 0 },
+       rewardDispatcher: { addGold: (n) => addGold(n), addXp: (n) => addXp(n), addShield: () => {}, addItem: () => {}, addCosmetic: () => {}, takeDamage: (n) => takeDamage(n), spendGold: () => true, spendShield: () => true, spendItem: () => true },
+       globalFlags,
+       eventHistory,
+       onSaveHistory: (history) => { if (history.length > 0) { const last = history[history.length - 1]; addEventToHistory({ id: last.id, choice: last.choice }); } },
+     });
+     await engine.executeChoice(loginEvent, choiceId);
+-    setShowLoginEvent(false);
+-    setLoginEvent(null);
+-  }, [loginEvent, player, globalFlags, eventHistory, addGold, addXp, addEventToHistory, takeDamage]);
++
++    const selectedChoice = loginEvent.choices.find((c) => c.id === choiceId);
++    if (selectedChoice?.action === 'battle' && selectedChoice.actionPayload) {
++      const { chapter, level, monsterId } = selectedChoice.actionPayload;
++      const params = monsterId ? `?monster=${monsterId}` : '';
++      navigate(`/battle/${chapter}/${level}${params}`);
++    } else {
++      setShowLoginEvent(false);
++      setLoginEvent(null);
++    }
++  }, [loginEvent, player, globalFlags, eventHistory, addGold, addXp, addEventToHistory, takeDamage, navigate]);
+ 
+   if (!loaded) {
+     return (
+       <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">
+         <p className="text-xl">Loading…</p>
+       </div>
+     );
+   }
+ 
+   return (

@@ -1,32 +1,28 @@
-# Task 4: Create the AnswerLog component
+# Task 4 Report — Question Type Weight Adjustment
 
-**Status**: ✅ Completed
+## Status: DONE ✅
 
-## File Created
+## Changes applied to `src/core/data/balance.ts`
 
-- `src/components/battle/AnswerLog.tsx` — `<AnswerLog>` component showing a scrollable left panel of answer history with auto-scroll to bottom.
+### 1. Updated `QUESTION_TYPE_WEIGHTS`
 
-## TypeScript Verification
+New weights (sum = 1.0):
 
-```
-$ npx tsc --noEmit
-# exit code 0, no errors
-```
+| Type           | Weight |
+|----------------|--------|
+| word-meaning   | 0.104  |
+| meaning-word   | 0.303  |
+| fill-blank     | 0.057  |
+| listening      | 0.190  |
+| spell          | 0.001  (0.1%) |
+| pos            | 0.095  |
+| match          | 0.250  (25%) |
 
-## Component Summary
+### 2. Removed boss-level match exclusion
 
-The `AnswerLog` component:
+The `.filter(([type]) => !(isBoss && type === 'match'))` line was removed from `pickQuestionType`. The `isBoss` parameter remains in the function signature for future use. The JSDoc note about boss levels was intentionally left unchanged per brief.
 
-- Reads `battle.log` from the Zustand `useBattleStore` (defaulting to `[]` when no battle exists).
-- Uses a `useRef` + `useEffect` to auto-scroll to the bottom whenever the log length changes.
-- When the log is empty, renders a centered "暂无记录" (no records) placeholder.
-- Renders each log entry with:
-  - A left border strip (green for correct, red for incorrect).
-  - Turn number, English word, Chinese translation.
-  - Correct/incorrect indicator and question type.
+## Verification
 
-## Commit
-
-```
-git commit -m "feat: add AnswerLog component for left panel"
-```
+- `npx tsc --noEmit` passed with zero errors.
+- Git commit: `56acb77` — message: "feat: adjust question weights — spell 0.1%, match 25%, remove boss exclusion"

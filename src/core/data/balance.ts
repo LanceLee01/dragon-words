@@ -19,7 +19,7 @@ export const QUESTION_TYPE_WEIGHTS: Record<QuestionType, number> = {
  * the round number.  Uses the multiplicative LCG hash
  * `(round * 2654435761) % 1000 / 1000` for reproducibility.
  *
- * Boss levels never generate `'match'` questions.
+ * All question types are available on boss levels (match is no longer excluded).
  */
 export function pickQuestionType(
   weights: Record<string, number>,

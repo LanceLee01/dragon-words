@@ -201,7 +201,7 @@ describe('generateQuestion', () => {
     expect(spell.chineseHint).toBeTruthy();
   });
 
-  it('can produce a match question on boss round when not boss level, boss level excludes match', () => {
+  it('can produce a match question on boss round (match is no longer excluded from boss)', () => {
     // Use round 5 which gives enough random range
     const used = new Set<number>([0, 1, 2, 3, 4]);
     // First, try non-boss: match should be possible
@@ -216,15 +216,14 @@ describe('generateQuestion', () => {
     }
     // Don't assert foundMatch — it's probabilistic; just ensure no crash
 
-    // Now test boss: should never produce match
+    // Now test boss: match is also allowed (no longer excluded)
     for (let round = 0; round < 50; round++) {
       const bossSet = new Set<number>(
         Array.from({ length: round }, (_, i) => i),
       );
       const q = generateQuestion(SAMPLE_WORDS, bossSet, 10, 1, undefined, true);
-      if (q) {
-        expect(q.type).not.toBe('match');
-      }
+      // match is no longer excluded from boss levels, so any type is valid
+      expect(q).toBeNull() || expect(['word-meaning', 'meaning-word', 'fill-blank', 'listening', 'spell', 'pos', 'match']).toContain(q!.type);
     }
   });
 
@@ -319,11 +318,11 @@ describe('generateMatchQuestion', () => {
 // ---------------------------------------------------------------------------
 
 describe('pickQuestionType', () => {
-  it('never returns match on boss levels', () => {
+  it('returns valid types on boss levels (match is no longer excluded)', () => {
     // Exhaustively check first 200 rounds
     for (let round = 0; round < 200; round++) {
       const type = pickQuestionType(QUESTION_TYPE_WEIGHTS, round, true);
-      expect(type).not.toBe('match');
+      expect(['word-meaning', 'meaning-word', 'fill-blank', 'listening', 'spell', 'pos', 'match']).toContain(type);
     }
   });
 
@@ -341,7 +340,7 @@ describe('pickQuestionType', () => {
       const type = pickQuestionType(QUESTION_TYPE_WEIGHTS, round, false);
       if (type === 'match') matchCount++;
     }
-    // match weight is 0.06, so ~60 out of 1000
+    // match weight is 0.25, so ~250 out of 1000
     expect(matchCount).toBeGreaterThan(0);
   });
 });

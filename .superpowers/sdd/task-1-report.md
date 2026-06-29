@@ -1,34 +1,25 @@
-# Task 1 Report
+# Task 1 Report — EventModal Action Navigation Fix
 
 ## Status: DONE
 
-## What changed
+## What was done
 
-**File: `src/core/data/types.ts`**
+Modified `src/App.tsx` to make the `handleLoginChoice` callback navigate to the battle page when the selected choice has `action === 'battle'`.
 
-1. **Added two fields to `BattleState`** (lines 243-246):
-   - `lastCrit: boolean;` — tracks whether the last attack was a critical hit
-   - `log: BattleLogEntry[];` — battle log entries accumulated during the fight
+### Changes
 
-   These were inserted after `lastDamageTaken: number;` (line 242) and before the closing `}` of `BattleState`.
+1. **Import `useNavigate`** from `react-router-dom` (line 5) — was missing despite being referenced in the brief.
 
-2. **Added `BattleLogEntry` interface** (lines 249-265):
-   - `export interface BattleLogEntry` with fields: `turn`, `wordEnglish`, `wordChinese`, `questionType`, `isCorrect`, `damageDealt`, `damageTaken`, `lastCombo`, `isCrit`, `monsterHpAfter`, `monsterMaxHp`, `playerHpAfter`, `playerMaxHp`, `monsterName`
+2. **Added `const navigate = useNavigate()`** call inside the component (after the `useEffect` block, before the callback).
 
-   This was inserted after the closing `}` of `BattleState` (line 247) and before `/** Base question fields shared by all question types */`.
+3. **Replaced modal-close logic** (lines 107–108) with:
+   - Find the selected choice via `loginEvent.choices.find((c) => c.id === choiceId)`
+   - If `selectedChoice?.action === 'battle' && selectedChoice.actionPayload`, extract `{ chapter, level, monsterId }` and navigate to `/battle/${chapter}/${level}?monster=${monsterId}` (the `?monster=` param is only appended when `monsterId` exists).
+   - Otherwise, close the modal (`setShowLoginEvent(false); setLoginEvent(null)`) as before.
 
-## `tsc` output
+4. **Added `navigate`** to the `useCallback` dependency array.
 
-Ran `npx tsc -p tsconfig.app.json --noEmit`. Output:
+### Verification
 
-```
-src/core/engine/battle.ts(87,3): error TS2739: Type '{ playerHp: number; ... }' is missing the following properties from type 'BattleState': lastCrit, log
-```
-
-This is the **expected** error — `createBattle()` returns a `BattleState` object missing the new `lastCrit` and `log` fields. It will be fixed in Task 2.
-
-Other errors shown are pre-existing and unrelated to this change (missing `word` on `MatchQuestion`, missing `timeLimit` in `PosQuestion`, missing `highestCombo`/`totalQuestions`/`totalCorrect`/`wordLevel` on `PlayerState`).
-
-## Commits
-
-- `6a8829a` — `feat: add BattleLogEntry type and lastCrit/log fields to BattleState`
+- `npx tsc --noEmit` — passes with zero errors.
+- Commit: `46273aa` with message `"fix: EventModal battle action now navigates to battle page"`.

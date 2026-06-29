@@ -173,6 +173,7 @@ function SinglePageContent({
   onContinue: () => void;
 }) {
   const [textDone, setTextDone] = useState(false);
+  const [selected, setSelected] = useState(false);
   const allText = useMemo(() =>
     beat.panels.filter(p => p.text).map(p => p.text!).join('\n\n'),
     [beat.panels]
@@ -228,13 +229,16 @@ function SinglePageContent({
             <button
               key={i}
               onClick={() => {
+                if (selected) return;
+                setSelected(true);
                 if (choice.setFlag) onChoice(choice.setFlag);
                 onContinue();
               }}
-              className="flex items-center justify-between rounded-lg border border-gray-600 bg-gray-800/60 px-5 py-3 text-left text-white transition hover:border-amber-500 hover:bg-gray-700"
+              disabled={selected}
+              className="flex items-center justify-between rounded-lg border border-gray-600 bg-gray-800/60 px-5 py-3 text-left text-white transition hover:border-amber-500 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span>{choice.text}</span>
-              <span className="text-gray-500">→</span>
+              <span className="text-gray-500">{selected ? '✓' : '→'}</span>
             </button>
           ))}
         </div>

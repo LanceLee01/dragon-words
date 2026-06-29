@@ -1,29 +1,29 @@
-# Task 2 — Init battle log and track lastCrit in engine
+# Task 2: StoryPlayer Single-Page Mode — Done
 
-**Status:** ✅ Complete
+## Changes Made
 
-## What changed
+### `src/components/adventure/StoryPlayer.tsx`
 
-**File:** `src/core/engine/battle.ts`
+1. **Added `useMemo` to React import** (line 4)
+2. **Added `singlePage?: boolean` to `StoryPlayerProps`** (line 17)
+3. **Added `SinglePageContent` component** (lines 164–261) — placed between `PanelContent` and `StoryPlayer`. It:
+   - Collects all panel text into one string via `useMemo` and renders it through a single `TypewriterText`
+   - Renders all image panels enlarged (`max-h-[70vh] object-contain`) in a scrollable container
+   - Shows choice buttons at the bottom if a choice panel exists (calls `onChoice` then `onContinue`)
+   - Shows a "继续 →" button that appears only after typewriter text completes (when no choice panel)
+4. **Destructured `singlePage` prop** in the StoryPlayer function (line 257)
+5. **Guarded auto-advance effect** — added `|| singlePage` to the early return (line 272), preventing timers from starting in single-page mode
+6. **Render guards** for singlePage mode:
+   - **ProgressBar** hidden when `singlePage` (line 354)
+   - **PanelContent** replaced with `SinglePageContent` when `singlePage` (lines 359–367)
+   - **Next/Close button** hidden when `singlePage` (line 371)
 
-| Change | Location (line) | Detail |
-|---|---|---|
-| `lastCrit: false` added to `createBattle` return | 105 | New field tracked on every `BattleState` |
-| `log: []` added to `createBattle` return | 106 | Empty battle log array initialized |
-| `next.lastCrit = crit;` in correct-answer path | 131 | After `isCrit(player, wasLastWrong)` call on line 130 |
-| `next.lastCrit = crit;` in wrong-answer path | 183 | After `isCrit(player, wasLastWrong)` call on line 182 |
+### `src/pages/BattlePage.tsx`
 
-## TypeScript check
+- Added `singlePage={true}` to the `<StoryPlayer>` invocation (line 705)
 
-```
-> cd "D:\reasonix\l9eng" && npx tsc --noEmit
-```
+## Verification
 
-**Result:** Zero errors.
-
-## Commit
-
-```
-9914724 feat: init battle log and track lastCrit in engine
- 1 file changed, 4 insertions(+)
-```
+- `npx tsc --noEmit` — passed with **zero errors**
+- Existing panel-by-panel mode (`singlePage=false/undefined`) is **completely untouched** — all guards use `!singlePage` which keeps original code paths when the prop is absent/falsy
+- Commit: `4412896` with message `feat: StoryPlayer single-page mode with enlarged images and continue button`
