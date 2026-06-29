@@ -5,13 +5,13 @@ import type { QuestionType } from './types';
 
 /** Probability weights for each question type (must sum to 1.0) */
 export const QUESTION_TYPE_WEIGHTS: Record<QuestionType, number> = {
-  'word-meaning': 0.104,
-  'meaning-word': 0.303,
-  'fill-blank':   0.057,
-  'listening':    0.190,
-  'spell':        0.001,
-  'pos':          0.095,
-  'match':        0.250,
+  'word-meaning': 0.139,
+  'meaning-word': 0.404,
+  'fill-blank':   0.076,
+  'listening':    0.254,
+  'spell':        0.000,
+  'pos':          0.127,
+  'match':        0.000,
 };
 
 /**
@@ -19,7 +19,7 @@ export const QUESTION_TYPE_WEIGHTS: Record<QuestionType, number> = {
  * the round number.  Uses the multiplicative LCG hash
  * `(round * 2654435761) % 1000 / 1000` for reproducibility.
  *
- * All question types are available on boss levels (match is no longer excluded).
+ * spell and match have weight 0 and are no longer generated.
  */
 export function pickQuestionType(
   weights: Record<string, number>,

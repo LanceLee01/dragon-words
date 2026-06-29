@@ -189,7 +189,7 @@ export const MONSTERS: Record<string, MonsterDef> = {
       description: '召唤哥布林增援',
       summon: true,
     },
-      { name: '王之怒吼', description: '提升100%攻击力1回合', enrage: true, enrageAttack: 100, weight: 1 },
+      { name: '王之怒吼', description: '提升100%攻击力1回合', enrage: true, enrageAttack: 16, weight: 1 },
     ],
   },
   deathKnight: {

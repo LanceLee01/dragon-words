@@ -142,6 +142,8 @@ export interface MonsterSkillDef {
   weight?: number;
   /** Damage multiplier (applied to monster.attack) */
   multiplier?: number;
+  /** Attack buff multiplier (e.g. 1.3 = +30% attack for this turn) */
+  attackBuff?: number;
   /** Whether it can stun the player */
   stun?: boolean;
   /** Whether it heals the monster */
@@ -237,6 +239,8 @@ export interface BattleState {
   phase: BattlePhase;
   stunTimer: number;
   invulnerable: number;
+  /** Monster shield countdown: reduces damage from player's next attack */
+  monsterShield: number;
   isBoss: boolean;
   status: 'ongoing' | 'won' | 'lost';
   /** Status effects on player */

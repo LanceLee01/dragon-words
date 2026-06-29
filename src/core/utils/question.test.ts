@@ -191,39 +191,25 @@ describe('generateQuestion', () => {
     }
   });
 
-  it('can produce a spell question on round 2 (spell guarantee)', () => {
-    const used = new Set<number>([0, 1]); // round = 2 → spell guarantee
+  it('produces a question on round 2 (spell weight is 0, no guarantee)', () => {
+    const used = new Set<number>([0, 1]); // round = 2
     const question = generateQuestion(SAMPLE_WORDS, used, 10, 1);
     expect(question).not.toBeNull();
-    expect(question!.type).toBe('spell');
-    const spell = question as SpellQuestion;
-    expect(spell.targetLetters).toBeDefined();
-    expect(spell.chineseHint).toBeTruthy();
+    // spell weight is 0, so spell should never appear
+    expect(question!.type).not.toBe('spell');
   });
 
-  it('can produce a match question on boss round (match is no longer excluded from boss)', () => {
-    // Use round 5 which gives enough random range
-    const used = new Set<number>([0, 1, 2, 3, 4]);
-    // First, try non-boss: match should be possible
-    let foundMatch = false;
-    for (let i = 0; i < 20; i++) {
-      const q = generateQuestion(SAMPLE_WORDS, used, 10, 1, undefined, false);
-      if (q && q.type === 'match') { foundMatch = true; break; }
-      // Increment round for next attempt (use a unique set each time)
-      const bigger = new Set<number>([0, 1, 2, 3, 4, 5 + i]);
-      const q2 = generateQuestion(SAMPLE_WORDS, bigger, 10, 1, undefined, false);
-      if (q2 && q2.type === 'match') { foundMatch = true; break; }
-    }
-    // Don't assert foundMatch — it's probabilistic; just ensure no crash
-
-    // Now test boss: match is also allowed (no longer excluded)
+  it('never produces match (weight is 0) on any round', () => {
+    // spell and match weights are both 0, so they should never appear
     for (let round = 0; round < 50; round++) {
-      const bossSet = new Set<number>(
+      const roundSet = new Set<number>(
         Array.from({ length: round }, (_, i) => i),
       );
-      const q = generateQuestion(SAMPLE_WORDS, bossSet, 10, 1, undefined, true);
-      // match is no longer excluded from boss levels, so any type is valid
-      expect(q).toBeNull() || expect(['word-meaning', 'meaning-word', 'fill-blank', 'listening', 'spell', 'pos', 'match']).toContain(q!.type);
+      const q = generateQuestion(SAMPLE_WORDS, roundSet, 10, 1, undefined, round % 2 === 0);
+      if (q !== null) {
+        expect(q.type).not.toBe('match');
+        expect(q.type).not.toBe('spell');
+      }
     }
   });
 
@@ -318,11 +304,11 @@ describe('generateMatchQuestion', () => {
 // ---------------------------------------------------------------------------
 
 describe('pickQuestionType', () => {
-  it('returns valid types on boss levels (match is no longer excluded)', () => {
+  it('returns valid types on boss levels (spell and match weights are 0)', () => {
     // Exhaustively check first 200 rounds
     for (let round = 0; round < 200; round++) {
       const type = pickQuestionType(QUESTION_TYPE_WEIGHTS, round, true);
-      expect(['word-meaning', 'meaning-word', 'fill-blank', 'listening', 'spell', 'pos', 'match']).toContain(type);
+      expect(['word-meaning', 'meaning-word', 'fill-blank', 'listening', 'pos']).toContain(type);
     }
   });
 
@@ -334,14 +320,12 @@ describe('pickQuestionType', () => {
     }
   });
 
-  it('returns match on non-boss levels at least occasionally', () => {
-    let matchCount = 0;
+  it('never returns match or spell (both weights are 0)', () => {
     for (let round = 0; round < 1000; round++) {
       const type = pickQuestionType(QUESTION_TYPE_WEIGHTS, round, false);
-      if (type === 'match') matchCount++;
+      expect(type).not.toBe('match');
+      expect(type).not.toBe('spell');
     }
-    // match weight is 0.25, so ~250 out of 1000
-    expect(matchCount).toBeGreaterThan(0);
   });
 });
 

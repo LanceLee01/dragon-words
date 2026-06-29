@@ -210,10 +210,8 @@ export function generateMatchQuestion(wordPool: Word[], timeLimit: number): Matc
  *
  * 1. Pick a word (30 % chance from mistake pool if available)
  * 2. Use `pickQuestionType` to determine the question type (pass round + isBoss)
- * 3. Spell guarantee: every 3rd question (round % 3 === 2) forces 'spell'
- *    if the wheel didn't already pick it.
- * 4. Dispatch to the appropriate generator.
- * 5. If the generator returns null (e.g. POS data unavailable), fall back to
+ * 3. Dispatch to the appropriate generator.
+ * 4. If the generator returns null (e.g. POS data unavailable), fall back to
  *    `word-meaning`.
  *
  * @param wordPool      The pool of available words for this chapter.
@@ -262,12 +260,7 @@ export function generateQuestion(
   const round = usedWordIds.size;
   const boss = isBoss ?? false;
 
-  // Spell guarantee: every 3rd question (round 2, 5, 8, …) forces spell
-  // if the wheel didn't already pick it.
-  let type = pickQuestionType(QUESTION_TYPE_WEIGHTS, round, boss);
-  if (round % 3 === 2 && type !== 'spell') {
-    type = 'spell';
-  }
+  const type = pickQuestionType(QUESTION_TYPE_WEIGHTS, round, boss);
 
   // Dispatch to the appropriate generator
   switch (type) {

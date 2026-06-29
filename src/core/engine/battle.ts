@@ -278,7 +278,14 @@ export function answerQuestion(
     const base = getPlayerAttack(player);
     const crit = isCrit(player, wasLastWrong);
     next.lastCrit = crit;
-    const damage = calculateDamage(base, next.combo, crit);
+    let damage = calculateDamage(base, next.combo, crit);
+
+    // Monster shield reduces damage by half
+    if (next.monsterShield > 0) {
+      next.monsterShield -= 1;
+      damage = Math.round(damage * 0.5);
+    }
+
     next.lastDamageDealt = damage;
     next.monsterHp = Math.max(0, next.monsterHp - damage);
     next.lastDamageTaken = 0;
@@ -340,9 +347,11 @@ export function monsterTurn(
     const skill = pickRandomSkill(monster.skills);
     skillName = skill.name;
 
-    // Apply skill multiplier
+    // Apply skill multiplier or attack buff
     if (skill.multiplier) {
       finalDmg = Math.max(1, Math.round(monster.attack * skill.multiplier - defense));
+    } else if (skill.attackBuff) {
+      finalDmg = Math.max(1, Math.round(monster.attack * skill.attackBuff - defense));
     }
 
     // Skill effects

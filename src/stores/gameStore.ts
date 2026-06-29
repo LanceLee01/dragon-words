@@ -5,6 +5,7 @@ import { create } from 'zustand';
 import type { GamePhase, Word } from '@/core/data/types';
 import { WORDS } from '@/core/data/words';
 import { GameFSM, type FSMEvent } from '@/core/engine/fsm';
+import { loadGameState, saveGameState } from '@/core/utils/storage';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -67,6 +68,15 @@ export const useGameStore = create<GameStore>((set, get) => {
     });
   }
 
+  /** Persist game state (flags + story progress) to localStorage */
+  function persistGameState(flags: Set<string>, sp: GameStore['storyProgress']) {
+    saveGameState({
+      globalFlags: Array.from(flags),
+      unlockedBeats: Array.from(sp.unlockedBeats),
+      galleryEntries: Array.from(sp.galleryEntries),
+    });
+  }
+
   return {
     phase: fsm.phase,
     fsm,
@@ -93,35 +103,37 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     // === P1: Random Events & Story Progress ===
     eventHistory: [],
-    globalFlags: new Set<string>(),
+    globalFlags: new Set<string>(loadGameState().globalFlags),
     storyProgress: {
-      unlockedBeats: new Set<string>(),
-      galleryEntries: new Set<string>(),
+      unlockedBeats: new Set<string>(loadGameState().unlockedBeats),
+      galleryEntries: new Set<string>(loadGameState().galleryEntries),
     },
 
     addEventToHistory: (entry) => set((s) => ({
       eventHistory: [...s.eventHistory, { ...entry, timestamp: Date.now() }],
     })),
 
-    setFlag: (flag) => set((s) => ({
-      globalFlags: new Set(s.globalFlags).add(flag),
-    })),
+    setFlag: (flag) => set((s) => {
+      const next = new Set(s.globalFlags).add(flag);
+      persistGameState(next, s.storyProgress);
+      return { globalFlags: next };
+    }),
 
     hasFlag: (flag) => get().globalFlags.has(flag),
 
-    unlockStoryBeat: (beatId) => set((s) => ({
-      storyProgress: {
-        ...s.storyProgress,
-        unlockedBeats: new Set(s.storyProgress.unlockedBeats).add(beatId),
-      },
-    })),
+    unlockStoryBeat: (beatId) => set((s) => {
+      const next = new Set(s.storyProgress.unlockedBeats).add(beatId);
+      const sp = { ...s.storyProgress, unlockedBeats: next };
+      persistGameState(s.globalFlags, sp);
+      return { storyProgress: sp };
+    }),
 
-    unlockGalleryEntry: (entryId) => set((s) => ({
-      storyProgress: {
-        ...s.storyProgress,
-        galleryEntries: new Set(s.storyProgress.galleryEntries).add(entryId),
-      },
-    })),
+    unlockGalleryEntry: (entryId) => set((s) => {
+      const next = new Set(s.storyProgress.galleryEntries).add(entryId);
+      const sp = { ...s.storyProgress, galleryEntries: next };
+      persistGameState(s.globalFlags, sp);
+      return { storyProgress: sp };
+    }),
 
     // === P1: Login Tracking ===
     lastLoginDate: localStorage.getItem('dw_last_login'),

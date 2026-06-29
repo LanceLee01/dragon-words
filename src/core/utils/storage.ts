@@ -13,6 +13,7 @@ const KEYS = {
   SETTINGS: 'dw_settings',
   WORD_STATS: 'dw_wordstats',
   FLAGGED_IMAGES: 'dw_flagged_images',
+  GAME_STATE: 'dw_game_state',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -161,4 +162,28 @@ export function loadFlaggedImages(): FlaggedImage[] {
 
 export function clearFlaggedImages(): void {
   safeSetItem(FLAGGED_IMAGES_KEY, []);
+}
+
+// ---------------------------------------------------------------------------
+// Game State (global flags + story progress)
+// ---------------------------------------------------------------------------
+
+export interface GameStateData {
+  globalFlags: string[];
+  unlockedBeats: string[];
+  galleryEntries: string[];
+}
+
+const DEFAULT_GAME_STATE: GameStateData = {
+  globalFlags: [],
+  unlockedBeats: [],
+  galleryEntries: [],
+};
+
+export function saveGameState(state: GameStateData): void {
+  safeSetItem(KEYS.GAME_STATE, state);
+}
+
+export function loadGameState(): GameStateData {
+  return safeGetItem(KEYS.GAME_STATE, DEFAULT_GAME_STATE);
 }

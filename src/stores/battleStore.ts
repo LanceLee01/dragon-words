@@ -179,6 +179,9 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     nextBattle.turn = afterMonster.turn;
     nextBattle.status = afterMonster.status;
     nextBattle.lastMonsterSkillName = afterMonster.lastMonsterSkillName;
+    nextBattle.stunTimer = afterMonster.stunTimer;
+    nextBattle.invulnerable = afterMonster.invulnerable;
+    nextBattle.monsterShield = afterMonster.monsterShield;
     // Keep phase as 'result' for correct, 'monster-turn' for wrong
     // (monsterTurn sets phase to 'question', so restore it)
     if (correct) nextBattle.phase = 'result';
