@@ -5,13 +5,13 @@ import type { QuestionType } from './types';
 
 /** Probability weights for each question type (must sum to 1.0) */
 export const QUESTION_TYPE_WEIGHTS: Record<QuestionType, number> = {
-  'word-meaning': 0.11,
-  'meaning-word': 0.32,
-  'fill-blank':   0.06,
-  'listening':    0.20,
-  'spell':        0.15,
-  'pos':          0.10,
-  'match':        0.06,
+  'word-meaning': 0.104,
+  'meaning-word': 0.303,
+  'fill-blank':   0.057,
+  'listening':    0.190,
+  'spell':        0.001,
+  'pos':          0.095,
+  'match':        0.250,
 };
 
 /**
@@ -26,9 +26,7 @@ export function pickQuestionType(
   round: number,
   isBoss: boolean,
 ): QuestionType {
-  const available = Object.entries(weights).filter(
-    ([type]) => !(isBoss && type === 'match'),
-  );
+  const available = Object.entries(weights);
   const rand = ((round * 2654435761) % 1000) / 1000;
   let cumulative = 0;
   for (const [type, weight] of available) {
