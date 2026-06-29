@@ -178,8 +178,8 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
         </>
       )}
 
-      {/* --- 2x2 option grid --- */}
-      <div className="grid w-full max-w-md grid-cols-2 gap-3">
+      {/* --- ABCD options in one horizontal row --- */}
+      <div className="grid w-full max-w-4xl grid-cols-4 gap-3">
         {question.options.map((option, idx) => (
           <motion.button
             key={`${idx}-${option}`}
