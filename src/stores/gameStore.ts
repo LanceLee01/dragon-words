@@ -26,6 +26,20 @@ export interface GameStore {
 
   /** Initialize the word pool (empty by default — caller fills) */
   initWords: () => void;
+
+  // === P1: Random Events & Story Progress ===
+  eventHistory: Array<{ id: string; timestamp: number; choice: string }>;
+  globalFlags: Set<string>;
+  storyProgress: {
+    unlockedBeats: Set<string>;
+    galleryEntries: Set<string>;
+  };
+
+  addEventToHistory: (entry: { id: string; choice: string }) => void;
+  setFlag: (flag: string) => void;
+  hasFlag: (flag: string) => boolean;
+  unlockStoryBeat: (beatId: string) => void;
+  unlockGalleryEntry: (entryId: string) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -70,5 +84,37 @@ export const useGameStore = create<GameStore>((set, get) => {
     initWords: () => {
       set({ words: WORDS });
     },
+
+    // === P1: Random Events & Story Progress ===
+    eventHistory: [],
+    globalFlags: new Set<string>(),
+    storyProgress: {
+      unlockedBeats: new Set<string>(),
+      galleryEntries: new Set<string>(),
+    },
+
+    addEventToHistory: (entry) => set((s) => ({
+      eventHistory: [...s.eventHistory, { ...entry, timestamp: Date.now() }],
+    })),
+
+    setFlag: (flag) => set((s) => ({
+      globalFlags: new Set(s.globalFlags).add(flag),
+    })),
+
+    hasFlag: (flag) => get().globalFlags.has(flag),
+
+    unlockStoryBeat: (beatId) => set((s) => ({
+      storyProgress: {
+        ...s.storyProgress,
+        unlockedBeats: new Set(s.storyProgress.unlockedBeats).add(beatId),
+      },
+    })),
+
+    unlockGalleryEntry: (entryId) => set((s) => ({
+      storyProgress: {
+        ...s.storyProgress,
+        galleryEntries: new Set(s.storyProgress.galleryEntries).add(entryId),
+      },
+    })),
   };
 });
